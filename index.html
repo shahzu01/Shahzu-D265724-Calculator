@@ -441,13 +441,10 @@
       <div class="checklist">
         <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:2px;text-transform:uppercase;letter-spacing:0.05em;font-family:'Oswald',sans-serif;">Before application</div>
         <label><input type="checkbox" class="ja-check" data-label="Joint surface cleaned immediately before application"> Joint surface cleaned immediately before application</label>
-        <label><input type="checkbox" class="ja-check" data-label="High-pressure air lance used"> High-pressure air lance used</label>
-        <label><input type="checkbox" class="ja-check" data-label="Air equipment moisture/oil protected"> Air equipment moisture/oil protected</label>
         <label><input type="checkbox" class="ja-check" data-label="Surface temp 40°F and rising"> Surface temp 40&deg;F and rising</label>
       </div>
       <div class="checklist" style="margin-top:10px;">
         <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:2px;text-transform:uppercase;letter-spacing:0.05em;font-family:'Oswald',sans-serif;">During application</div>
-        <label><input type="checkbox" class="ja-check" data-label="Applicator wand with sealing shoe used"> Applicator wand with sealing shoe used</label>
         <label><input type="checkbox" class="ja-check" data-label="Band thickness approx. 1/4–3/8 in"> Band thickness approx. 1/4&ndash;3/8 in</label>
         <label><input type="checkbox" class="ja-check" data-label="Correct joint surface coated (entire vertical face)"> Correct joint surface coated (entire vertical face)</label>
       </div>
@@ -458,10 +455,34 @@
       </div>
 
       <div class="grid2" style="margin-top:14px;">
+        <div class="field"><label>Joint Type</label>
+          <select id="ja_type">
+            <option value="Longitudinal">Longitudinal Joint</option>
+            <option value="Transverse">Transverse Joint</option>
+            <option value="Butt Joint">Butt Joint</option>
+            <option value="Cutback">Cutback</option>
+          </select>
+        </div>
+        <div class="field"><label>Joint Location</label>
+          <select id="ja_locmode">
+            <option value="mainline">On mainline (use stations)</option>
+            <option value="offmainline">Intersection / turning lane / ramp (no station line)</option>
+          </select>
+        </div>
         <div class="field"><label>Material Temp (&deg;F)</label><input type="number" id="ja_matTemp" placeholder="395" inputmode="decimal"></div>
         <div class="field"><label>Hose Temp (&deg;F)</label><input type="number" id="ja_hoseTemp" placeholder="368" inputmode="decimal"></div>
+      </div>
+
+      <div class="grid2" id="ja_mainline_fields">
         <div class="field"><label>Starting Station</label><input type="text" id="ja_start" placeholder="203+00"></div>
         <div class="field"><label>Ending Station</label><input type="text" id="ja_end" placeholder="164+00"></div>
+      </div>
+      <div class="grid2" id="ja_offmainline_fields" style="display:none;">
+        <div class="field full"><label>Location / Description</label><input type="text" id="ja_location" placeholder="e.g. Main St intersection, EB left-turn lane"></div>
+        <div class="field"><label>Linear Feet</label><input type="number" id="ja_directLF" placeholder="85" inputmode="decimal"></div>
+      </div>
+
+      <div class="grid2">
         <div class="field"><label># of Joints</label><input type="number" id="ja_joints" value="1" inputmode="numeric"></div>
         <div class="field"><label>Date</label><input type="date" id="ja_date"></div>
       </div>
@@ -482,7 +503,7 @@
       </div>
       <div class="log-table-wrap">
         <table class="log" id="ja_table">
-          <thead><tr><th>Date</th><th>Start</th><th>End</th><th>Joints</th><th>LF</th><th>Mat &deg;F</th><th>Hose &deg;F</th><th>QC</th><th></th></tr></thead>
+          <thead><tr><th>Date</th><th>Type</th><th>Start / Location</th><th>End</th><th>Joints</th><th>LF</th><th>Mat &deg;F</th><th>Hose &deg;F</th><th>QC</th><th></th></tr></thead>
           <tbody id="ja_tbody"></tbody>
         </table>
         <div class="log-empty" id="ja_empty">No entries yet — add a joint segment above.</div>
@@ -950,16 +971,33 @@
   }
 
   /* ================= JOINT ADHESIVE QA ================= */
-  function calcJoint(){
+  function jointBaseLF(){
+    const mode = $('ja_locmode').value;
+    if(mode === 'offmainline'){
+      const lf = parseFloat($('ja_directLF').value);
+      return isFinite(lf) ? lf : null;
+    }
     const s=parseStation($('ja_start').value), e=parseStation($('ja_end').value);
+    return (s!==null && e!==null) ? Math.abs(e-s) : null;
+  }
+
+  function calcJoint(){
+    const base = jointBaseLF();
     const joints=parseFloat($('ja_joints').value)||1;
-    if(s!==null && e!==null){
-      const lf = Math.abs(e-s) * joints;
+    if(base!==null){
+      const lf = base * joints;
       $('ja_out').innerHTML = fmt(lf,0)+'<span class="unit">LF</span>';
     } else {
       $('ja_out').innerHTML = '&mdash;';
     }
     renderJointQcPreview();
+  }
+
+  function toggleJointLocMode(){
+    const mode = $('ja_locmode').value;
+    $('ja_mainline_fields').style.display = (mode==='mainline') ? 'grid' : 'none';
+    $('ja_offmainline_fields').style.display = (mode==='offmainline') ? 'grid' : 'none';
+    calcJoint();
   }
 
   function renderJointQcPreview(){
@@ -982,14 +1020,29 @@
   function saveJointLog(entries){ try{ localStorage.setItem(JOINT_LOG_KEY, JSON.stringify(entries)); }catch(e){} }
 
   function addJointLogEntry(){
-    const s=parseStation($('ja_start').value), e=parseStation($('ja_end').value);
+    const mode = $('ja_locmode').value;
+    const type = $('ja_type').value;
     const joints=parseFloat($('ja_joints').value)||1;
     const date=$('ja_date').value || todayStr();
     const matTemp=parseFloat($('ja_matTemp').value);
     const hoseTemp=parseFloat($('ja_hoseTemp').value);
 
-    if(s===null || e===null){ alert('Enter both starting and ending station.'); return; }
-    const lf = Math.abs(e-s) * joints;
+    let startLabel, endLabel, base;
+    if(mode === 'offmainline'){
+      const loc = $('ja_location').value.trim();
+      base = parseFloat($('ja_directLF').value);
+      if(!loc){ alert('Enter a location / description for this intersection or turning lane.'); return; }
+      if(!isFinite(base)){ alert('Enter the linear feet for this location.'); return; }
+      startLabel = loc;
+      endLabel = '';
+    } else {
+      const s=parseStation($('ja_start').value), e=parseStation($('ja_end').value);
+      if(s===null || e===null){ alert('Enter both starting and ending station.'); return; }
+      base = Math.abs(e-s);
+      startLabel = toStation(s);
+      endLabel = toStation(e);
+    }
+    const lf = base * joints;
 
     const uncheckedFlags = [];
     document.querySelectorAll('.ja-check').forEach(cb=>{ if(!cb.checked) uncheckedFlags.push(cb.dataset.label); });
@@ -998,7 +1051,7 @@
 
     const entries = loadJointLog();
     entries.push({
-      date, startStation: toStation(s), endStation: toStation(e), joints,
+      date, type, locMode: mode, startStation: startLabel, endStation: endLabel, joints,
       lf: lf.toFixed(0), matTemp: isFinite(matTemp)?matTemp:'', hoseTemp: isFinite(hoseTemp)?hoseTemp:'',
       tempFlag, uncheckedFlags, anyFlag
     });
@@ -1014,8 +1067,10 @@
     table.style.display='table'; empty.style.display='none';
     tbody.innerHTML = entries.map((e,i)=>{
       const qc = e.anyFlag ? '<span style="color:var(--warn-red);font-weight:600;">FLAGGED</span>' : '<span style="color:var(--ok-green);font-weight:600;">OK</span>';
+      const type = e.type || 'Longitudinal';
+      const endCell = e.endStation ? e.endStation : '—';
       return `<tr>
-        <td>${e.date}</td><td class="station">${e.startStation}</td><td class="station">${e.endStation}</td>
+        <td>${e.date}</td><td>${type}</td><td class="station">${e.startStation}</td><td class="station">${endCell}</td>
         <td>${e.joints}</td><td>${e.lf}</td>
         <td class="${e.tempFlag?'flag':''}">${e.matTemp!==''?e.matTemp:'—'}</td>
         <td>${e.hoseTemp!==''?e.hoseTemp:'—'}</td>
@@ -1028,8 +1083,8 @@
   function exportJointCSV(){
     const entries = loadJointLog();
     if(entries.length===0){ alert('No entries to export yet.'); return; }
-    const headers=['Date','Start Station','End Station','# Joints','Linear Feet','Material Temp F','Hose Temp F','QC Status','Unconfirmed Items'];
-    const rows=entries.map(e=>[e.date,e.startStation,e.endStation,e.joints,e.lf,e.matTemp,e.hoseTemp,e.anyFlag?'FLAGGED':'OK', (e.uncheckedFlags||[]).join('; ')]);
+    const headers=['Date','Joint Type','Start Station / Location','End Station','# Joints','Linear Feet','Material Temp F','Hose Temp F','QC Status','Unconfirmed Items'];
+    const rows=entries.map(e=>[e.date,e.type||'Longitudinal',e.startStation,e.endStation||'',e.joints,e.lf,e.matTemp,e.hoseTemp,e.anyFlag?'FLAGGED':'OK', (e.uncheckedFlags||[]).join('; ')]);
     downloadCSV(headers, rows, 'joint-adhesive-report');
   }
   function clearJointLog(){
@@ -1095,7 +1150,7 @@
     downloadCSV(headers, rows, 'tac-coat-shift-log');
   }
   function clearTacLog(){
-    if(confirm('Clear tonight\\'s TAC shift log? This cannot be undone.')){ saveTacLog([]); renderTacLog(); }
+    if(confirm('Clear tonight\'s TAC shift log? This cannot be undone.')){ saveTacLog([]); renderTacLog(); }
   }
 
   /* ================= SHARED CSV HELPER ================= */
@@ -1121,6 +1176,7 @@
   document.addEventListener('change', (e) => {
     if(e.target.classList.contains('ja-check')) renderJointQcPreview();
   });
+  $('ja_locmode').addEventListener('change', toggleJointLocMode);
 
   $('rt_add').addEventListener('click', addTruck);
   $('rt_tbody').addEventListener('click', (e) => {
@@ -1192,6 +1248,13 @@
   calcTac();
 })();
 
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('service-worker.js').catch(() => {});
+  });
+}
 </script>
 </body>
 </html>
