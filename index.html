@@ -59,7 +59,7 @@
   .field .hint{ font-size:10px; color:var(--muted); margin-top:5px; line-height:1.4; }
 
   /* Top-level section switcher */
-  .sections{ display:flex; overflow-x:auto; gap:6px; margin-bottom:16px; padding-bottom:4px; }
+  .sections{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:16px; }
   .section-btn{
     flex:0 0 auto; font-family:'Oswald',sans-serif; font-size:12.5px; text-transform:uppercase;
     letter-spacing:0.03em; color:var(--muted); background:var(--asphalt-2); border:1.5px solid var(--concrete);
@@ -68,7 +68,7 @@
   .section-btn.active{ color:var(--asphalt); background:var(--safety-orange); border-color:var(--safety-orange); font-weight:600; }
 
   /* Sub-tabs within a section */
-  .stations{ display:flex; overflow-x:auto; gap:4px; margin-bottom:18px; padding-bottom:4px; -webkit-overflow-scrolling:touch; }
+  .stations{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:18px; }
   .stations::-webkit-scrollbar{height:4px;}
   .stations::-webkit-scrollbar-thumb{background:var(--concrete); border-radius:4px;}
   .stop{
@@ -183,23 +183,23 @@
     <div class="subtitle">Mill &amp; Fill inspector toolkit</div>
   </header>
 
-  <div class="config">
-    <div class="field">
+  <div class="config" id="globalConfig">
+    <div class="field cfg-fill-only">
       <label>Density (lb/ft&sup3;)</label>
       <input type="number" id="density" value="145" step="0.1" inputmode="decimal">
       <div class="hint">Overrides 145 default in all Fill calculations</div>
     </div>
-    <div class="field">
+    <div class="field cfg-fill-only">
       <label>Default Truck Load (tons)</label>
       <input type="number" id="truckTons" value="40" step="0.5" inputmode="decimal">
       <div class="hint">Used for quick truck-coverage calcs</div>
     </div>
-    <div class="field">
+    <div class="field cfg-depth">
       <label>Target Depth (in)</label>
       <input type="number" id="targetDepth" value="2" step="0.25" inputmode="decimal">
       <div class="hint">QA target for both Mill and Fill depth checks</div>
     </div>
-    <div class="field">
+    <div class="field cfg-depth">
       <label>Depth Tolerance (&plusmn; in)</label>
       <input type="number" id="depthTol" value="0.25" step="0.05" inputmode="decimal">
       <div class="hint">Field measurement flags if outside target &plusmn; this</div>
@@ -212,6 +212,7 @@
     <button class="section-btn" data-section="joint">Joint Adhesive QA</button>
     <button class="section-btn" data-section="tac">TAC Coat</button>
     <button class="section-btn" data-section="roster">Truck Roster</button>
+    <button class="section-btn" data-section="dailyreport">Daily Report</button>
   </div>
 
   <div class="log-toolbar" style="margin:10px 0 4px;">
@@ -221,18 +222,18 @@
   <!-- ============ FILL SECTION ============ -->
   <div class="section-content" id="section-fill">
     <div class="stations" id="fillTabs">
-      <button class="stop active" data-tab="tonnage"><span class="num">01</span>Tonnage</button>
-      <button class="stop" data-tab="truck"><span class="num">02</span>Coverage</button>
-      <button class="stop" data-tab="stationtons"><span class="num">03</span>Station&rarr;Tons</button>
-      <button class="stop" data-tab="tonsstation"><span class="num">04</span>Tons&rarr;Station</button>
-      <button class="stop" data-tab="width"><span class="num">05</span>Width</button>
-      <button class="stop" data-tab="depth"><span class="num">06</span>Depth</button>
-      <button class="stop" data-tab="length"><span class="num">07</span>Length</button>
-      <button class="stop" data-tab="convert"><span class="num">08</span>Convert</button>
-      <button class="stop" data-tab="log"><span class="num">09</span>Log &amp; QA</button>
+      <button class="stop active" data-tab="log"><span class="num">01</span>Log &amp; QA</button>
+      <button class="stop" data-tab="tonnage"><span class="num">02</span>Tonnage</button>
+      <button class="stop" data-tab="truck"><span class="num">03</span>Coverage</button>
+      <button class="stop" data-tab="stationtons"><span class="num">04</span>Station&rarr;Tons</button>
+      <button class="stop" data-tab="tonsstation"><span class="num">05</span>Tons&rarr;Station</button>
+      <button class="stop" data-tab="width"><span class="num">06</span>Width</button>
+      <button class="stop" data-tab="depth"><span class="num">07</span>Depth</button>
+      <button class="stop" data-tab="length"><span class="num">08</span>Length</button>
+      <button class="stop" data-tab="convert"><span class="num">09</span>Convert</button>
     </div>
 
-    <div class="panel fill-tab-panel" id="panel-tonnage">
+    <div class="panel fill-tab-panel" id="panel-tonnage" style="display:none;">
       <h2>Master Tonnage</h2>
       <div class="desc">Tons = (L &times; W &times; D &times; density) &divide; 24,000</div>
       <div class="grid2">
@@ -321,7 +322,7 @@
       <div class="result"><div class="label">Converted value</div><div class="value" id="cv_out">&mdash;</div></div>
     </div>
 
-    <div class="panel fill-tab-panel" id="panel-log" style="display:none;">
+    <div class="panel fill-tab-panel" id="panel-log">
       <h2>Log Truck Load &rarr; QA &amp; Report</h2>
       <div class="desc">Receipt from the truck driver, unloading temperature, a random field depth check, and start/end station for the load. Placement temperature must read <strong>&gt;280&deg;F</strong> via temp gun during pour. Field depth is checked against your target &plusmn; tolerance above.</div>
       <div class="grid2">
@@ -355,6 +356,7 @@
       <div class="log-count" id="lg_count">0 entries logged</div>
       <div class="log-toolbar">
         <button class="btn" id="lg_export">Export CSV</button>
+        <button class="btn primary" id="lg_sync">&#9729; Sync to Cloud</button>
         <button class="btn danger" id="lg_clear">Clear Report</button>
       </div>
       <div class="log-table-wrap">
@@ -415,6 +417,7 @@
       <div class="log-count" id="mi_count">0 entries logged</div>
       <div class="log-toolbar">
         <button class="btn" id="mi_export">Export CSV</button>
+        <button class="btn primary" id="mi_sync">&#9729; Sync to Cloud</button>
         <button class="btn danger" id="mi_clear">Clear Report</button>
       </div>
       <div class="log-table-wrap">
@@ -517,6 +520,7 @@
       <div class="log-count" id="ja_count">0 entries logged</div>
       <div class="log-toolbar">
         <button class="btn" id="ja_export">Export CSV</button>
+        <button class="btn primary" id="ja_sync">&#9729; Sync to Cloud</button>
         <button class="btn danger" id="ja_clear">Clear Report</button>
       </div>
       <div class="log-table-wrap">
@@ -577,6 +581,7 @@
       <div class="log-count" id="tac_count">0 tickets logged tonight</div>
       <div class="log-toolbar">
         <button class="btn" id="tac_export">Export CSV</button>
+        <button class="btn primary" id="tac_sync">&#9729; Sync to Cloud</button>
         <button class="btn danger" id="tac_clear">Clear Shift Log</button>
       </div>
       <div class="log-table-wrap">
@@ -612,9 +617,44 @@
     </div>
   </div>
 
+  <!-- ============ DAILY REPORT SECTION (shared/synced) ============ -->
+  <div class="section-content" id="section-dailyreport" style="display:none;">
+    <div class="panel">
+      <h2>Daily Report — All Inspectors</h2>
+      <div class="desc">Pulls everyone's synced data for one date into a single combined view. Each inspector's own "Sync to Cloud" button in their section pushes their entries here without touching anyone else's.</div>
+
+      <div class="grid2">
+        <div class="field"><label>Report Date</label><input type="date" id="dr_date"></div>
+        <div class="field" style="display:flex; align-items:flex-end;">
+          <button class="btn primary" id="dr_load" style="width:100%;">Load Report</button>
+        </div>
+      </div>
+
+      <div class="grid2" style="margin-top:6px;">
+        <div class="field"><label>Admin Access</label><input type="text" id="dr_adminInput" placeholder="Type admin name to unlock controls"></div>
+        <div class="field" style="display:flex; align-items:flex-end;">
+          <span id="dr_adminStatus" style="font-size:12px; color:var(--muted);">Not unlocked</span>
+        </div>
+      </div>
+
+      <div id="dr_dayLockRow" style="display:none; margin-bottom:14px;">
+        <button class="btn danger" id="dr_toggleDayLock" style="width:100%;">Lock Entire Day</button>
+      </div>
+
+      <div id="dr_status" style="font-size:12px; color:var(--muted); margin-bottom:10px;">No report loaded yet.</div>
+
+      <div id="dr_results"></div>
+
+      <div class="log-toolbar" style="margin-top:14px;">
+        <button class="btn" id="dr_exportAll">Export Combined CSV</button>
+      </div>
+    </div>
+  </div>
+
   <footer>
     Assumptions: 145 lb/ft&sup3; density &amp; 40-ton truck load unless overridden above. QA flags (temperature, depth) are advisory records — they do not block saving an entry.<br>
     For payment quantities, always follow the project&rsquo;s contract/spec measurement requirements.
+
   </footer>
 </div>
 
@@ -649,7 +689,101 @@
 
   const TEMP_MIN_PASS = 280;
 
+  function genId(){
+    return (crypto.randomUUID ? crypto.randomUUID() : (Date.now()+'_'+Math.random().toString(36).slice(2)));
+  }
+
+  /* ================= ADMIN / CLOUD SYNC ================= */
+  const ADMIN_NAME = 'ulfat shahzad';
+  const ADMIN_KEY = 'millfill_isAdmin';
+  function isAdmin(){ return localStorage.getItem(ADMIN_KEY) === '1'; }
+
+  function waitForCloud(){
+    return new Promise((resolve) => {
+      if (window.__millfillCloudReady) return resolve();
+      document.addEventListener('millfill-cloud-ready', () => resolve(), { once:true });
+      setTimeout(resolve, 4000); // fail-safe timeout so UI never hangs forever
+    });
+  }
+
+  function sanitizeId(name){
+    return (name||'unknown').trim().toLowerCase().replace(/[^a-z0-9]+/g,'_');
+  }
+
+  /**
+   * Sync one operation's TODAY entries to the cloud, grouped by inspector.
+   * Locked cloud entries are preserved even if the same inspector re-syncs.
+   */
+  async function syncOperation(opKey, loadFn){
+    await waitForCloud();
+    if(!window.__millfillCloud){ alert('Cloud not reachable right now — check your connection and try again.'); return; }
+
+    const today = todayStr();
+    try{
+      const dayDoc = await window.__millfillCloud.getDayDoc(today);
+      if(dayDoc.locked){
+        alert('Today has been locked by the admin. No further syncing is allowed for ' + today + '.');
+        return;
+      }
+    } catch(err){
+      alert('Could not reach the cloud database. Check your internet connection and try again.');
+      return;
+    }
+
+    const all = loadFn().filter(e => e.date === today);
+    if(all.length === 0){ alert('No entries logged today for this section yet — nothing to sync.'); return; }
+
+    const byInspector = {};
+    all.forEach(e => {
+      const name = e.inspector || 'Unassigned';
+      if(!byInspector[name]) byInspector[name] = [];
+      byInspector[name].push(e);
+    });
+
+    let syncedCount = 0, inspectorCount = 0;
+    for(const [inspectorName, localEntries] of Object.entries(byInspector)){
+      const inspectorId = sanitizeId(inspectorName);
+      let cloudDoc;
+      try{
+        cloudDoc = await window.__millfillCloud.getInspectorDoc(today, inspectorId) || {};
+      } catch(err){ cloudDoc = {}; }
+
+      const cloudOpEntries = cloudDoc[opKey] || [];
+      const lockedCloud = cloudOpEntries.filter(e => e.locked);
+      const lockedIds = new Set(lockedCloud.map(e => e.id));
+      const freshLocal = localEntries.filter(e => !lockedIds.has(e.id));
+      const merged = [...lockedCloud, ...freshLocal];
+
+      const updatedDoc = { ...cloudDoc, [opKey]: merged, inspectorName, updatedAt: new Date().toISOString() };
+      try{
+        await window.__millfillCloud.setInspectorDoc(today, inspectorId, updatedDoc);
+        syncedCount += freshLocal.length;
+        inspectorCount++;
+      } catch(err){
+        alert('Sync failed for ' + inspectorName + ': ' + err.message);
+      }
+    }
+    alert(`Synced ${syncedCount} ${opKey} entr${syncedCount===1?'y':'ies'} for ${inspectorCount} inspector(s) — ${today}.`);
+  }
+
   /* ================= TOP-LEVEL SECTION SWITCHING ================= */
+  function updateGlobalConfigVisibility(section){
+    const cfg = document.getElementById('globalConfig');
+    const fillOnly = document.querySelectorAll('.cfg-fill-only');
+    const depthGroup = document.querySelectorAll('.cfg-depth');
+    if(section === 'fill'){
+      cfg.style.display = 'grid';
+      fillOnly.forEach(el => el.style.display = 'block');
+      depthGroup.forEach(el => el.style.display = 'block');
+    } else if(section === 'mill'){
+      cfg.style.display = 'grid';
+      fillOnly.forEach(el => el.style.display = 'none');
+      depthGroup.forEach(el => el.style.display = 'block');
+    } else {
+      cfg.style.display = 'none';
+    }
+  }
+
   document.getElementById('sections').addEventListener('click', (e) => {
     const btn = e.target.closest('.section-btn');
     if(!btn) return;
@@ -657,6 +791,7 @@
     btn.classList.add('active');
     document.querySelectorAll('.section-content').forEach(s=>s.style.display='none');
     document.getElementById('section-'+btn.dataset.section).style.display='block';
+    updateGlobalConfigVisibility(btn.dataset.section);
   });
 
   /* ================= FILL SUB-TABS ================= */
@@ -934,6 +1069,7 @@
 
     const entries = loadFillLog();
     entries.push({
+      id: genId(), locked:false,
       date, inspector, ticket, truckNum, carrier,
       startStation: toStation(s), endStation: endStationLabel,
       lf: lf.toFixed(0), tons: tons.toFixed(2), width:W, depth:D, density:rho,
@@ -1036,6 +1172,7 @@
 
     const entries = loadMillLog();
     entries.push({
+      id: genId(), locked:false,
       date, inspector, truckNum, carrier,
       stA: toStation(A), stB: toStation(B), lf: lf.toFixed(0),
       cy: cy.toFixed(1), width:W, depth:D,
@@ -1162,6 +1299,7 @@
 
     const entries = loadJointLog();
     entries.push({
+      id: genId(), locked:false,
       date, inspector, type, locMode: mode, startStation: startLabel, endStation: endLabel, joints,
       lf: lf.toFixed(0), matTemp: isFinite(matTemp)?matTemp:'', hoseTemp: isFinite(hoseTemp)?hoseTemp:'',
       tempFlag, uncheckedFlags, anyFlag
@@ -1246,6 +1384,7 @@
     const deltaT = temp-60, factor = 1-(deltaT*0.00025), corrected = gallons*factor, finalPay = Math.round(corrected);
     const entries = loadTacLog();
     entries.push({
+      id: genId(), locked:false,
       date: $('tac_date').value || todayStr(), inspector,
       ticket: $('tac_ticket').value, truck: getTacTruckValue(), contractor: $('tac_contractor').value,
       gallons, temp, finalPay
@@ -1405,6 +1544,7 @@
 
   $('lg_add').addEventListener('click', addFillLogEntry);
   $('lg_export').addEventListener('click', exportFillCSV);
+  $('lg_sync').addEventListener('click', () => syncOperation('fill', loadFillLog));
   $('lg_clear').addEventListener('click', clearFillLog);
   $('lg_tbody').addEventListener('click', (e) => {
     const btn = e.target.closest('.del-btn'); if(!btn) return;
@@ -1414,6 +1554,7 @@
 
   $('mi_add').addEventListener('click', addMillLogEntry);
   $('mi_export').addEventListener('click', exportMillCSV);
+  $('mi_sync').addEventListener('click', () => syncOperation('mill', loadMillLog));
   $('mi_clear').addEventListener('click', clearMillLog);
   $('mi_tbody').addEventListener('click', (e) => {
     const btn = e.target.closest('.del-btn'); if(!btn) return;
@@ -1423,6 +1564,7 @@
 
   $('ja_add').addEventListener('click', addJointLogEntry);
   $('ja_export').addEventListener('click', exportJointCSV);
+  $('ja_sync').addEventListener('click', () => syncOperation('joint', loadJointLog));
   $('ja_clear').addEventListener('click', clearJointLog);
   $('ja_tbody').addEventListener('click', (e) => {
     const btn = e.target.closest('.del-btn'); if(!btn) return;
@@ -1432,11 +1574,156 @@
 
   $('tac_add').addEventListener('click', addTacEntry);
   $('tac_export').addEventListener('click', exportTacCSV);
+  $('tac_sync').addEventListener('click', () => syncOperation('tac', loadTacLog));
   $('tac_clear').addEventListener('click', clearTacLog);
   $('tac_tbody').addEventListener('click', (e) => {
     const btn = e.target.closest('.del-btn'); if(!btn) return;
     const entries = loadTacLog(); entries.splice(parseInt(btn.dataset.idx,10),1);
     saveTacLog(entries); renderTacLog();
+  });
+
+  /* ================= DAILY REPORT (combined, cloud-backed) ================= */
+  let dr_currentData = null; // {dayLocked, inspectors: {id: {...doc}}}
+
+  function updateAdminUI(){
+    const status = $('dr_adminStatus');
+    const lockRow = $('dr_dayLockRow');
+    if(isAdmin()){
+      status.textContent = 'Admin controls unlocked';
+      status.style.color = 'var(--ok-green)';
+      lockRow.style.display = 'block';
+    } else {
+      status.textContent = 'Not unlocked';
+      status.style.color = 'var(--muted)';
+      lockRow.style.display = 'none';
+    }
+  }
+
+  $('dr_adminInput').addEventListener('input', () => {
+    const val = $('dr_adminInput').value.trim().toLowerCase();
+    if(val === ADMIN_NAME){
+      localStorage.setItem(ADMIN_KEY, '1');
+      updateAdminUI();
+      if(dr_currentData) renderDailyReportTables();
+    }
+  });
+
+  async function loadDailyReport(){
+    await waitForCloud();
+    if(!window.__millfillCloud){ $('dr_status').textContent = 'Cloud not reachable.'; return; }
+    const date = $('dr_date').value || todayStr();
+    $('dr_status').textContent = 'Loading...';
+    try{
+      const dayDoc = await window.__millfillCloud.getDayDoc(date);
+      const inspectors = await window.__millfillCloud.getAllInspectorDocs(date);
+      dr_currentData = { date, dayLocked: !!dayDoc.locked, inspectors };
+      const names = Object.keys(inspectors);
+      $('dr_status').textContent = names.length
+        ? `${names.length} inspector(s) synced for ${date}. Day is ${dayDoc.locked ? 'LOCKED' : 'unlocked'}.`
+        : `No synced data yet for ${date}.`;
+      $('dr_toggleDayLock').textContent = dayDoc.locked ? 'Unlock Entire Day' : 'Lock Entire Day';
+      renderDailyReportTables();
+    } catch(err){
+      $('dr_status').textContent = 'Error loading report: ' + err.message;
+    }
+  }
+
+  function drOpRows(opKey, columns, rowFn){
+    if(!dr_currentData) return '';
+    const rows = [];
+    Object.entries(dr_currentData.inspectors).forEach(([inspectorId, doc]) => {
+      (doc[opKey]||[]).forEach(entry => {
+        rows.push({ inspectorId, inspectorName: doc.inspectorName || inspectorId, entry });
+      });
+    });
+    if(rows.length === 0) return `<div class="log-empty">No ${opKey} entries synced for this date.</div>`;
+    const admin = isAdmin();
+    return `<div class="log-table-wrap"><table class="log"><thead><tr><th>Inspector</th>${columns.map(c=>`<th>${c}</th>`).join('')}<th>Lock</th></tr></thead><tbody>
+      ${rows.map(r => {
+        const cells = rowFn(r.entry);
+        const lockBtn = admin
+          ? `<button class="btn" data-oplock="${opKey}" data-inspector="${r.inspectorId}" data-id="${r.entry.id}" style="padding:6px 10px; font-size:11px;">${r.entry.locked ? '&#128274; Unlock' : '&#128275; Lock'}</button>`
+          : (r.entry.locked ? '<span style="color:var(--caution-yellow);">&#128274;</span>' : '');
+        return `<tr><td>${r.inspectorName}</td>${cells.map(c=>`<td>${c}</td>`).join('')}<td>${lockBtn}</td></tr>`;
+      }).join('')}
+    </tbody></table></div>`;
+  }
+
+  function renderDailyReportTables(){
+    if(!dr_currentData){ $('dr_results').innerHTML = ''; return; }
+    const html = `
+      <h3 style="font-family:'Oswald',sans-serif; font-size:14px; text-transform:uppercase; color:var(--muted); margin:16px 0 8px;">Fill / Asphalt</h3>
+      ${drOpRows('fill', ['Date','Ticket','Truck','Start','End','LF','Tons','Temp','Depth'], e =>
+        [e.date, e.ticket||'—', e.truckNum||'—', e.startStation, e.endStation, e.lf, e.tons, e.temp||'—', e.measDepth||'—'])}
+
+      <h3 style="font-family:'Oswald',sans-serif; font-size:14px; text-transform:uppercase; color:var(--muted); margin:16px 0 8px;">Milling</h3>
+      ${drOpRows('mill', ['Date','Truck','Sta A','Sta B','LF','CY','Depth'], e =>
+        [e.date, e.truckNum||'—', e.stA, e.stB, e.lf, e.cy, e.measDepth||'—'])}
+
+      <h3 style="font-family:'Oswald',sans-serif; font-size:14px; text-transform:uppercase; color:var(--muted); margin:16px 0 8px;">Joint Adhesive</h3>
+      ${drOpRows('joint', ['Date','Type','Start','End','Joints','LF','Mat°F'], e =>
+        [e.date, e.type||'—', e.startStation, e.endStation||'—', e.joints, e.lf, e.matTemp||'—'])}
+
+      <h3 style="font-family:'Oswald',sans-serif; font-size:14px; text-transform:uppercase; color:var(--muted); margin:16px 0 8px;">TAC Coat</h3>
+      ${drOpRows('tac', ['Date','Ticket','Truck','Gallons','Temp','Final Pay'], e =>
+        [e.date, e.ticket||'—', e.truck||'—', e.gallons, e.temp, e.finalPay])}
+    `;
+    $('dr_results').innerHTML = html;
+
+    $('dr_results').querySelectorAll('[data-oplock]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const opKey = btn.dataset.oplock, inspectorId = btn.dataset.inspector, id = btn.dataset.id;
+        const doc = dr_currentData.inspectors[inspectorId];
+        const entry = (doc[opKey]||[]).find(e => e.id === id);
+        if(!entry) return;
+        entry.locked = !entry.locked;
+        try{
+          await window.__millfillCloud.setInspectorDoc(dr_currentData.date, inspectorId, doc);
+          renderDailyReportTables();
+        } catch(err){ alert('Could not update lock: ' + err.message); }
+      });
+    });
+  }
+
+  $('dr_load').addEventListener('click', loadDailyReport);
+
+  $('dr_toggleDayLock').addEventListener('click', async () => {
+    if(!dr_currentData) return;
+    const newLock = !dr_currentData.dayLocked;
+    try{
+      await window.__millfillCloud.setDayLock(dr_currentData.date, newLock);
+      dr_currentData.dayLocked = newLock;
+      $('dr_toggleDayLock').textContent = newLock ? 'Unlock Entire Day' : 'Lock Entire Day';
+      $('dr_status').textContent = `Day is now ${newLock ? 'LOCKED' : 'unlocked'} for ${dr_currentData.date}.`;
+    } catch(err){ alert('Could not update day lock: ' + err.message); }
+  });
+
+  $('dr_exportAll').addEventListener('click', () => {
+    if(!dr_currentData){ alert('Load a report first.'); return; }
+    const lines = [];
+    const pushSection = (title, opKey, headers, rowFn) => {
+      lines.push(title);
+      lines.push(['Inspector', ...headers].join(','));
+      Object.entries(dr_currentData.inspectors).forEach(([id, doc]) => {
+        (doc[opKey]||[]).forEach(e => lines.push([doc.inspectorName||id, ...rowFn(e)].join(',')));
+      });
+      lines.push('');
+    };
+    pushSection('FILL', 'fill', ['Date','Ticket','Truck','Start','End','LF','Tons','Temp','Depth','Locked'],
+      e=>[e.date,e.ticket||'',e.truckNum||'',e.startStation,e.endStation,e.lf,e.tons,e.temp,e.measDepth,e.locked?'YES':'']);
+    pushSection('MILLING', 'mill', ['Date','Truck','StaA','StaB','LF','CY','Depth','Locked'],
+      e=>[e.date,e.truckNum||'',e.stA,e.stB,e.lf,e.cy,e.measDepth,e.locked?'YES':'']);
+    pushSection('JOINT ADHESIVE', 'joint', ['Date','Type','Start','End','Joints','LF','MatTemp','Locked'],
+      e=>[e.date,e.type||'',e.startStation,e.endStation||'',e.joints,e.lf,e.matTemp,e.locked?'YES':'']);
+    pushSection('TAC COAT', 'tac', ['Date','Ticket','Truck','Gallons','Temp','FinalPay','Locked'],
+      e=>[e.date,e.ticket||'',e.truck||'',e.gallons,e.temp,e.finalPay,e.locked?'YES':'']);
+    const csv = lines.join('\n');
+    const blob = new Blob([csv], {type:'text/csv'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `daily-report-combined-${dr_currentData.date}.csv`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   });
 
   /* ================= INIT ================= */
@@ -1460,8 +1747,60 @@
   calcMill();
   calcJoint();
   calcTac();
+  updateGlobalConfigVisibility('fill');
+  $('dr_date').value = todayStr();
+  updateAdminUI();
 })();
 
+</script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+  import {
+    getFirestore, doc, getDoc, setDoc, collection, getDocs
+  } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyD9cfw7jIxPN4xdamwBX-S23FfjyzLc8Qg",
+    authDomain: "shahzu01-d265724.firebaseapp.com",
+    projectId: "shahzu01-d265724",
+    storageBucket: "shahzu01-d265724.firebasestorage.app",
+    messagingSenderId: "215581957857",
+    appId: "1:215581957857:web:b2e89aff70c3b5a729e1a0"
+  };
+
+  const fbApp = initializeApp(firebaseConfig);
+  const db = getFirestore(fbApp);
+
+  // Expose a small bridge so the main (non-module) app script can call these
+  window.__millfillCloud = {
+    async getDayDoc(dateStr){
+      const ref = doc(db, "dailyReports", dateStr);
+      const snap = await getDoc(ref);
+      return snap.exists() ? snap.data() : { locked: false };
+    },
+    async setDayLock(dateStr, locked){
+      const ref = doc(db, "dailyReports", dateStr);
+      await setDoc(ref, { locked }, { merge: true });
+    },
+    async getInspectorDoc(dateStr, inspectorId){
+      const ref = doc(db, "dailyReports", dateStr, "inspectors", inspectorId);
+      const snap = await getDoc(ref);
+      return snap.exists() ? snap.data() : null;
+    },
+    async setInspectorDoc(dateStr, inspectorId, data){
+      const ref = doc(db, "dailyReports", dateStr, "inspectors", inspectorId);
+      await setDoc(ref, data, { merge: true });
+    },
+    async getAllInspectorDocs(dateStr){
+      const colRef = collection(db, "dailyReports", dateStr, "inspectors");
+      const snaps = await getDocs(colRef);
+      const out = {};
+      snaps.forEach(s => { out[s.id] = s.data(); });
+      return out;
+    }
+  };
+  window.__millfillCloudReady = true;
+  document.dispatchEvent(new Event('millfill-cloud-ready'));
 </script>
 <script>
 if ('serviceWorker' in navigator) {
