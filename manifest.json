@@ -1,0 +1,15 @@
+{
+  "name": "NYSDOT D265724 Mill & Fill",
+  "short_name": "D265724 M&F",
+  "description": "Field toolkit for NYSDOT Contract D265724 Mill and Fill: asphalt tonnage, joint adhesive QA/QC, tack coat payment, and milling volume.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1b1b1d",
+  "theme_color": "#1b1b1d",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
