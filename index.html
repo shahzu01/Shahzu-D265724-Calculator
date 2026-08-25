@@ -213,6 +213,7 @@
     <button class="section-btn" data-section="tac">TAC Coat</button>
     <button class="section-btn" data-section="roster">Truck Roster</button>
     <button class="section-btn" data-section="dailyreport">Daily Report</button>
+    <button class="section-btn" data-section="drain">Drainage Cleaning</button>
   </div>
 
   <div class="log-toolbar" style="margin:10px 0 4px;">
@@ -380,16 +381,16 @@
   <!-- ============ MILLING SECTION ============ -->
   <div class="section-content" id="section-mill" style="display:none;">
     <div class="panel">
-      <h2>Milling Volume</h2>
-      <div class="desc">CY = (LF &times; W &times; D) &divide; 324. Station order doesn't matter — absolute distance is used.</div>
+      <h2>Milling Area</h2>
+      <div class="desc">SY = (LF &times; W) &divide; 9. Station order doesn't matter — absolute distance is used. Depth is a fixed spec requirement, verified separately below, not part of the SY payment calc.</div>
       <div class="grid2">
         <div class="field"><label>Station A</label><input type="text" id="mi_stA" placeholder="300+00"></div>
         <div class="field"><label>Station B</label><input type="text" id="mi_stB" placeholder="164+00"></div>
         <div class="field"><label>Width (ft)</label><input type="number" id="mi_W" value="12" inputmode="decimal"></div>
-        <div class="field"><label>Milling Depth (in)</label><input type="number" id="mi_D" value="2" step="0.25" inputmode="decimal"></div>
+        <div class="field"><label>Spec Milling Depth (in)</label><input type="number" id="mi_D" value="2" step="0.25" inputmode="decimal"></div>
       </div>
       <div class="result">
-        <div class="label">Cubic yards</div>
+        <div class="label">Square yards</div>
         <div class="value" id="mi_out">&mdash;</div>
         <div class="station" id="mi_lf"></div>
       </div>
@@ -423,7 +424,7 @@
       <div class="log-table-wrap">
         <table class="log" id="mi_table">
           <thead><tr>
-            <th>Date</th><th>Inspector</th><th>Truck</th><th>Carrier</th><th>Station A</th><th>Station B</th><th>LF</th><th>CY</th><th>Meas. Depth</th><th>QC</th><th></th>
+            <th>Date</th><th>Inspector</th><th>Truck</th><th>Carrier</th><th>Station A</th><th>Station B</th><th>LF</th><th>SY</th><th>Meas. Depth</th><th>QC</th><th></th>
           </tr></thead>
           <tbody id="mi_tbody"></tbody>
         </table>
@@ -618,6 +619,82 @@
   </div>
 
   <!-- ============ DAILY REPORT SECTION (shared/synced) ============ -->
+  <!-- ============ DRAINAGE CLEANING SECTION ============ -->
+  <div class="section-content" id="section-drain" style="display:none;">
+    <div class="panel">
+      <h2>Drainage Structure Cleaning</h2>
+      <div class="desc">Subcontractor: <strong>E &amp; B Industrial Cleaning Corp</strong>. Pre-loaded with all 243 structures from the project tracker — start typing a Structure ID to find it.</div>
+
+      <div id="drain_progress" class="result" style="margin-top:0; margin-bottom:16px;">
+        <div class="label">Progress</div>
+        <div class="value" id="drain_progressVal">&mdash;</div>
+      </div>
+
+      <div class="grid2">
+        <div class="field full">
+          <label>Structure ID</label>
+          <input type="text" id="drain_structId" list="drain_structList" placeholder="Start typing e.g. DS1-162">
+          <datalist id="drain_structList"></datalist>
+        </div>
+        <div class="field full">
+          <label>Location</label>
+          <input type="text" id="drain_desc" placeholder="Auto-fills from Structure ID" readonly>
+        </div>
+        <div class="field">
+          <label>Direction</label>
+          <input type="text" id="drain_dir" placeholder="—" readonly>
+        </div>
+        <div class="field">
+          <label>Cleaned?</label>
+          <select id="drain_cleaned">
+            <option value="Y">Yes</option>
+            <option value="N">No — skipped</option>
+          </select>
+        </div>
+        <div class="field full" id="drain_commentsWrap" style="display:none;">
+          <label>Comments (required if skipped)</label>
+          <input type="text" id="drain_comments" placeholder="Reason for skipping">
+        </div>
+        <div class="field">
+          <label>Inspector</label>
+          <select id="drain_inspector"><option value="">— Select inspector —</option></select>
+        </div>
+        <div class="field" id="drain_inspector_other_wrap" style="display:none;"><label>Inspector Name</label><input type="text" id="drain_inspector_other" placeholder="Type name"></div>
+        <div class="field">
+          <label>Subcontractor</label>
+          <input type="text" id="drain_subcontractor" value="E &amp; B Industrial Cleaning Corp">
+        </div>
+        <div class="field">
+          <label>Contractor Employee Name</label>
+          <input type="text" id="drain_employee" placeholder="Crew member who cleaned it">
+        </div>
+        <div class="field">
+          <label>Date</label>
+          <input type="date" id="drain_date">
+        </div>
+      </div>
+
+      <div class="log-toolbar" style="margin-top:8px;">
+        <button class="btn primary" id="drain_add">+ Add to Report</button>
+      </div>
+      <div class="log-count" id="drain_count">0 entries logged</div>
+      <div class="log-toolbar">
+        <button class="btn" id="drain_export">Export CSV</button>
+        <button class="btn primary" id="drain_sync">&#9729; Sync to Cloud</button>
+        <button class="btn danger" id="drain_clear">Clear Report</button>
+      </div>
+      <div class="log-table-wrap">
+        <table class="log" id="drain_table">
+          <thead><tr>
+            <th>Date</th><th>Structure</th><th>Direction</th><th>Cleaned</th><th>Inspector</th><th>Employee</th><th>Comments</th><th></th>
+          </tr></thead>
+          <tbody id="drain_tbody"></tbody>
+        </table>
+        <div class="log-empty" id="drain_empty">No entries yet — log a structure above.</div>
+      </div>
+    </div>
+  </div>
+
   <div class="section-content" id="section-dailyreport" style="display:none;">
     <div class="panel">
       <h2>Daily Report — All Inspectors</h2>
@@ -939,6 +1016,11 @@
 
   /* ================= INSPECTORS ================= */
   const INSPECTORS = ['John Lopera','Ajit Dharmashin','Jason White','Ulfat Shahzad'];
+
+  /* ================= DRAINAGE STRUCTURE DATA (from project tracker) ================= */
+const DRAIN_STRUCTURES = [{"id":"DS1-1","desc":"SW CORNER OF SUNRISE HWY AND THEATER RD","dir":"EB"},{"id":"DS1-2","desc":"FAR RIGHT LANE ON SUNRISE HWY BY THEATER RD","dir":"EB"},{"id":"DS1-3","desc":"ON SUNRISE HWY 330 FEET FROM THEATER RD","dir":"EB"},{"id":"DS1-4","desc":"75 FEET FROM DS1-3 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-5","desc":"45 FEET FROM SE CORNER OF GREEN ACRES RD WEST ON SUNRISE HWY","dir":"EB"},{"id":"DS1-6","desc":"290 FEET FROM DS1-5 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-7","desc":"125 FEET FROM SE CORNER OF MARKE RD AND SUNRISE HWY","dir":"EB"},{"id":"DS1-8","desc":"182 FEET FROM DS1-7 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-9","desc":"230 FEET FROM DS1-8 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-10","desc":"250 FEET FROM DS1-9 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-11","desc":"251 FEET FROM DS1-10 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-12","desc":"188 FEET FROM SE CORNER ON SUNRISE HWY AND TARGET ENTRANCE","dir":"EB"},{"id":"DS1-13","desc":"240 FEET FROM DS1-12 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-14","desc":"45 FEET FROM SE CORNER ON S TERRACE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-15","desc":"190 FEET FROM DS1-14 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-16","desc":"175 FEET FROM DS1-15 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-17","desc":"70 FEET FROM SW CORNER OF GREEN ACRES RD E AND SUNRISE HWY","dir":"EB"},{"id":"DS1-18","desc":"65 FEET FROM SE CORNER OF GREEN ACRES RD E AND SUNRISE HWY","dir":"EB"},{"id":"DS1-19","desc":"250 FEET FROM DS1-18 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-20","desc":"250 FEET FROM DS1-19 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-21","desc":"250 FEET FROM DS1-20 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-22","desc":"250 FEET FROM DS1-21 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-23","desc":"190 FEET FROM THE SE CORNER OF MILL RD AND SUNRISE HWY","dir":"EB"},{"id":"DS1-24","desc":"290 FEET FROM DS1-23 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-25","desc":"290 FEET FROM DS1-24 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-26","desc":"290 FEET FROM DS1-25 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-27","desc":"225 FEET FROM DS1-26 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-28","desc":"SW CORNER OF S FRANKLIN RD AND SUNRISE HWY","dir":"EB"},{"id":"DS1-29","desc":"SW CORNER OF 1ST STREET AND SUNRISE HWY","dir":"EB"},{"id":"DS1-30","desc":"SW CORNER OF LEGION PL AND SUNRISE HWY","dir":"EB"},{"id":"DS1-31","desc":"SE CORNER OF LEGION PL AND SUNRISE HWY","dir":"EB"},{"id":"DS1-32","desc":"45 FEET FROM DS1-31 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-33","desc":"45 FEET FROM DS1-32 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-34","desc":"155 FEET FROM FROM DS1-33 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-35","desc":"140 FEET FROM FROM DS1-34 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-36","desc":"SE CORNER OF ROCKAWAY BLVD AND SUNRISE HWY","dir":"EB"},{"id":"DS1-37","desc":"65 FEET FROM SW CORNER OF 4TH STREET AND SUNRISE HWY","dir":"EB"},{"id":"DS1-38","desc":"SE CORNER OF 4TH STREET AND SUNRISE HWY","dir":"EB"},{"id":"DS1-39","desc":"SE CORNER OF 5TH STREET AND SUNRISE HWY","dir":"EB"},{"id":"DS1-40","desc":"160 FEET FROM DS1-39 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-41","desc":"SE CORNER OF 6TH STREET AND SUNRISE HWY","dir":"EB"},{"id":"DS1-42","desc":"190 FEET FROM DS1-41 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-43","desc":"60 FEET FROM DS1-42 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-44","desc":"SW CORNER OF BROOKSIDE RD AND SUNRISE HWY","dir":"EB"},{"id":"DS1-45","desc":"205 FEET FROM DS1-44 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-46","desc":"SW CORNER OF BROOKLYN AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-47","desc":"50 FEET FROM SE CORNER OF BROOKLYN AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-48","desc":"SE CORNER OF ASTOR PLACE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-49","desc":"50 FEET FROM SE CORNER OF WOODLAWN AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-50","desc":"SE CORNER OF SCRANTON AVE AND BISMARK RD","dir":"EB"},{"id":"DS1-51","desc":"SW CORNER OF SCRANTON AVE AND BISMARK RD","dir":"EB"},{"id":"DS1-52","desc":"SE CORNER OF HORTON AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-53","desc":"190 FEET FROM DS1-52 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-54","desc":"170 FEET FROM SE CORNER OF RODGER AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-55","desc":"SE CORNER OF RODGERS AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-56","desc":"215 FEET FROM RODGERS AVE ON SUNRISE HWY","dir":"EB"},{"id":"DS1-57","desc":"SE CORNER OF BIXLEY AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-58","desc":"SW CORNER OF BIXLEY AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-59","desc":"SW CORNER OF FREER AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-60","desc":"SE CORNER OF FREER AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-61","desc":"90 FEET FROM DS1-60 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-62","desc":"SE CORNER OF NORMAN ST AND SUNRISE HWY","dir":"EB"},{"id":"DS1-63","desc":"SE CORNER OF REYAM RD AND SUNRISE HWY","dir":"EB"},{"id":"DS1-64","desc":"205 FEET FROM SE CORNER OF REYAM RD AND SUNRISE HWY","dir":"EB"},{"id":"DS1-65","desc":"97 FEET FROM DS1-64 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-66","desc":"270 FEET FROM DS1-65 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-67","desc":"140 FEET FROM DS1-66 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-68","desc":"150 FEET FROM DS1-67 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-69","desc":"300 FEET FROM SE CORNER OF ENDVIEW AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-70","desc":"WEST SIDE OF SW RAMP ON BROADWAY AND SUNRISE HWY","dir":"EB"},{"id":"DS1-71","desc":"SOUTH SIDE OF SW RAMP ON BROADWAY AND SUNRISE HWY","dir":"EB"},{"id":"DS1-72","desc":"SW CORNER OF ROOSEVELT AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-73","desc":"SE CORNER OF ROOSEVELT AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-74","desc":"65 FEET FROM SW CORNER OF FOREST AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-75","desc":"80 FEET FROM SE CORNER OF FOREST AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-76","desc":"145 FEET FROM THE SE CORNER OF RANDALL AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-77","desc":"SW CORNER OF EARLE AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-78","desc":"130 FEET FROM THE SE CORNER OF EARLE AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-79","desc":"SW CORNER OF VINCENT AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-80","desc":"SE CORNER OF VINCENT AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-81","desc":"120 FEET FROM DS1-80 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-82","desc":"SE CORNER OF DENTON AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-83","desc":"330 FEET FROM DS1-82 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-84","desc":"SW CORNER OF SHEPARD AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-85","desc":"SE CORNER OF SHEPARD AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-86","desc":"170 FEET FROM DS1-85 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-87","desc":"45 FEET FROM SE CORNER ON ROCKLYN AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-88","desc":"85 FEET FROM SE CORNER OF WYOMING AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-89","desc":"30 FEET FROM SW CORNER OF EXETER ST AND SUNRISE HWY","dir":"EB"},{"id":"DS1-90","desc":"30 FEET FROM SE CORNER OF EXETER ST AND SUNRISE HWY","dir":"EB"},{"id":"DS1-91","desc":"30 FEET FROM SW CORNER OF LAKEWOOD BLVD AND SUNRISE HWY","dir":"EB"},{"id":"DS1-92","desc":"180 FEET FROM SE CORNER OF LAKEWOOD BLVD AND SUNRISE HWY","dir":"EB"},{"id":"DS1-93","desc":"210 FEET FROM THE SE CORNER OF OCEAN AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-94","desc":"175 FEET FROM DS1-93 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-95","desc":"160 FEET FROM DS1-94 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-96","desc":"330 FEET FROM DS1-95 ON SUNRISE HWY ON MEDIAN AFTER STRIPING","dir":"EB"},{"id":"DS1-97","desc":"130 FEET FROM DS1-96 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-98","desc":"100 FEET FROM DS1-97 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-99","desc":"1000 FEET FROM DS1-98 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-100","desc":"150 FEET FROM DS1-99 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-101","desc":"405 FEET FROM SW CORNER OF N CENTRE AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-102","desc":"170 FEET FROM SW CORNER OF N CENTRE AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-103","desc":"SE CORNER OF N CENTRE AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-104","desc":"200 FEET FROM DS1-103 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-105","desc":"SE CORNER OF N VILLAGE AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-106","desc":"200 FEET FROM DS1-105 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-107","desc":"200 FEET FROM DS1-106 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-108","desc":"92 FEET FROM DS1-107 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-109","desc":"SW CORNER OF N PARK AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-110","desc":"100 FEET FROM SE CORNER OF N PARK AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-111","desc":"200 FEET FROM DS1-110 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-112","desc":"350 FEET FROM DS1-111 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-113","desc":"135 FEET FROM SW CORNER ON MORRIS AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-114","desc":"SE CORNER OF MORRIS AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-115","desc":"100 FEET FROM DS1-114 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-116","desc":"SW CORNER OF N MARION PL AND SUNRISE HWY","dir":"EB"},{"id":"DS1-117","desc":"SE CORNER OF N MARION PL AND SUNRISE HWY","dir":"EB"},{"id":"DS1-118","desc":"140 FEET FROM CROSSWALK ON MORRIS AVE ON EAST SIDE OF MEDIAN","dir":"EB"},{"id":"DS1-119","desc":"140 FEET FROM DS1-118 ON EAST SIDE OF MEDIAN ON SUNRISE HWY","dir":"EB"},{"id":"DS1-120","desc":"60 FEET FROM DS1-119 ON EAST SIDE OF MEDIAN ON SUNRISE HWY","dir":"EB"},{"id":"DS1-121","desc":"85 FEET FROM DS1-120 ON EAST SIDE OF MEDIAN ON SUNRISE HWY","dir":"EB"},{"id":"DS1-122","desc":"100 FEET FROM DS1-121 ON EAST SIDE OF MEDIAN ON SUNRISE HWY","dir":"EB"},{"id":"DS1-123","desc":"SE CORNER OF N KENSINGTON AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-124","desc":"SW CORNER OF MONTAUK AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-125","desc":"310 FEET FROM SE CORNER OF MONTAUK AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-126","desc":"SW CORNER OF N LONG BEACH ROAD AND SUNRISE HWY","dir":"EB"},{"id":"DS1-127","desc":"SE CORNER OF N LONG BEACH ROAD AND SUNRISE HWY","dir":"EB"},{"id":"DS1-128","desc":"235 FEET FROM SW CORNER OF N OCEANSIDE ROAD AND SUNRISE HWY","dir":"EB"},{"id":"DS1-129","desc":"SW CORNER OF CHESTNUT ST AND SUNRISE HWY","dir":"EB"},{"id":"DS1-130","desc":"105 FEET FROM SE CORNER OF CHESTNUT ST AND SUNRISE HWY","dir":"EB"},{"id":"DS1-131","desc":"SE CORNER OF STATE ST AND SUNRISE HWY","dir":"EB"},{"id":"DS1-132","desc":"SE STREET OF CONCORD ST AND SUNRISE HWY","dir":"EB"},{"id":"DS1-133","desc":"SW CORNER OF YORKTOWN ST AND SUNRISE HWY","dir":"EB"},{"id":"DS1-134","desc":"SE CORNER OF YORKTOWN ST AND SUNRISE HWY","dir":"EB"},{"id":"DS1-135","desc":"415 FEET FROM DS1-134 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-136","desc":"235 FEET FROM DS1-135 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-137","desc":"100 FEET FROM SE CORNER OF CHARING CROSS RD AND SUNRISE HWY","dir":"EB"},{"id":"DS1-138","desc":"SE CORNER OF DERBY RD AND SUNRISE HWY","dir":"EB"},{"id":"DS1-139","desc":"205 FEET FROM DS1-138 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-140","desc":"SE CORNER OF CROYDON DR AND SUNRISE HWY","dir":"EB"},{"id":"DS1-141","desc":"SW CORNER OF CROYDON DR AND SUNRISE HWY","dir":"EB"},{"id":"DS1-142","desc":"SW CORNER OF LANCASTER AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-143","desc":"SE CORNER OF LANCASTER AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-144","desc":"200 FEET FROM SE CORNER OF ROCKWOOD AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-145","desc":"SW CORNER OF EDNA CT AND SUNRISE HWY","dir":"EB"},{"id":"DS1-146","desc":"210 FEET FROM SE CORNER OF EDNA CT AND SUNRISE HWY","dir":"EB"},{"id":"DS1-147","desc":"425 FEET FROM DS1-146 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-148","desc":"335 FEET FROM DS1-147 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-149","desc":"SOUTH OF SE CORNER OF GRAND AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-150","desc":"EAST OF SE CORNER OF GRAND AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-151","desc":"220 FEET FROM DS1-150 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-152","desc":"NE CORNER OF GRAND AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-153","desc":"NW CORNER OF GRAND AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-154","desc":"175 FEET FROM DS1-153 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-155","desc":"210 FEET FROM DS1-154 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-156","desc":"250 FEET FROM DS1-155 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-157","desc":"200 FEET FROM DS1-156 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-158","desc":"50 FEET EAST OF THE NW RAMP ON CHARING CROSS RD AND SUNRISE HWY","dir":"WB"},{"id":"DS1-159","desc":"161 FEET WEST OF THE NW RAMP ON CHARING CROSS RD AND SUNRISE HWY","dir":"WB"},{"id":"DS1-160","desc":"400 FEET FROM DS1-159 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-161","desc":"360 FEET FROM NW RAMP ON YORKSHIRE ST AND SUNRISE HWY","dir":"WB"},{"id":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD AND SUNRISE HWY","dir":"WB"},{"id":"DS1-163","desc":"NE CORNER OF N LONG BEACH RD AND SUNRISE HWY","dir":"WB"},{"id":"DS1-164","desc":"WEST SIDE OF NW CORNER ON LONG BEACH RD AND SUNRISE HWY","dir":"WB"},{"id":"DS1-165","desc":"NORTH SIDE OF NW CORNER ON LONG BEACH RD AND SUNRISE HWY","dir":"WB"},{"id":"DS1-166","desc":"175 FEET FROM DS1-165 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-167","desc":"250 FEET FROM DS1-166 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-168","desc":"415 FEET FROM DS1-167 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-169","desc":"102 FEET FROM DS1-168 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-170","desc":"240 FEET FROM DS1-169 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-171","desc":"222 FEET FROM DS1-170 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-172","desc":"NE CORNER OF N FOREST AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-173","desc":"NW CORNER OF N FOREST AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-174","desc":"500 FEET FROM DS1-173 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-175","desc":"210 FEET FROM DS1-174 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-176","desc":"150 FEET FROM DS1-175 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-177","desc":"NE CORNER OF MORRIS AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-178","desc":"NW CORNER OF MORRIS AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-179","desc":"135 FEET FROM NW CORNER ON MORRIS AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-180","desc":"352 FEET FROM DS1-179 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-181","desc":"150 FEET FROM NW CORNER OF N PARK AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-182","desc":"170 FEET FROM DS1-181 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-183","desc":"NE CORNER OF N VILLAGE AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-184","desc":"200 FEET FROM NW CORNER OF N VILLAGE AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-185","desc":"NE CORNER OF N CENTRE AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-186","desc":"200 FEET FROM NW CORNER OF N CENTRE AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-187","desc":"185 FEET FROM NW CORNER OF BANKS AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-188","desc":"100 FEET FROM DS1-187 ON SUNRISE HWY JUST BEFORE MERRICK ROAD","dir":"WB"},{"id":"DS1-189","desc":"200 FEET FROM DS1-188 ON SUNRISE HWY UNDER MERRICK ROAD","dir":"WB"},{"id":"DS1-190","desc":"200 FEET FROM DS1-189 ON SUNRISE HWY UNDER MERRICK ROAD","dir":"WB"},{"id":"DS1-191","desc":"250 FEET FROM MERRICK ROAD BRIDGE ON WB SIDE OF MEDIAN","dir":"WB"},{"id":"DS1-192","desc":"475 FEET FROM DS1-190 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-193","desc":"450 FEET FROM NE CORNER OF OCEAN AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-194","desc":"350 FEET FROM NE CORNER OF OCEAN AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-195","desc":"200 FEET FROM NE CORNER OF OCEAN AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-196","desc":"370 FEET FROM THE NW CORNER OF OCEAN AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-197","desc":"175 FEET FROM DS1-196 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-198","desc":"250 FEET FROM DS1-197 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-199","desc":"NE CORNER OF ROCKLYN AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-200","desc":"NW CORNER OF ROCKLYN AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-201","desc":"175 FEET FROM DS1-200 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-202","desc":"220 FEET FROM DS1-201 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-203","desc":"120 FEET FROM DS1-202 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-204","desc":"135 FEET FROM DS1-203 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-205","desc":"EAST SIDE OF NE CORNER OF DENTON AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-206","desc":"NORTH SIDE OF NE CORNER OF DENTON AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-207","desc":"NE CORNER VINCENT AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-208","desc":"NW CORNER VINCENT AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-209","desc":"NE CORNER OF EARLE AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-210","desc":"NORTH SIDE OF NW CORNER OF EARLE AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-211","desc":"WEST SIDE OF NW CORNER OF EARLE AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-212","desc":"115 FEET FROM NE CORNER OF FOREST AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-213","desc":"NW CORNER OF FOREST AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-214","desc":"85 FEET FROM DS1-213 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-215","desc":"NE CORNER OF ATLANTIC AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-215A","desc":"ADD-ON STRUCTURE (not in original plan set) - located between DS1-215 and DS1-216 on Sunrise Hwy","dir":"WB"},{"id":"DS1-216","desc":"NE CORNER OF BROADWAY AND SUNRISE HWY","dir":"WB"},{"id":"DS1-217","desc":"NW CORNER OF BROADWAY AND SUNRISE HWY","dir":"WB"},{"id":"DS1-218","desc":"170 FEET FROM DS1-217 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-219","desc":"80 FEET FROM DS1-218 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-220","desc":"300 FEET FROM DS1-219 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-221","desc":"2 FEET FROM DS1-220 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-222","desc":"50 FEET FROM NE CORNER OF HORTON AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-223","desc":"25 FEET FROM NE CORNER OF HORTON AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-224","desc":"60 FEET FROM NW CORNER OF HORTON AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-225","desc":"60 FEET FROM DS1-224 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-226","desc":"150 FEET FROM DS1-225 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-227","desc":"300 FEET FROM DS1-226 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-228","desc":"300 FEET FROM DS1-227 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-229","desc":"NE CORNER OF SATTERIE AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-230","desc":"NW CORNER OF SATTERIE AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-231","desc":"2 FEET IN FRONT OF DS1-230 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-232","desc":"110 FEET FROM DS1-231 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-233","desc":"915 FEET FROM DS1-232 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-234","desc":"NE CORNER OF 4TH STREET AND SUNRISE HWY","dir":"WB"},{"id":"DS1-235","desc":"NW CORNER OF 4TH STREET AND SUNRISE HWY","dir":"WB"},{"id":"DS1-236","desc":"NE CORNER OF ROCKAWAY AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-237","desc":"NW CORNER OF ROCKAWAY AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-238","desc":"190 FEET FROM DS1-237 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-239","desc":"140 FEET FROM DS1-238 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-240","desc":"150 FEET FROM DS1-239 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-241","desc":"NW CORNER OF S FRANKLIN AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-242","desc":"1670 FEET FROM THE NW RAMP OF S TERRACE PLACE AND SUNRISE HWY","dir":"WB"}];
+const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-05"},{"structureId":"DS1-163","desc":"NE CORNER OF N LONG BEACH RD AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-05"},{"structureId":"DS1-166","desc":"175 FEET FROM DS1-165 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-05"},{"structureId":"DS1-167","desc":"250 FEET FROM DS1-166 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-05"},{"structureId":"DS1-168","desc":"415 FEET FROM DS1-167 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-05"},{"structureId":"DS1-169","desc":"102 FEET FROM DS1-168 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-05"},{"structureId":"DS1-170","desc":"240 FEET FROM DS1-169 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-05"},{"structureId":"DS1-171","desc":"222 FEET FROM DS1-170 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-05"},{"structureId":"DS1-172","desc":"NE CORNER OF N FOREST AVE AND SUNRISE HWY","dir":"WB","inspector":"Ajit Dharmashin","date":"2026-08-07"},{"structureId":"DS1-173","desc":"NW CORNER OF N FOREST AVE AND SUNRISE HWY","dir":"WB","inspector":"Ajit Dharmashin","date":"2026-08-07"},{"structureId":"DS1-174","desc":"500 FEET FROM DS1-173 ON SUNRISE HWY","dir":"WB","inspector":"Ajit Dharmashin","date":"2026-08-07"},{"structureId":"DS1-175","desc":"210 FEET FROM DS1-174 ON SUNRISE HWY","dir":"WB","inspector":"Ajit Dharmashin","date":"2026-08-07"},{"structureId":"DS1-176","desc":"150 FEET FROM DS1-175 ON SUNRISE HWY","dir":"WB","inspector":"Ajit Dharmashin","date":"2026-08-07"},{"structureId":"DS1-179","desc":"135 FEET FROM NW CORNER ON MORRIS AVE AND SUNRISE HWY","dir":"WB","inspector":"Ajit Dharmashin","date":"2026-08-07"},{"structureId":"DS1-180","desc":"352 FEET FROM DS1-179 ON SUNRISE HWY","dir":"WB","inspector":"Ajit Dharmashin","date":"2026-08-07"},{"structureId":"DS1-181","desc":"150 FEET FROM NW CORNER OF N PARK AVE AND SUNRISE HWY","dir":"WB","inspector":"Ajit Dharmashin","date":"2026-08-07"},{"structureId":"DS1-182","desc":"170 FEET FROM DS1-181 ON SUNRISE HWY","dir":"WB","inspector":"Ajit Dharmashin","date":"2026-08-07"},{"structureId":"DS1-183","desc":"NE CORNER OF N VILLAGE AVE AND SUNRISE HWY","dir":"WB","inspector":"Ajit Dharmashin","date":"2026-08-07"},{"structureId":"DS1-184","desc":"200 FEET FROM NW CORNER OF N VILLAGE AVE AND SUNRISE HWY","dir":"WB","inspector":"Ajit Dharmashin","date":"2026-08-07"},{"structureId":"DS1-185","desc":"NE CORNER OF N CENTRE AVE AND SUNRISE HWY","dir":"WB","inspector":"Ajit Dharmashin","date":"2026-08-07"},{"structureId":"DS1-215A","desc":"ADD-ON STRUCTURE (not in original plan set) - located between DS1-215 and DS1-216 on Sunrise Hwy","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-14"},{"structureId":"DS1-216","desc":"NE CORNER OF BROADWAY AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-14"},{"structureId":"DS1-217","desc":"NW CORNER OF BROADWAY AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-14"},{"structureId":"DS1-218","desc":"170 FEET FROM DS1-217 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-14"},{"structureId":"DS1-219","desc":"80 FEET FROM DS1-218 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-14"},{"structureId":"DS1-220","desc":"300 FEET FROM DS1-219 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-14"},{"structureId":"DS1-221","desc":"2 FEET FROM DS1-220 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-14"},{"structureId":"DS1-222","desc":"50 FEET FROM NE CORNER OF HORTON AVE AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-14"},{"structureId":"DS1-223","desc":"25 FEET FROM NE CORNER OF HORTON AVE AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-14"},{"structureId":"DS1-224","desc":"60 FEET FROM NW CORNER OF HORTON AVE AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-17"},{"structureId":"DS1-225","desc":"60 FEET FROM DS1-224 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-17"},{"structureId":"DS1-226","desc":"150 FEET FROM DS1-225 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-17"},{"structureId":"DS1-227","desc":"300 FEET FROM DS1-226 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-17"},{"structureId":"DS1-228","desc":"300 FEET FROM DS1-227 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-17"},{"structureId":"DS1-229","desc":"NE CORNER OF SATTERIE AVE AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-17"},{"structureId":"DS1-230","desc":"NW CORNER OF SATTERIE AVE AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-18"},{"structureId":"DS1-231","desc":"2 FEET IN FRONT OF DS1-230 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-18"},{"structureId":"DS1-232","desc":"110 FEET FROM DS1-231 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-18"},{"structureId":"DS1-233","desc":"915 FEET FROM DS1-232 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-18"},{"structureId":"DS1-234","desc":"NE CORNER OF 4TH STREET AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-18"},{"structureId":"DS1-235","desc":"NW CORNER OF 4TH STREET AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-19"},{"structureId":"DS1-236","desc":"NE CORNER OF ROCKAWAY AVE AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-19"},{"structureId":"DS1-237","desc":"NW CORNER OF ROCKAWAY AVE AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-19"},{"structureId":"DS1-238","desc":"190 FEET FROM DS1-237 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-19"},{"structureId":"DS1-239","desc":"140 FEET FROM DS1-238 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-19"},{"structureId":"DS1-240","desc":"150 FEET FROM DS1-239 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-19"},{"structureId":"DS1-241","desc":"NW CORNER OF S FRANKLIN AVE AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-19"},{"structureId":"DS1-242","desc":"1670 FEET FROM THE NW RAMP OF S TERRACE PLACE AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-19"}];
+
   const LAST_INSPECTOR_KEY = 'millfill_lastInspector';
   function inspectorOptionsHTML(){
     return '<option value="">— Select inspector —</option>' +
@@ -1122,11 +1204,11 @@
   /* ================= MILLING ================= */
   function calcMill(){
     const A=parseStation($('mi_stA').value), B=parseStation($('mi_stB').value);
-    const W=parseFloat($('mi_W').value), D=parseFloat($('mi_D').value);
+    const W=parseFloat($('mi_W').value);
     if(A!==null && B!==null){
       const lf=Math.abs(B-A);
-      const cy=(lf*W*D)/324;
-      $('mi_out').innerHTML = isFinite(cy) ? fmt(cy,1)+'<span class="unit">CY</span>' : '&mdash;';
+      const sy=(lf*W)/9;
+      $('mi_out').innerHTML = isFinite(sy) ? fmt(sy,1)+'<span class="unit">SY</span>' : '&mdash;';
       $('mi_lf').textContent = fmt(lf,0)+' LF';
     } else {
       $('mi_out').innerHTML='&mdash;'; $('mi_lf').textContent='';
@@ -1166,7 +1248,7 @@
     }
     if(!inspector){ alert('Please select or type in the inspector name.'); return; }
     const lf=Math.abs(B-A);
-    const cy=(lf*W*D)/324;
+    const sy=(lf*W)/9;
     const tgt=targetDepth(), tol=depthTol();
     const depthFlag = isFinite(measDepth) && Math.abs(measDepth-tgt)>tol;
 
@@ -1175,7 +1257,7 @@
       id: genId(), locked:false,
       date, inspector, truckNum, carrier,
       stA: toStation(A), stB: toStation(B), lf: lf.toFixed(0),
-      cy: cy.toFixed(1), width:W, depth:D,
+      sy: sy.toFixed(1), width:W, depth:D,
       measDepth: isFinite(measDepth)?measDepth:'', depthFlag
     });
     saveMillLog(entries);
@@ -1194,7 +1276,7 @@
       return `<tr>
         <td>${e.date||''}</td><td>${e.inspector||''}</td><td>${e.truckNum||''}</td><td>${e.carrier||''}</td>
         <td class="station">${e.stA}</td><td class="station">${e.stB}</td>
-        <td>${e.lf}</td><td class="tons">${e.cy}</td>
+        <td>${e.lf}</td><td class="tons">${e.sy}</td>
         <td class="${e.depthFlag?'flag':''}">${e.measDepth!==''?e.measDepth:'—'}</td>
         <td>${qc}</td>
         <td><button class="del-btn" data-idx="${i}" title="Delete">&#10005;</button></td>
@@ -1205,11 +1287,11 @@
   function exportMillCSV(){
     const entries = loadMillLog();
     if(entries.length===0){ alert('No entries to export yet.'); return; }
-    const headers=['Date','Inspector','Truck #','Carrier','Station A','Station B','Linear Feet','CY','Width (ft)','Depth (in)','Measured Depth','Depth Flag'];
-    const rows=entries.map(e=>[e.date,e.inspector||'',e.truckNum,e.carrier,e.stA,e.stB,e.lf,e.cy,e.width,e.depth,e.measDepth,e.depthFlag?'FLAG':'OK']);
-    let sumLF=0, sumCY=0;
-    entries.forEach(e=>{ sumLF+=parseFloat(e.lf)||0; sumCY+=parseFloat(e.cy)||0; });
-    rows.push(['TOTAL','','','','','',sumLF.toFixed(0),sumCY.toFixed(1),'','','','']);
+    const headers=['Date','Inspector','Truck #','Carrier','Station A','Station B','Linear Feet','SY','Width (ft)','Depth (in)','Measured Depth','Depth Flag'];
+    const rows=entries.map(e=>[e.date,e.inspector||'',e.truckNum,e.carrier,e.stA,e.stB,e.lf,e.sy,e.width,e.depth,e.measDepth,e.depthFlag?'FLAG':'OK']);
+    let sumLF=0, sumSY=0;
+    entries.forEach(e=>{ sumLF+=parseFloat(e.lf)||0; sumSY+=parseFloat(e.sy)||0; });
+    rows.push(['TOTAL','','','','','',sumLF.toFixed(0),sumSY.toFixed(1),'','','','']);
     downloadCSV(headers, rows, 'milling-report');
   }
   function clearMillLog(){
@@ -1453,7 +1535,7 @@
     lines.push(['Generated', new Date().toLocaleString()].map(csvField).join(','));
     lines.push('');
 
-    let grand = {fillTons:0, fillLF:0, millCY:0, millLF:0, jointJoints:0, jointLF:0, tacGallons:0, tacFinal:0};
+    let grand = {fillTons:0, fillLF:0, millSY:0, millLF:0, jointJoints:0, jointLF:0, tacGallons:0, tacFinal:0};
 
     lines.push(csvField('FILL / ASPHALT PLACEMENT'));
     lines.push(['Date','Inspector','Ticket #','Truck #','Carrier','Start Station','End Station','Linear Feet','Tons','Placement Temp F','Meas. Depth','QC'].map(csvField).join(','));
@@ -1465,12 +1547,12 @@
     lines.push('');
 
     lines.push(csvField('MILLING'));
-    lines.push(['Date','Inspector','Truck #','Carrier','Station A','Station B','Linear Feet','CY','Meas. Depth','QC'].map(csvField).join(','));
+    lines.push(['Date','Inspector','Truck #','Carrier','Station A','Station B','Linear Feet','SY','Meas. Depth','QC'].map(csvField).join(','));
     mill.forEach(e=>{
-      grand.millCY += parseFloat(e.cy)||0; grand.millLF += parseFloat(e.lf)||0;
-      lines.push([e.date,e.inspector||'',e.truckNum,e.carrier,e.stA,e.stB,e.lf,e.cy,e.measDepth,e.depthFlag?'FLAGGED':'OK'].map(csvField).join(','));
+      grand.millSY += parseFloat(e.sy)||0; grand.millLF += parseFloat(e.lf)||0;
+      lines.push([e.date,e.inspector||'',e.truckNum,e.carrier,e.stA,e.stB,e.lf,e.sy,e.measDepth,e.depthFlag?'FLAGGED':'OK'].map(csvField).join(','));
     });
-    lines.push(['','','','','','SUBTOTAL',grand.millLF.toFixed(0),grand.millCY.toFixed(1),'',''].map(csvField).join(','));
+    lines.push(['','','','','','SUBTOTAL',grand.millLF.toFixed(0),grand.millSY.toFixed(1),'',''].map(csvField).join(','));
     lines.push('');
 
     lines.push(csvField('JOINT ADHESIVE QA'));
@@ -1495,7 +1577,7 @@
     lines.push(['Fill Linear Feet', grand.fillLF.toFixed(0)].map(csvField).join(','));
     lines.push(['Fill Tons', grand.fillTons.toFixed(2)].map(csvField).join(','));
     lines.push(['Milling Linear Feet', grand.millLF.toFixed(0)].map(csvField).join(','));
-    lines.push(['Milling CY', grand.millCY.toFixed(1)].map(csvField).join(','));
+    lines.push(['Milling SY', grand.millSY.toFixed(1)].map(csvField).join(','));
     lines.push(['Joint Adhesive # Joints', grand.jointJoints].map(csvField).join(','));
     lines.push(['Joint Adhesive Linear Feet', grand.jointLF.toFixed(0)].map(csvField).join(','));
     lines.push(['TAC Delivered Gallons', grand.tacGallons].map(csvField).join(','));
@@ -1657,8 +1739,8 @@
         [e.date, e.ticket||'—', e.truckNum||'—', e.startStation, e.endStation, e.lf, e.tons, e.temp||'—', e.measDepth||'—'])}
 
       <h3 style="font-family:'Oswald',sans-serif; font-size:14px; text-transform:uppercase; color:var(--muted); margin:16px 0 8px;">Milling</h3>
-      ${drOpRows('mill', ['Date','Truck','Sta A','Sta B','LF','CY','Depth'], e =>
-        [e.date, e.truckNum||'—', e.stA, e.stB, e.lf, e.cy, e.measDepth||'—'])}
+      ${drOpRows('mill', ['Date','Truck','Sta A','Sta B','LF','SY','Depth'], e =>
+        [e.date, e.truckNum||'—', e.stA, e.stB, e.lf, e.sy, e.measDepth||'—'])}
 
       <h3 style="font-family:'Oswald',sans-serif; font-size:14px; text-transform:uppercase; color:var(--muted); margin:16px 0 8px;">Joint Adhesive</h3>
       ${drOpRows('joint', ['Date','Type','Start','End','Joints','LF','Mat°F'], e =>
@@ -1667,6 +1749,10 @@
       <h3 style="font-family:'Oswald',sans-serif; font-size:14px; text-transform:uppercase; color:var(--muted); margin:16px 0 8px;">TAC Coat</h3>
       ${drOpRows('tac', ['Date','Ticket','Truck','Gallons','Temp','Final Pay'], e =>
         [e.date, e.ticket||'—', e.truck||'—', e.gallons, e.temp, e.finalPay])}
+
+      <h3 style="font-family:'Oswald',sans-serif; font-size:14px; text-transform:uppercase; color:var(--muted); margin:16px 0 8px;">Drainage Cleaning</h3>
+      ${drOpRows('drain', ['Date','Structure','Dir','Cleaned','Employee','Comments'], e =>
+        [e.date, e.structureId, e.dir, e.cleaned, e.employee||'—', e.comments||'—'])}
     `;
     $('dr_results').innerHTML = html;
 
@@ -1711,12 +1797,14 @@
     };
     pushSection('FILL', 'fill', ['Date','Ticket','Truck','Start','End','LF','Tons','Temp','Depth','Locked'],
       e=>[e.date,e.ticket||'',e.truckNum||'',e.startStation,e.endStation,e.lf,e.tons,e.temp,e.measDepth,e.locked?'YES':'']);
-    pushSection('MILLING', 'mill', ['Date','Truck','StaA','StaB','LF','CY','Depth','Locked'],
-      e=>[e.date,e.truckNum||'',e.stA,e.stB,e.lf,e.cy,e.measDepth,e.locked?'YES':'']);
+    pushSection('MILLING', 'mill', ['Date','Truck','StaA','StaB','LF','SY','Depth','Locked'],
+      e=>[e.date,e.truckNum||'',e.stA,e.stB,e.lf,e.sy,e.measDepth,e.locked?'YES':'']);
     pushSection('JOINT ADHESIVE', 'joint', ['Date','Type','Start','End','Joints','LF','MatTemp','Locked'],
       e=>[e.date,e.type||'',e.startStation,e.endStation||'',e.joints,e.lf,e.matTemp,e.locked?'YES':'']);
     pushSection('TAC COAT', 'tac', ['Date','Ticket','Truck','Gallons','Temp','FinalPay','Locked'],
       e=>[e.date,e.ticket||'',e.truck||'',e.gallons,e.temp,e.finalPay,e.locked?'YES':'']);
+    pushSection('DRAINAGE CLEANING', 'drain', ['Date','Structure','Direction','Cleaned','Employee','Comments','Locked'],
+      e=>[e.date,e.structureId,e.dir,e.cleaned,e.employee||'',e.comments||'',e.locked?'YES':'']);
     const csv = lines.join('\n');
     const blob = new Blob([csv], {type:'text/csv'});
     const url = URL.createObjectURL(blob);
@@ -1725,6 +1813,135 @@
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     URL.revokeObjectURL(url);
   });
+
+  /* ================= DRAINAGE CLEANING ================= */
+  const DRAIN_LOG_KEY = 'millfill_drainlog_v1';
+  const DRAIN_SEEDED_KEY = 'millfill_drainseeded_v1';
+
+  function loadDrainLog(){ try{ return JSON.parse(localStorage.getItem(DRAIN_LOG_KEY))||[]; }catch(e){ return []; } }
+  function saveDrainLog(entries){ try{ localStorage.setItem(DRAIN_LOG_KEY, JSON.stringify(entries)); }catch(e){} }
+
+  function seedDrainLogIfEmpty(){
+    if(localStorage.getItem(DRAIN_SEEDED_KEY)) return;
+    const existing = loadDrainLog();
+    if(existing.length > 0){ localStorage.setItem(DRAIN_SEEDED_KEY,'1'); return; }
+    const seeded = DRAIN_SEED.map(s => ({
+      id: genId(), locked:false,
+      date: s.date || todayStr(), inspector: s.inspector,
+      structureId: s.structureId, desc: s.desc, dir: s.dir,
+      cleaned: 'Y', employee: '', subcontractor: 'E & B Industrial Cleaning Corp', comments: ''
+    }));
+    saveDrainLog(seeded);
+    localStorage.setItem(DRAIN_SEEDED_KEY, '1');
+  }
+
+  function populateDrainDatalist(){
+    const dl = $('drain_structList');
+    dl.innerHTML = DRAIN_STRUCTURES.map(s => `<option value="${s.id}">${s.desc} (${s.dir})</option>`).join('');
+  }
+
+  $('drain_structId').addEventListener('input', () => {
+    const val = $('drain_structId').value.trim().toUpperCase();
+    const match = DRAIN_STRUCTURES.find(s => s.id.toUpperCase() === val);
+    if(match){
+      $('drain_desc').value = match.desc;
+      $('drain_dir').value = match.dir;
+    } else {
+      $('drain_desc').value = '';
+      $('drain_dir').value = '';
+    }
+  });
+
+  $('drain_cleaned').addEventListener('change', () => {
+    $('drain_commentsWrap').style.display = $('drain_cleaned').value === 'N' ? 'block' : 'none';
+  });
+
+  function latestStatusPerStructure(){
+    const entries = loadDrainLog();
+    const map = {};
+    entries.forEach(e => {
+      const prev = map[e.structureId];
+      if(!prev || (e.date||'') >= (prev.date||'')) map[e.structureId] = e;
+    });
+    return map;
+  }
+
+  function renderDrainProgress(){
+    const statusMap = latestStatusPerStructure();
+    const total = DRAIN_STRUCTURES.length;
+    const cleaned = Object.values(statusMap).filter(e => e.cleaned === 'Y').length;
+    $('drain_progressVal').innerHTML = `${cleaned} <span class="unit">/ ${total} structures cleaned</span>`;
+  }
+
+  function renderDrainLog(){
+    const entries = loadDrainLog();
+    const tbody = $('drain_tbody'), table = $('drain_table'), empty = $('drain_empty');
+    $('drain_count').textContent = entries.length + (entries.length===1?' entry logged':' entries logged');
+    if(entries.length === 0){ table.style.display='none'; empty.style.display='block'; renderDrainProgress(); return; }
+    table.style.display='table'; empty.style.display='none';
+    const sorted = [...entries].sort((a,b) => (b.date||'').localeCompare(a.date||''));
+    tbody.innerHTML = sorted.map(e => {
+      const idx = entries.indexOf(e);
+      const cleanedCell = e.cleaned === 'Y'
+        ? '<span style="color:var(--ok-green);font-weight:600;">YES</span>'
+        : '<span style="color:var(--warn-red);font-weight:600;">SKIPPED</span>';
+      return `<tr>
+        <td>${e.date||''}</td><td class="station">${e.structureId}</td><td>${e.dir||''}</td>
+        <td>${cleanedCell}</td><td>${e.inspector||''}</td><td>${e.employee||'—'}</td>
+        <td>${e.comments ? e.comments.replace(/</g,'&lt;') : '—'}</td>
+        <td><button class="del-btn" data-idx="${idx}" title="Delete">&#10005;</button></td>
+      </tr>`;
+    }).join('');
+    renderDrainProgress();
+  }
+
+  function addDrainEntry(){
+    const structureId = $('drain_structId').value.trim().toUpperCase();
+    const match = DRAIN_STRUCTURES.find(s => s.id.toUpperCase() === structureId);
+    if(!match){ alert('Enter a valid Structure ID from the tracker (e.g. DS1-162).'); return; }
+    const cleaned = $('drain_cleaned').value;
+    const comments = $('drain_comments').value.trim();
+    if(cleaned === 'N' && !comments){ alert('Please enter a comment explaining why this structure was skipped.'); return; }
+    const inspector = getInspectorValue('drain');
+    if(!inspector){ alert('Please select an inspector.'); return; }
+
+    const entries = loadDrainLog();
+    entries.push({
+      id: genId(), locked:false,
+      date: $('drain_date').value || todayStr(),
+      inspector, structureId: match.id, desc: match.desc, dir: match.dir,
+      cleaned, employee: $('drain_employee').value.trim(),
+      subcontractor: $('drain_subcontractor').value.trim() || 'E & B Industrial Cleaning Corp',
+      comments: cleaned === 'N' ? comments : ''
+    });
+    saveDrainLog(entries);
+    renderDrainLog();
+    $('drain_structId').value=''; $('drain_desc').value=''; $('drain_dir').value='';
+    $('drain_comments').value=''; $('drain_employee').value='';
+    $('drain_commentsWrap').style.display='none';
+  }
+
+  function exportDrainCSV(){
+    const entries = loadDrainLog();
+    if(entries.length===0){ alert('No entries to export yet.'); return; }
+    const headers=['Date','Structure ID','Location','Direction','Cleaned','Inspector','Subcontractor','Employee','Comments'];
+    const rows=entries.map(e=>[e.date,e.structureId,`"${(e.desc||'').replace(/"/g,'""')}"`,e.dir,e.cleaned,e.inspector,`"${e.subcontractor||''}"`,e.employee||'',`"${(e.comments||'').replace(/"/g,'""')}"`]);
+    downloadCSV(headers, rows, 'drainage-cleaning-report');
+  }
+  function clearDrainLog(){
+    if(confirm('Clear all Drainage Cleaning entries? This cannot be undone.')){ saveDrainLog([]); renderDrainLog(); }
+  }
+
+  $('drain_add').addEventListener('click', addDrainEntry);
+  $('drain_export').addEventListener('click', exportDrainCSV);
+  $('drain_clear').addEventListener('click', clearDrainLog);
+  $('drain_sync').addEventListener('click', () => syncOperation('drain', loadDrainLog));
+  $('drain_tbody').addEventListener('click', (e) => {
+    const btn = e.target.closest('.del-btn'); if(!btn) return;
+    const entries = loadDrainLog(); entries.splice(parseInt(btn.dataset.idx,10),1);
+    saveDrainLog(entries); renderDrainLog();
+  });
+  $('drain_inspector') && wireInspectorField('drain');
 
   /* ================= INIT ================= */
   $('lg_date').value = todayStr();
@@ -1750,6 +1967,11 @@
   updateGlobalConfigVisibility('fill');
   $('dr_date').value = todayStr();
   updateAdminUI();
+
+  $('drain_date').value = todayStr();
+  populateDrainDatalist();
+  seedDrainLogIfEmpty();
+  renderDrainLog();
 })();
 
 </script>
