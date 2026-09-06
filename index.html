@@ -167,11 +167,65 @@
   .locked-row .k{ color:var(--muted); }
   .locked-row .v{ font-weight:500; }
 
+  /* Home dashboard */
+  .home-tiles{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:18px; }
+  .home-tile{ background:var(--asphalt); border-radius:8px; padding:12px 8px; text-align:center; }
+  .home-tile .pct{ font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:20px; color:var(--line-paint); }
+  .home-tile .lbl{ font-family:'Oswald',sans-serif; font-size:9.5px; text-transform:uppercase; letter-spacing:0.05em; color:var(--muted); margin-top:2px; }
+  .home-today-grid{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+  .home-today-card{ background:var(--asphalt); border:1px solid var(--concrete); border-radius:8px; padding:10px 6px; text-align:center; }
+  .home-today-card .v{ font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:15px; color:var(--line-paint); }
+  .home-today-card .l{ font-family:'Oswald',sans-serif; font-size:8.5px; text-transform:uppercase; letter-spacing:0.04em; color:var(--muted); margin-top:3px; }
+  .home-bar-btn{
+    all:unset; display:block; cursor:pointer; width:100%; padding:12px; border-radius:8px; margin-bottom:12px;
+    background:var(--asphalt); border:1px solid var(--concrete);
+  }
+  .home-bar-btn:active{ background:var(--asphalt-3); }
+  .home-bar-row{ display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+  .home-bar-row .name{ font-family:'Oswald',sans-serif; font-size:13px; text-transform:uppercase; letter-spacing:0.03em; color:var(--line-paint); }
+  .home-bar-row .qty{ font-size:11px; color:var(--muted); }
+  .home-bar-track{ height:20px; background:var(--asphalt-3); border-radius:5px; overflow:hidden; position:relative; }
+  .home-bar-fill{ height:100%; border-radius:5px; }
+  .home-quickgrid{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:14px; }
+  .home-quickbtn{
+    font-family:'Oswald',sans-serif; font-size:11.5px; text-transform:uppercase; letter-spacing:0.03em;
+    background:var(--asphalt); border:1px solid var(--concrete); color:var(--line-paint); border-radius:6px;
+    padding:12px 10px; cursor:pointer; text-align:left;
+  }
+  .detail-stat{ background:var(--asphalt); border-radius:8px; padding:12px; text-align:center; }
+  .detail-stat .v{ font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:18px; }
+  .detail-stat .l{ font-size:10px; color:var(--muted); margin-top:2px; }
+  .detail-row{
+    background:var(--asphalt); border-radius:6px; padding:10px 12px; margin-bottom:6px;
+    display:flex; justify-content:space-between; align-items:center; font-size:12px;
+  }
+
+  /* Data Management */
+  .pin-dots{ display:flex; gap:10px; justify-content:center; margin:10px 0 16px; }
+  .pin-dot{ width:16px; height:16px; border-radius:50%; border:2px solid var(--concrete); }
+  .pin-dot.filled{ background:var(--safety-orange); border-color:var(--safety-orange); }
+  #dm_pinInput{
+    width:100%; box-sizing:border-box; background:var(--asphalt); color:var(--line-paint);
+    border:1.5px solid var(--concrete); border-radius:6px; padding:12px 10px; min-height:46px;
+    font-family:'IBM Plex Mono',monospace;
+  }
+  #dm_pinInput::placeholder{ color:var(--muted); letter-spacing:normal; font-size:14px; }
+  #dm_pinInput:focus{ outline:none; border-color:var(--safety-orange); background:var(--asphalt-3); }
+  .dm-checkrow{
+    display:flex; align-items:center; gap:10px; background:var(--asphalt); border-radius:6px;
+    padding:9px 10px; margin-bottom:6px; font-size:12px;
+  }
+  .dm-checkrow input[type="checkbox"]{ width:17px; height:17px; flex-shrink:0; }
+  .dm-checkrow .meta{ flex:1; }
+  .dm-checkrow .lockicon{ color:var(--caution-yellow); font-size:13px; }
+
   @media (max-width:480px){
     .config, .grid2{ grid-template-columns:1fr; }
     .ref-images{ grid-template-columns:1fr; }
     h1{ font-size:19px; }
     .result .value{ font-size:36px; }
+    .home-tiles{ grid-template-columns:1fr 1fr 1fr; }
+    .home-quickgrid{ grid-template-columns:1fr; }
   }
 </style>
 </head>
@@ -207,22 +261,105 @@
   </div>
 
   <div class="sections" id="sections">
-    <button class="section-btn active" data-section="fill">Fill (Asphalt)</button>
+    <button class="section-btn active" data-section="home">Home</button>
+    <button class="section-btn" data-section="fill">Fill (Asphalt)</button>
     <button class="section-btn" data-section="mill">Milling</button>
     <button class="section-btn" data-section="joint">Joint Adhesive QA</button>
     <button class="section-btn" data-section="tac">TAC Coat</button>
     <button class="section-btn" data-section="roster">Truck Roster</button>
     <button class="section-btn" data-section="dailyreport">Daily Report</button>
     <button class="section-btn" data-section="drain">Drainage Cleaning</button>
-    <button class="section-btn" data-section="geometry">Geometry</button>
+    <button class="section-btn" data-section="datamgmt">Data Management</button>
   </div>
 
   <div class="log-toolbar" style="margin:10px 0 4px;">
     <button class="btn primary" id="exportDailyBtn" style="width:100%;">Export Full Daily Report (All Operations)</button>
   </div>
 
+  <!-- ============ HOME / DASHBOARD SECTION ============ -->
+  <div class="section-content" id="section-home">
+    <div class="panel" id="home_overview">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:4px;">
+        <div>
+          <h2 style="margin-bottom:2px;">Mill &amp; Fill Toolkit</h2>
+          <div class="desc" style="margin-bottom:0;">Contract D265724 &middot; Station 24+30 &rarr; 364+10</div>
+        </div>
+        <div style="text-align:right; flex-shrink:0; margin-left:10px;">
+          <div style="font-size:11px; color:var(--muted);" id="home_dateDisplay">&nbsp;</div>
+          <div id="home_syncPill" style="font-size:10px; margin-top:4px; padding:3px 8px; border-radius:10px; display:inline-block; background:var(--asphalt); border:1px solid var(--concrete); color:var(--muted);">&#9729; checking&hellip;</div>
+        </div>
+      </div>
+
+      <div style="font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em; font-family:'Oswald',sans-serif; margin:18px 0 8px;">Today's Operations</div>
+      <div class="home-today-grid">
+        <div class="home-today-card"><div class="v" id="today_mill">0 SY</div><div class="l">Milling</div></div>
+        <div class="home-today-card"><div class="v" id="today_fill">0 tons</div><div class="l">Fill</div></div>
+        <div class="home-today-card"><div class="v" id="today_joint">0 LF</div><div class="l">Joint Adhesive</div></div>
+        <div class="home-today-card"><div class="v" id="today_tac">0 gal</div><div class="l">Tack Coat</div></div>
+        <div class="home-today-card"><div class="v" id="today_drain">0</div><div class="l">Drainage</div></div>
+      </div>
+
+      <div style="font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em; font-family:'Oswald',sans-serif; margin:20px 0 8px;">Quick Log</div>
+      <div class="home-quickgrid">
+        <button class="home-quickbtn" data-goto="mill">&#9881; Log Milling</button>
+        <button class="home-quickbtn" data-goto="fill">&#128663; Log Fill Load</button>
+        <button class="home-quickbtn" data-goto="joint">&#129514; Log Joint Adhesive</button>
+        <button class="home-quickbtn" data-goto="tac">&#128167; Log Tack Coat</button>
+        <button class="home-quickbtn" data-goto="drain">&#128295; Update Drainage</button>
+      </div>
+
+      <div style="font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em; font-family:'Oswald',sans-serif; margin:20px 0 8px;">Overall Project Progress</div>
+      <div class="home-tiles">
+        <div class="home-tile"><div class="pct" id="home_pct_mill">0%</div><div class="lbl">Milling</div></div>
+        <div class="home-tile"><div class="pct" id="home_pct_fill">0%</div><div class="lbl">Filling</div></div>
+        <div class="home-tile"><div class="pct" id="home_pct_drain">0%</div><div class="lbl">Drainage</div></div>
+      </div>
+
+      <button class="home-bar-btn" data-op="mill">
+        <div class="home-bar-row"><span class="name">Milling</span><span class="qty" id="home_qty_mill">0 / 126,023 SY</span></div>
+        <div class="home-bar-track"><div class="home-bar-fill" id="home_bar_mill" style="width:0%;background:#378ADD;"></div></div>
+      </button>
+      <button class="home-bar-btn" data-op="fill">
+        <div class="home-bar-row"><span class="name">Filling</span><span class="qty" id="home_qty_fill">0 / 13,705 tons</span></div>
+        <div class="home-bar-track"><div class="home-bar-fill" id="home_bar_fill" style="width:0%;background:var(--ok-green);"></div></div>
+      </button>
+      <button class="home-bar-btn" data-op="joint">
+        <div class="home-bar-row"><span class="name">Joint Adhesive</span><span class="qty" id="home_qty_joint">0 LF logged &middot; target not yet set</span></div>
+        <div class="home-bar-track"><div class="home-bar-fill" id="home_bar_joint" style="width:0%;background:#b06de0;"></div></div>
+      </button>
+      <button class="home-bar-btn" data-op="tac">
+        <div class="home-bar-row"><span class="name">Tack Coat</span><span class="qty" id="home_qty_tac">0 gal logged &middot; target not yet set</span></div>
+        <div class="home-bar-track"><div class="home-bar-fill" id="home_bar_tac" style="width:0%;background:#e0a020;"></div></div>
+      </button>
+      <button class="home-bar-btn" data-op="drain">
+        <div class="home-bar-row"><span class="name">Drainage Cleaning</span><span class="qty" id="home_qty_drain">0 / 243 structures</span></div>
+        <div class="home-bar-track"><div class="home-bar-fill" id="home_bar_drain" style="width:0%;background:var(--caution-yellow);"></div></div>
+      </button>
+
+      <div id="home_status" style="font-size:11px; color:var(--muted); margin-top:10px;">Loading corridor totals&hellip;</div>
+
+      <div id="home_attention" style="display:none; margin-top:20px; background:rgba(255,199,44,0.06); border:1px solid var(--caution-yellow); border-radius:8px; padding:14px 16px;">
+        <div style="font-family:'Oswald',sans-serif; font-size:12px; text-transform:uppercase; letter-spacing:0.05em; color:var(--caution-yellow); margin-bottom:8px;">&#9888; Attention Required</div>
+        <ul id="home_attention_list" style="margin:0 0 12px; padding-left:18px; font-size:13px; line-height:1.7; color:var(--line-paint);"></ul>
+        <div class="log-toolbar" style="margin-bottom:0;">
+          <button class="btn" id="home_reviewIssues">Review Issues</button>
+          <button class="btn primary" id="home_retrySync">&#9729; Retry Sync</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" id="home_detail" style="display:none;">
+      <button class="btn" id="home_back" style="margin-bottom:14px;">&larr; Back to overview</button>
+      <h2 id="home_detail_title">&nbsp;</h2>
+      <div class="desc" id="home_detail_subtitle"></div>
+      <div class="grid2" id="home_detail_stats"></div>
+      <div style="font-size:11px; color:var(--muted); margin:14px 0 8px;">Synced entries (most recent first)</div>
+      <div id="home_detail_list"></div>
+    </div>
+  </div>
+
   <!-- ============ FILL SECTION ============ -->
-  <div class="section-content" id="section-fill">
+  <div class="section-content" id="section-fill" style="display:none;">
     <div class="stations" id="fillTabs">
       <button class="stop active" data-tab="log"><span class="num">01</span>Log &amp; QA</button>
       <button class="stop" data-tab="tonnage"><span class="num">02</span>Tonnage</button>
@@ -619,7 +756,6 @@
     </div>
   </div>
 
-  <!-- ============ DAILY REPORT SECTION (shared/synced) ============ -->
   <!-- ============ DRAINAGE CLEANING SECTION ============ -->
   <div class="section-content" id="section-drain" style="display:none;">
     <div class="panel">
@@ -696,107 +832,6 @@
     </div>
   </div>
 
-  <!-- ============ GEOMETRY (CORRIDOR REFERENCE) SECTION ============ -->
-  <div class="section-content" id="section-geometry" style="display:none;">
-
-    <div class="panel">
-      <h2>Wheel Calibration</h2>
-      <div class="desc">Station = Base Station + Manual Wheel Reading. Update this if you re-zero the wheel at a new point of beginning.</div>
-      <div class="grid2">
-        <div class="field"><label>Base Station (e.g. 24+30)</label><input type="text" id="geo_baseStation" placeholder="24+30"></div>
-        <div class="field"><label>Manual Reading to Check</label><input type="number" id="geo_checkReading" placeholder="776" inputmode="decimal"></div>
-      </div>
-      <div class="result">
-        <div class="label">Predicted station</div>
-        <div class="value" id="geo_predictedStation">&mdash;</div>
-      </div>
-    </div>
-
-    <div class="panel">
-      <h2>Intersections</h2>
-      <div class="desc">Entering/exiting dimensions where known; use Area Override when only a total square footage was measured (no width &times; length breakdown).</div>
-      <div class="grid2">
-        <div class="field full"><label>Intersection Name</label><input type="text" id="geo_int_name" placeholder="Theatre Rd"></div>
-        <div class="field"><label>Station</label><input type="text" id="geo_int_station" placeholder="e.g. 24+90"></div>
-        <div class="field"><label>Direction</label><input type="text" id="geo_int_dir" value="EB"></div>
-        <div class="field"><label>Entering Width (ft)</label><input type="number" id="geo_int_ew" inputmode="decimal"></div>
-        <div class="field"><label>Entering Length (ft)</label><input type="number" id="geo_int_el" inputmode="decimal"></div>
-        <div class="field"><label>Exiting Width (ft)</label><input type="number" id="geo_int_xw" inputmode="decimal"></div>
-        <div class="field"><label>Exiting Length (ft)</label><input type="number" id="geo_int_xl" inputmode="decimal"></div>
-        <div class="field full"><label>Area Override (SF) — use only if no W&times;L breakdown available</label><input type="number" id="geo_int_areaOverride" inputmode="decimal"></div>
-        <div class="field full"><label>Notes</label><input type="text" id="geo_int_notes" placeholder="e.g. mill up to concrete roadway"></div>
-      </div>
-      <div class="result">
-        <div class="label">Computed area</div>
-        <div class="value" id="geo_int_computed">&mdash;</div>
-      </div>
-      <div class="log-toolbar" style="margin-top:14px;">
-        <button class="btn primary" id="geo_int_add">+ Add Intersection</button>
-      </div>
-      <div class="log-toolbar">
-        <button class="btn" id="geo_int_export">Export CSV</button>
-      </div>
-      <div class="log-table-wrap">
-        <table class="log" id="geo_int_table">
-          <thead><tr><th>Name</th><th>Station</th><th>Entering</th><th>Exiting</th><th>Area (SF)</th><th>Notes</th><th></th></tr></thead>
-          <tbody id="geo_int_tbody"></tbody>
-        </table>
-        <div class="log-empty" id="geo_int_empty">No intersections recorded yet.</div>
-      </div>
-    </div>
-
-    <div class="panel">
-      <h2>Turn Lanes</h2>
-      <div class="desc">Record dedicated turn lanes separately from the through-lane typical section.</div>
-      <div class="grid2">
-        <div class="field full"><label>Location</label><input type="text" id="geo_tl_location" placeholder="Mill Rd"></div>
-        <div class="field"><label>Start Station</label><input type="text" id="geo_tl_station" placeholder="72+50"></div>
-        <div class="field"><label>Length 1 (ft)</label><input type="number" id="geo_tl_len1" inputmode="decimal"></div>
-        <div class="field"><label>Length 2 (ft, if 2nd lane)</label><input type="number" id="geo_tl_len2" inputmode="decimal"></div>
-        <div class="field"><label>Combined Width (ft)</label><input type="number" id="geo_tl_width" inputmode="decimal"></div>
-        <div class="field full"><label>Notes</label><input type="text" id="geo_tl_notes" placeholder="e.g. 2 left turn lanes"></div>
-      </div>
-      <div class="log-toolbar" style="margin-top:6px;">
-        <button class="btn primary" id="geo_tl_add">+ Add Turn Lane</button>
-      </div>
-      <div class="log-toolbar">
-        <button class="btn" id="geo_tl_export">Export CSV</button>
-      </div>
-      <div class="log-table-wrap">
-        <table class="log" id="geo_tl_table">
-          <thead><tr><th>Location</th><th>Station</th><th>Length(s)</th><th>Width</th><th>Notes</th><th></th></tr></thead>
-          <tbody id="geo_tl_tbody"></tbody>
-        </table>
-        <div class="log-empty" id="geo_tl_empty">No turn lanes recorded yet.</div>
-      </div>
-    </div>
-
-    <div class="panel">
-      <h2>Typical Section (Through-Lane Widths)</h2>
-      <div class="desc">Baseline lane configuration for a station range, before any turn-lane or intersection widening.</div>
-      <div class="grid2">
-        <div class="field"><label>Start Station</label><input type="text" id="geo_ts_start" placeholder="24+30"></div>
-        <div class="field"><label>End Station</label><input type="text" id="geo_ts_end" placeholder="48+00"></div>
-        <div class="field"><label># Through Lanes</label><input type="number" id="geo_ts_lanes" value="4" inputmode="numeric"></div>
-        <div class="field"><label>Total Width incl. curb offsets (ft)</label><input type="number" id="geo_ts_width" value="58" inputmode="decimal"></div>
-        <div class="field full"><label>Notes</label><input type="text" id="geo_ts_notes" placeholder="e.g. L, M, R, R-turn @ ~12 ft each, 1 ft curb offset each side"></div>
-      </div>
-      <div class="log-toolbar" style="margin-top:6px;">
-        <button class="btn primary" id="geo_ts_add">+ Add Segment</button>
-      </div>
-      <div class="log-toolbar">
-        <button class="btn" id="geo_ts_export">Export CSV</button>
-      </div>
-      <div class="log-table-wrap">
-        <table class="log" id="geo_ts_table">
-          <thead><tr><th>Start</th><th>End</th><th># Lanes</th><th>Total Width</th><th>Notes</th><th></th></tr></thead>
-          <tbody id="geo_ts_tbody"></tbody>
-        </table>
-        <div class="log-empty" id="geo_ts_empty">No typical sections recorded yet.</div>
-      </div>
-    </div>
-
-  </div>
 
   <div class="section-content" id="section-dailyreport" style="display:none;">
     <div class="panel">
@@ -827,6 +862,62 @@
 
       <div class="log-toolbar" style="margin-top:14px;">
         <button class="btn" id="dr_exportAll">Export Combined CSV</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ DATA MANAGEMENT (PIN-GATED LOCK/ERASE) ============ -->
+  <div class="section-content" id="section-datamgmt" style="display:none;">
+    <div class="panel" id="dm_gatePanel">
+      <h2>Data Management</h2>
+      <div class="desc">Lock or erase report entries — by individual report, date, operation, or week. Requires the 4-digit admin PIN.</div>
+      <div class="pin-dots" id="dm_pinDots">
+        <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+      </div>
+      <input type="tel" id="dm_pinInput" maxlength="4" inputmode="numeric" placeholder="Enter 4-digit PIN" style="text-align:center; letter-spacing:8px; font-size:20px;" autocomplete="off">
+      <div id="dm_pinError" style="color:var(--warn-red); font-size:12px; text-align:center; margin-top:8px; display:none;">Incorrect PIN.</div>
+    </div>
+
+    <div id="dm_panel" style="display:none;">
+      <div class="panel">
+        <h2>Filter Entries</h2>
+        <div class="grid2">
+          <div class="field"><label>Operation</label>
+            <select id="dm_opFilter">
+              <option value="all">All Operations</option>
+              <option value="fill">Fill (Asphalt)</option>
+              <option value="mill">Milling</option>
+              <option value="joint">Joint Adhesive</option>
+              <option value="tac">TAC Coat</option>
+              <option value="drain">Drainage Cleaning</option>
+            </select>
+          </div>
+          <div class="field"><label>Scope</label>
+            <select id="dm_scope">
+              <option value="all">All dates</option>
+              <option value="date">Single date</option>
+              <option value="week">Week (7 days from)</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid2" id="dm_dateWrap" style="display:none;">
+          <div class="field full"><label id="dm_dateLabel">Date</label><input type="date" id="dm_dateInput"></div>
+        </div>
+        <button class="btn primary" id="dm_search" style="width:100%;">Search</button>
+      </div>
+
+      <div class="panel" id="dm_resultsPanel" style="display:none;">
+        <h2>Matching Entries</h2>
+        <div id="dm_status" style="font-size:12px; color:var(--muted); margin-bottom:10px;"></div>
+        <div class="log-toolbar">
+          <button class="btn" id="dm_selectAll">Select All</button>
+          <button class="btn" id="dm_selectNone">Select None</button>
+        </div>
+        <div id="dm_resultsList"></div>
+        <div class="log-toolbar" style="margin-top:14px;">
+          <button class="btn primary" id="dm_lockSelected">&#128274; Lock Selected</button>
+          <button class="btn danger" id="dm_eraseSelected">&#128465; Erase Selected</button>
+        </div>
       </div>
     </div>
   </div>
@@ -894,24 +985,32 @@
    * Sync one operation's TODAY entries to the cloud, grouped by inspector.
    * Locked cloud entries are preserved even if the same inspector re-syncs.
    */
-  async function syncOperation(opKey, loadFn){
+  async function syncOperation(opKey, loadFn, silent){
     await waitForCloud();
-    if(!window.__millfillCloud){ alert('Cloud not reachable right now — check your connection and try again.'); return; }
+    if(!window.__millfillCloud){
+      if(silent) return { ok:false, reason:'cloud-unreachable' };
+      alert('Cloud not reachable right now — check your connection and try again.'); return;
+    }
 
     const today = todayStr();
     try{
       const dayDoc = await window.__millfillCloud.getDayDoc(today);
       if(dayDoc.locked){
+        if(silent) return { ok:false, reason:'day-locked' };
         alert('Today has been locked by the admin. No further syncing is allowed for ' + today + '.');
         return;
       }
     } catch(err){
+      if(silent) return { ok:false, reason:'cloud-error' };
       alert('Could not reach the cloud database. Check your internet connection and try again.');
       return;
     }
 
     const all = loadFn().filter(e => e.date === today);
-    if(all.length === 0){ alert('No entries logged today for this section yet — nothing to sync.'); return; }
+    if(all.length === 0){
+      if(silent) return { ok:true, syncedCount:0, inspectorCount:0 };
+      alert('No entries logged today for this section yet — nothing to sync.'); return;
+    }
 
     const byInspector = {};
     all.forEach(e => {
@@ -920,7 +1019,7 @@
       byInspector[name].push(e);
     });
 
-    let syncedCount = 0, inspectorCount = 0;
+    let syncedCount = 0, inspectorCount = 0, failures = [];
     for(const [inspectorName, localEntries] of Object.entries(byInspector)){
       const inspectorId = sanitizeId(inspectorName);
       let cloudDoc;
@@ -940,9 +1039,11 @@
         syncedCount += freshLocal.length;
         inspectorCount++;
       } catch(err){
-        alert('Sync failed for ' + inspectorName + ': ' + err.message);
+        failures.push(inspectorName);
+        if(!silent) alert('Sync failed for ' + inspectorName + ': ' + err.message);
       }
     }
+    if(silent) return { ok: failures.length===0, syncedCount, inspectorCount, failures };
     alert(`Synced ${syncedCount} ${opKey} entr${syncedCount===1?'y':'ies'} for ${inspectorCount} inspector(s) — ${today}.`);
   }
 
@@ -964,14 +1065,18 @@
     }
   }
 
+  function switchToSection(sectionKey){
+    document.querySelectorAll('.section-btn').forEach(b=>b.classList.toggle('active', b.dataset.section===sectionKey));
+    document.querySelectorAll('.section-content').forEach(s=>s.style.display='none');
+    document.getElementById('section-'+sectionKey).style.display='block';
+    updateGlobalConfigVisibility(sectionKey);
+    if(sectionKey === 'home') refreshHomeDashboard();
+  }
+
   document.getElementById('sections').addEventListener('click', (e) => {
     const btn = e.target.closest('.section-btn');
     if(!btn) return;
-    document.querySelectorAll('.section-btn').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    document.querySelectorAll('.section-content').forEach(s=>s.style.display='none');
-    document.getElementById('section-'+btn.dataset.section).style.display='block';
-    updateGlobalConfigVisibility(btn.dataset.section);
+    switchToSection(btn.dataset.section);
   });
 
   /* ================= FILL SUB-TABS ================= */
@@ -1124,10 +1229,11 @@
 const DRAIN_STRUCTURES = [{"id":"DS1-1","desc":"SW CORNER OF SUNRISE HWY AND THEATER RD","dir":"EB"},{"id":"DS1-2","desc":"FAR RIGHT LANE ON SUNRISE HWY BY THEATER RD","dir":"EB"},{"id":"DS1-3","desc":"ON SUNRISE HWY 330 FEET FROM THEATER RD","dir":"EB"},{"id":"DS1-4","desc":"75 FEET FROM DS1-3 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-5","desc":"45 FEET FROM SE CORNER OF GREEN ACRES RD WEST ON SUNRISE HWY","dir":"EB"},{"id":"DS1-6","desc":"290 FEET FROM DS1-5 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-7","desc":"125 FEET FROM SE CORNER OF MARKE RD AND SUNRISE HWY","dir":"EB"},{"id":"DS1-8","desc":"182 FEET FROM DS1-7 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-9","desc":"230 FEET FROM DS1-8 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-10","desc":"250 FEET FROM DS1-9 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-11","desc":"251 FEET FROM DS1-10 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-12","desc":"188 FEET FROM SE CORNER ON SUNRISE HWY AND TARGET ENTRANCE","dir":"EB"},{"id":"DS1-13","desc":"240 FEET FROM DS1-12 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-14","desc":"45 FEET FROM SE CORNER ON S TERRACE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-15","desc":"190 FEET FROM DS1-14 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-16","desc":"175 FEET FROM DS1-15 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-17","desc":"70 FEET FROM SW CORNER OF GREEN ACRES RD E AND SUNRISE HWY","dir":"EB"},{"id":"DS1-18","desc":"65 FEET FROM SE CORNER OF GREEN ACRES RD E AND SUNRISE HWY","dir":"EB"},{"id":"DS1-19","desc":"250 FEET FROM DS1-18 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-20","desc":"250 FEET FROM DS1-19 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-21","desc":"250 FEET FROM DS1-20 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-22","desc":"250 FEET FROM DS1-21 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-23","desc":"190 FEET FROM THE SE CORNER OF MILL RD AND SUNRISE HWY","dir":"EB"},{"id":"DS1-24","desc":"290 FEET FROM DS1-23 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-25","desc":"290 FEET FROM DS1-24 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-26","desc":"290 FEET FROM DS1-25 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-27","desc":"225 FEET FROM DS1-26 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-28","desc":"SW CORNER OF S FRANKLIN RD AND SUNRISE HWY","dir":"EB"},{"id":"DS1-29","desc":"SW CORNER OF 1ST STREET AND SUNRISE HWY","dir":"EB"},{"id":"DS1-30","desc":"SW CORNER OF LEGION PL AND SUNRISE HWY","dir":"EB"},{"id":"DS1-31","desc":"SE CORNER OF LEGION PL AND SUNRISE HWY","dir":"EB"},{"id":"DS1-32","desc":"45 FEET FROM DS1-31 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-33","desc":"45 FEET FROM DS1-32 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-34","desc":"155 FEET FROM FROM DS1-33 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-35","desc":"140 FEET FROM FROM DS1-34 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-36","desc":"SE CORNER OF ROCKAWAY BLVD AND SUNRISE HWY","dir":"EB"},{"id":"DS1-37","desc":"65 FEET FROM SW CORNER OF 4TH STREET AND SUNRISE HWY","dir":"EB"},{"id":"DS1-38","desc":"SE CORNER OF 4TH STREET AND SUNRISE HWY","dir":"EB"},{"id":"DS1-39","desc":"SE CORNER OF 5TH STREET AND SUNRISE HWY","dir":"EB"},{"id":"DS1-40","desc":"160 FEET FROM DS1-39 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-41","desc":"SE CORNER OF 6TH STREET AND SUNRISE HWY","dir":"EB"},{"id":"DS1-42","desc":"190 FEET FROM DS1-41 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-43","desc":"60 FEET FROM DS1-42 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-44","desc":"SW CORNER OF BROOKSIDE RD AND SUNRISE HWY","dir":"EB"},{"id":"DS1-45","desc":"205 FEET FROM DS1-44 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-46","desc":"SW CORNER OF BROOKLYN AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-47","desc":"50 FEET FROM SE CORNER OF BROOKLYN AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-48","desc":"SE CORNER OF ASTOR PLACE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-49","desc":"50 FEET FROM SE CORNER OF WOODLAWN AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-50","desc":"SE CORNER OF SCRANTON AVE AND BISMARK RD","dir":"EB"},{"id":"DS1-51","desc":"SW CORNER OF SCRANTON AVE AND BISMARK RD","dir":"EB"},{"id":"DS1-52","desc":"SE CORNER OF HORTON AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-53","desc":"190 FEET FROM DS1-52 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-54","desc":"170 FEET FROM SE CORNER OF RODGER AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-55","desc":"SE CORNER OF RODGERS AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-56","desc":"215 FEET FROM RODGERS AVE ON SUNRISE HWY","dir":"EB"},{"id":"DS1-57","desc":"SE CORNER OF BIXLEY AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-58","desc":"SW CORNER OF BIXLEY AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-59","desc":"SW CORNER OF FREER AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-60","desc":"SE CORNER OF FREER AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-61","desc":"90 FEET FROM DS1-60 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-62","desc":"SE CORNER OF NORMAN ST AND SUNRISE HWY","dir":"EB"},{"id":"DS1-63","desc":"SE CORNER OF REYAM RD AND SUNRISE HWY","dir":"EB"},{"id":"DS1-64","desc":"205 FEET FROM SE CORNER OF REYAM RD AND SUNRISE HWY","dir":"EB"},{"id":"DS1-65","desc":"97 FEET FROM DS1-64 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-66","desc":"270 FEET FROM DS1-65 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-67","desc":"140 FEET FROM DS1-66 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-68","desc":"150 FEET FROM DS1-67 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-69","desc":"300 FEET FROM SE CORNER OF ENDVIEW AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-70","desc":"WEST SIDE OF SW RAMP ON BROADWAY AND SUNRISE HWY","dir":"EB"},{"id":"DS1-71","desc":"SOUTH SIDE OF SW RAMP ON BROADWAY AND SUNRISE HWY","dir":"EB"},{"id":"DS1-72","desc":"SW CORNER OF ROOSEVELT AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-73","desc":"SE CORNER OF ROOSEVELT AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-74","desc":"65 FEET FROM SW CORNER OF FOREST AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-75","desc":"80 FEET FROM SE CORNER OF FOREST AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-76","desc":"145 FEET FROM THE SE CORNER OF RANDALL AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-77","desc":"SW CORNER OF EARLE AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-78","desc":"130 FEET FROM THE SE CORNER OF EARLE AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-79","desc":"SW CORNER OF VINCENT AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-80","desc":"SE CORNER OF VINCENT AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-81","desc":"120 FEET FROM DS1-80 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-82","desc":"SE CORNER OF DENTON AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-83","desc":"330 FEET FROM DS1-82 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-84","desc":"SW CORNER OF SHEPARD AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-85","desc":"SE CORNER OF SHEPARD AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-86","desc":"170 FEET FROM DS1-85 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-87","desc":"45 FEET FROM SE CORNER ON ROCKLYN AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-88","desc":"85 FEET FROM SE CORNER OF WYOMING AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-89","desc":"30 FEET FROM SW CORNER OF EXETER ST AND SUNRISE HWY","dir":"EB"},{"id":"DS1-90","desc":"30 FEET FROM SE CORNER OF EXETER ST AND SUNRISE HWY","dir":"EB"},{"id":"DS1-91","desc":"30 FEET FROM SW CORNER OF LAKEWOOD BLVD AND SUNRISE HWY","dir":"EB"},{"id":"DS1-92","desc":"180 FEET FROM SE CORNER OF LAKEWOOD BLVD AND SUNRISE HWY","dir":"EB"},{"id":"DS1-93","desc":"210 FEET FROM THE SE CORNER OF OCEAN AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-94","desc":"175 FEET FROM DS1-93 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-95","desc":"160 FEET FROM DS1-94 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-96","desc":"330 FEET FROM DS1-95 ON SUNRISE HWY ON MEDIAN AFTER STRIPING","dir":"EB"},{"id":"DS1-97","desc":"130 FEET FROM DS1-96 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-98","desc":"100 FEET FROM DS1-97 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-99","desc":"1000 FEET FROM DS1-98 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-100","desc":"150 FEET FROM DS1-99 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-101","desc":"405 FEET FROM SW CORNER OF N CENTRE AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-102","desc":"170 FEET FROM SW CORNER OF N CENTRE AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-103","desc":"SE CORNER OF N CENTRE AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-104","desc":"200 FEET FROM DS1-103 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-105","desc":"SE CORNER OF N VILLAGE AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-106","desc":"200 FEET FROM DS1-105 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-107","desc":"200 FEET FROM DS1-106 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-108","desc":"92 FEET FROM DS1-107 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-109","desc":"SW CORNER OF N PARK AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-110","desc":"100 FEET FROM SE CORNER OF N PARK AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-111","desc":"200 FEET FROM DS1-110 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-112","desc":"350 FEET FROM DS1-111 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-113","desc":"135 FEET FROM SW CORNER ON MORRIS AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-114","desc":"SE CORNER OF MORRIS AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-115","desc":"100 FEET FROM DS1-114 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-116","desc":"SW CORNER OF N MARION PL AND SUNRISE HWY","dir":"EB"},{"id":"DS1-117","desc":"SE CORNER OF N MARION PL AND SUNRISE HWY","dir":"EB"},{"id":"DS1-118","desc":"140 FEET FROM CROSSWALK ON MORRIS AVE ON EAST SIDE OF MEDIAN","dir":"EB"},{"id":"DS1-119","desc":"140 FEET FROM DS1-118 ON EAST SIDE OF MEDIAN ON SUNRISE HWY","dir":"EB"},{"id":"DS1-120","desc":"60 FEET FROM DS1-119 ON EAST SIDE OF MEDIAN ON SUNRISE HWY","dir":"EB"},{"id":"DS1-121","desc":"85 FEET FROM DS1-120 ON EAST SIDE OF MEDIAN ON SUNRISE HWY","dir":"EB"},{"id":"DS1-122","desc":"100 FEET FROM DS1-121 ON EAST SIDE OF MEDIAN ON SUNRISE HWY","dir":"EB"},{"id":"DS1-123","desc":"SE CORNER OF N KENSINGTON AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-124","desc":"SW CORNER OF MONTAUK AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-125","desc":"310 FEET FROM SE CORNER OF MONTAUK AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-126","desc":"SW CORNER OF N LONG BEACH ROAD AND SUNRISE HWY","dir":"EB"},{"id":"DS1-127","desc":"SE CORNER OF N LONG BEACH ROAD AND SUNRISE HWY","dir":"EB"},{"id":"DS1-128","desc":"235 FEET FROM SW CORNER OF N OCEANSIDE ROAD AND SUNRISE HWY","dir":"EB"},{"id":"DS1-129","desc":"SW CORNER OF CHESTNUT ST AND SUNRISE HWY","dir":"EB"},{"id":"DS1-130","desc":"105 FEET FROM SE CORNER OF CHESTNUT ST AND SUNRISE HWY","dir":"EB"},{"id":"DS1-131","desc":"SE CORNER OF STATE ST AND SUNRISE HWY","dir":"EB"},{"id":"DS1-132","desc":"SE STREET OF CONCORD ST AND SUNRISE HWY","dir":"EB"},{"id":"DS1-133","desc":"SW CORNER OF YORKTOWN ST AND SUNRISE HWY","dir":"EB"},{"id":"DS1-134","desc":"SE CORNER OF YORKTOWN ST AND SUNRISE HWY","dir":"EB"},{"id":"DS1-135","desc":"415 FEET FROM DS1-134 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-136","desc":"235 FEET FROM DS1-135 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-137","desc":"100 FEET FROM SE CORNER OF CHARING CROSS RD AND SUNRISE HWY","dir":"EB"},{"id":"DS1-138","desc":"SE CORNER OF DERBY RD AND SUNRISE HWY","dir":"EB"},{"id":"DS1-139","desc":"205 FEET FROM DS1-138 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-140","desc":"SE CORNER OF CROYDON DR AND SUNRISE HWY","dir":"EB"},{"id":"DS1-141","desc":"SW CORNER OF CROYDON DR AND SUNRISE HWY","dir":"EB"},{"id":"DS1-142","desc":"SW CORNER OF LANCASTER AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-143","desc":"SE CORNER OF LANCASTER AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-144","desc":"200 FEET FROM SE CORNER OF ROCKWOOD AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-145","desc":"SW CORNER OF EDNA CT AND SUNRISE HWY","dir":"EB"},{"id":"DS1-146","desc":"210 FEET FROM SE CORNER OF EDNA CT AND SUNRISE HWY","dir":"EB"},{"id":"DS1-147","desc":"425 FEET FROM DS1-146 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-148","desc":"335 FEET FROM DS1-147 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-149","desc":"SOUTH OF SE CORNER OF GRAND AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-150","desc":"EAST OF SE CORNER OF GRAND AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-151","desc":"220 FEET FROM DS1-150 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-152","desc":"NE CORNER OF GRAND AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-153","desc":"NW CORNER OF GRAND AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-154","desc":"175 FEET FROM DS1-153 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-155","desc":"210 FEET FROM DS1-154 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-156","desc":"250 FEET FROM DS1-155 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-157","desc":"200 FEET FROM DS1-156 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-158","desc":"50 FEET EAST OF THE NW RAMP ON CHARING CROSS RD AND SUNRISE HWY","dir":"WB"},{"id":"DS1-159","desc":"161 FEET WEST OF THE NW RAMP ON CHARING CROSS RD AND SUNRISE HWY","dir":"WB"},{"id":"DS1-160","desc":"400 FEET FROM DS1-159 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-161","desc":"360 FEET FROM NW RAMP ON YORKSHIRE ST AND SUNRISE HWY","dir":"WB"},{"id":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD AND SUNRISE HWY","dir":"WB"},{"id":"DS1-163","desc":"NE CORNER OF N LONG BEACH RD AND SUNRISE HWY","dir":"WB"},{"id":"DS1-164","desc":"WEST SIDE OF NW CORNER ON LONG BEACH RD AND SUNRISE HWY","dir":"WB"},{"id":"DS1-165","desc":"NORTH SIDE OF NW CORNER ON LONG BEACH RD AND SUNRISE HWY","dir":"WB"},{"id":"DS1-166","desc":"175 FEET FROM DS1-165 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-167","desc":"250 FEET FROM DS1-166 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-168","desc":"415 FEET FROM DS1-167 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-169","desc":"102 FEET FROM DS1-168 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-170","desc":"240 FEET FROM DS1-169 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-171","desc":"222 FEET FROM DS1-170 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-172","desc":"NE CORNER OF N FOREST AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-173","desc":"NW CORNER OF N FOREST AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-174","desc":"500 FEET FROM DS1-173 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-175","desc":"210 FEET FROM DS1-174 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-176","desc":"150 FEET FROM DS1-175 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-177","desc":"NE CORNER OF MORRIS AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-178","desc":"NW CORNER OF MORRIS AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-179","desc":"135 FEET FROM NW CORNER ON MORRIS AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-180","desc":"352 FEET FROM DS1-179 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-181","desc":"150 FEET FROM NW CORNER OF N PARK AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-182","desc":"170 FEET FROM DS1-181 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-183","desc":"NE CORNER OF N VILLAGE AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-184","desc":"200 FEET FROM NW CORNER OF N VILLAGE AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-185","desc":"NE CORNER OF N CENTRE AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-186","desc":"200 FEET FROM NW CORNER OF N CENTRE AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-187","desc":"185 FEET FROM NW CORNER OF BANKS AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-188","desc":"100 FEET FROM DS1-187 ON SUNRISE HWY JUST BEFORE MERRICK ROAD","dir":"WB"},{"id":"DS1-189","desc":"200 FEET FROM DS1-188 ON SUNRISE HWY UNDER MERRICK ROAD","dir":"WB"},{"id":"DS1-190","desc":"200 FEET FROM DS1-189 ON SUNRISE HWY UNDER MERRICK ROAD","dir":"WB"},{"id":"DS1-191","desc":"250 FEET FROM MERRICK ROAD BRIDGE ON WB SIDE OF MEDIAN","dir":"WB"},{"id":"DS1-192","desc":"475 FEET FROM DS1-190 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-193","desc":"450 FEET FROM NE CORNER OF OCEAN AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-194","desc":"350 FEET FROM NE CORNER OF OCEAN AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-195","desc":"200 FEET FROM NE CORNER OF OCEAN AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-196","desc":"370 FEET FROM THE NW CORNER OF OCEAN AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-197","desc":"175 FEET FROM DS1-196 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-198","desc":"250 FEET FROM DS1-197 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-199","desc":"NE CORNER OF ROCKLYN AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-200","desc":"NW CORNER OF ROCKLYN AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-201","desc":"175 FEET FROM DS1-200 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-202","desc":"220 FEET FROM DS1-201 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-203","desc":"120 FEET FROM DS1-202 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-204","desc":"135 FEET FROM DS1-203 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-205","desc":"EAST SIDE OF NE CORNER OF DENTON AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-206","desc":"NORTH SIDE OF NE CORNER OF DENTON AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-207","desc":"NE CORNER VINCENT AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-208","desc":"NW CORNER VINCENT AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-209","desc":"NE CORNER OF EARLE AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-210","desc":"NORTH SIDE OF NW CORNER OF EARLE AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-211","desc":"WEST SIDE OF NW CORNER OF EARLE AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-212","desc":"115 FEET FROM NE CORNER OF FOREST AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-213","desc":"NW CORNER OF FOREST AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-214","desc":"85 FEET FROM DS1-213 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-215","desc":"NE CORNER OF ATLANTIC AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-215A","desc":"ADD-ON STRUCTURE (not in original plan set) - located between DS1-215 and DS1-216 on Sunrise Hwy","dir":"WB"},{"id":"DS1-216","desc":"NE CORNER OF BROADWAY AND SUNRISE HWY","dir":"WB"},{"id":"DS1-217","desc":"NW CORNER OF BROADWAY AND SUNRISE HWY","dir":"WB"},{"id":"DS1-218","desc":"170 FEET FROM DS1-217 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-219","desc":"80 FEET FROM DS1-218 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-220","desc":"300 FEET FROM DS1-219 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-221","desc":"2 FEET FROM DS1-220 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-222","desc":"50 FEET FROM NE CORNER OF HORTON AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-223","desc":"25 FEET FROM NE CORNER OF HORTON AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-224","desc":"60 FEET FROM NW CORNER OF HORTON AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-225","desc":"60 FEET FROM DS1-224 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-226","desc":"150 FEET FROM DS1-225 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-227","desc":"300 FEET FROM DS1-226 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-228","desc":"300 FEET FROM DS1-227 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-229","desc":"NE CORNER OF SATTERIE AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-230","desc":"NW CORNER OF SATTERIE AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-231","desc":"2 FEET IN FRONT OF DS1-230 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-232","desc":"110 FEET FROM DS1-231 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-233","desc":"915 FEET FROM DS1-232 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-234","desc":"NE CORNER OF 4TH STREET AND SUNRISE HWY","dir":"WB"},{"id":"DS1-235","desc":"NW CORNER OF 4TH STREET AND SUNRISE HWY","dir":"WB"},{"id":"DS1-236","desc":"NE CORNER OF ROCKAWAY AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-237","desc":"NW CORNER OF ROCKAWAY AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-238","desc":"190 FEET FROM DS1-237 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-239","desc":"140 FEET FROM DS1-238 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-240","desc":"150 FEET FROM DS1-239 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-241","desc":"NW CORNER OF S FRANKLIN AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-242","desc":"1670 FEET FROM THE NW RAMP OF S TERRACE PLACE AND SUNRISE HWY","dir":"WB"}];
 const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-05"},{"structureId":"DS1-163","desc":"NE CORNER OF N LONG BEACH RD AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-05"},{"structureId":"DS1-166","desc":"175 FEET FROM DS1-165 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-05"},{"structureId":"DS1-167","desc":"250 FEET FROM DS1-166 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-05"},{"structureId":"DS1-168","desc":"415 FEET FROM DS1-167 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-05"},{"structureId":"DS1-169","desc":"102 FEET FROM DS1-168 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-05"},{"structureId":"DS1-170","desc":"240 FEET FROM DS1-169 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-05"},{"structureId":"DS1-171","desc":"222 FEET FROM DS1-170 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-05"},{"structureId":"DS1-172","desc":"NE CORNER OF N FOREST AVE AND SUNRISE HWY","dir":"WB","inspector":"Ajit Dharmashin","date":"2026-08-07"},{"structureId":"DS1-173","desc":"NW CORNER OF N FOREST AVE AND SUNRISE HWY","dir":"WB","inspector":"Ajit Dharmashin","date":"2026-08-07"},{"structureId":"DS1-174","desc":"500 FEET FROM DS1-173 ON SUNRISE HWY","dir":"WB","inspector":"Ajit Dharmashin","date":"2026-08-07"},{"structureId":"DS1-175","desc":"210 FEET FROM DS1-174 ON SUNRISE HWY","dir":"WB","inspector":"Ajit Dharmashin","date":"2026-08-07"},{"structureId":"DS1-176","desc":"150 FEET FROM DS1-175 ON SUNRISE HWY","dir":"WB","inspector":"Ajit Dharmashin","date":"2026-08-07"},{"structureId":"DS1-179","desc":"135 FEET FROM NW CORNER ON MORRIS AVE AND SUNRISE HWY","dir":"WB","inspector":"Ajit Dharmashin","date":"2026-08-07"},{"structureId":"DS1-180","desc":"352 FEET FROM DS1-179 ON SUNRISE HWY","dir":"WB","inspector":"Ajit Dharmashin","date":"2026-08-07"},{"structureId":"DS1-181","desc":"150 FEET FROM NW CORNER OF N PARK AVE AND SUNRISE HWY","dir":"WB","inspector":"Ajit Dharmashin","date":"2026-08-07"},{"structureId":"DS1-182","desc":"170 FEET FROM DS1-181 ON SUNRISE HWY","dir":"WB","inspector":"Ajit Dharmashin","date":"2026-08-07"},{"structureId":"DS1-183","desc":"NE CORNER OF N VILLAGE AVE AND SUNRISE HWY","dir":"WB","inspector":"Ajit Dharmashin","date":"2026-08-07"},{"structureId":"DS1-184","desc":"200 FEET FROM NW CORNER OF N VILLAGE AVE AND SUNRISE HWY","dir":"WB","inspector":"Ajit Dharmashin","date":"2026-08-07"},{"structureId":"DS1-185","desc":"NE CORNER OF N CENTRE AVE AND SUNRISE HWY","dir":"WB","inspector":"Ajit Dharmashin","date":"2026-08-07"},{"structureId":"DS1-215A","desc":"ADD-ON STRUCTURE (not in original plan set) - located between DS1-215 and DS1-216 on Sunrise Hwy","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-14"},{"structureId":"DS1-216","desc":"NE CORNER OF BROADWAY AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-14"},{"structureId":"DS1-217","desc":"NW CORNER OF BROADWAY AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-14"},{"structureId":"DS1-218","desc":"170 FEET FROM DS1-217 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-14"},{"structureId":"DS1-219","desc":"80 FEET FROM DS1-218 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-14"},{"structureId":"DS1-220","desc":"300 FEET FROM DS1-219 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-14"},{"structureId":"DS1-221","desc":"2 FEET FROM DS1-220 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-14"},{"structureId":"DS1-222","desc":"50 FEET FROM NE CORNER OF HORTON AVE AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-14"},{"structureId":"DS1-223","desc":"25 FEET FROM NE CORNER OF HORTON AVE AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-14"},{"structureId":"DS1-224","desc":"60 FEET FROM NW CORNER OF HORTON AVE AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-17"},{"structureId":"DS1-225","desc":"60 FEET FROM DS1-224 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-17"},{"structureId":"DS1-226","desc":"150 FEET FROM DS1-225 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-17"},{"structureId":"DS1-227","desc":"300 FEET FROM DS1-226 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-17"},{"structureId":"DS1-228","desc":"300 FEET FROM DS1-227 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-17"},{"structureId":"DS1-229","desc":"NE CORNER OF SATTERIE AVE AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-17"},{"structureId":"DS1-230","desc":"NW CORNER OF SATTERIE AVE AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-18"},{"structureId":"DS1-231","desc":"2 FEET IN FRONT OF DS1-230 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-18"},{"structureId":"DS1-232","desc":"110 FEET FROM DS1-231 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-18"},{"structureId":"DS1-233","desc":"915 FEET FROM DS1-232 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-18"},{"structureId":"DS1-234","desc":"NE CORNER OF 4TH STREET AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-18"},{"structureId":"DS1-235","desc":"NW CORNER OF 4TH STREET AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-19"},{"structureId":"DS1-236","desc":"NE CORNER OF ROCKAWAY AVE AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-19"},{"structureId":"DS1-237","desc":"NW CORNER OF ROCKAWAY AVE AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-19"},{"structureId":"DS1-238","desc":"190 FEET FROM DS1-237 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-19"},{"structureId":"DS1-239","desc":"140 FEET FROM DS1-238 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-19"},{"structureId":"DS1-240","desc":"150 FEET FROM DS1-239 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-19"},{"structureId":"DS1-241","desc":"NW CORNER OF S FRANKLIN AVE AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-19"},{"structureId":"DS1-242","desc":"1670 FEET FROM THE NW RAMP OF S TERRACE PLACE AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-19"}];
 
-  /* ================= GEOMETRY REFERENCE SEED DATA (manual survey, confirmed) ================= */
-const GEO_SEED_INTERSECTIONS = [{"name":"Theatre Rd","station":"24+90","dir":"EB","ew":36,"el":83,"xw":36,"xl":98,"areaOverride":null,"notes":""},{"name":"Green Acres Rd West","station":"29+56.5","dir":"EB","ew":27,"el":76,"xw":44,"xl":90,"areaOverride":null,"notes":""},{"name":"Market Rd","station":"33+64.5","dir":"EB","ew":30,"el":40,"xw":20,"xl":51,"areaOverride":null,"notes":""},{"name":"Target Entrance","station":"48+00","dir":"EB","ew":48,"el":97,"xw":null,"xl":null,"areaOverride":null,"notes":""},{"name":"S. Terrace (right turn)","station":"53+50","dir":"EB","ew":null,"el":null,"xw":null,"xl":null,"areaOverride":6780,"notes":"Only total area measured"},{"name":"Green Acres Rd East","station":"","dir":"EB","ew":null,"el":null,"xw":null,"xl":null,"areaOverride":2997,"notes":"Only total area measured"},{"name":"T-Mobile junction / lot","station":"","dir":"EB","ew":null,"el":null,"xw":null,"xl":null,"areaOverride":570,"notes":"Only total area measured"},{"name":"Mill Rd","station":"72+50","dir":"EB","ew":null,"el":null,"xw":null,"xl":null,"areaOverride":5885,"notes":"2 turn lanes, 55 ft combined width"}];
-const GEO_SEED_TURNLANES = [{"location":"Target Entrance","station":"48+00","len1":348,"len2":null,"width":null,"notes":""},{"location":"S. Terrace","station":"53+50","len1":418,"len2":null,"width":null,"notes":"Start of left turn lane"},{"location":"Mill Rd","station":"72+50","len1":114,"len2":100,"width":55,"notes":"2 left turn lanes"},{"location":"Hicks St","station":"86+00","len1":365,"len2":null,"width":13,"notes":"Left turn lane"}];
-const GEO_SEED_TYPICALSECTIONS = [{"start":"24+30","end":"48+00","lanes":4,"width":58,"notes":"L, M, R, R-turn @ ~12 ft each, 1 ft curb offset each side"},{"start":"72+50","end":"86+00","lanes":1,"width":12,"notes":"Right shoulder counted as 1 lane, ~12 ft, Mill Rd to Hicks St"},{"start":"86+00","end":"S. Franklin Ave","lanes":4,"width":48,"notes":"~12 ft each lane, per manual survey"}];
+  /* ================= HOME DASHBOARD TARGETS ================= */
+  const HOME_TARGETS = { mill: 126023.1, fill: 13705.0, drain: DRAIN_STRUCTURES.length, joint: null, tac: null };
+  const HOME_COLORS = { mill:'#378ADD', fill:'#5fae4a', drain:'#ffc72c', joint:'#b06de0', tac:'#e0a020' };
+  const HOME_LABELS = { mill:'Milling', fill:'Filling', drain:'Drainage Cleaning', joint:'Joint Adhesive', tac:'Tack Coat' };
+  const HOME_UNITS = { mill:'SY', fill:'tons', drain:'structures', joint:'LF', tac:'gal' };
 
 
   const LAST_INSPECTOR_KEY = 'millfill_lastInspector';
@@ -1372,6 +1478,8 @@ const GEO_SEED_TYPICALSECTIONS = [{"start":"24+30","end":"48+00","lanes":4,"widt
     saveMillLog(entries);
     rememberInspector('mi');
     renderMillLog(); renderRoster();
+    $('mi_stA').value = toStation(Math.max(A,B));
+    $('mi_stB').value = '';
   }
 
   function renderMillLog(){
@@ -1739,7 +1847,10 @@ const GEO_SEED_TYPICALSECTIONS = [{"start":"24+30","end":"48+00","lanes":4,"widt
   $('lg_clear').addEventListener('click', clearFillLog);
   $('lg_tbody').addEventListener('click', (e) => {
     const btn = e.target.closest('.del-btn'); if(!btn) return;
-    const entries = loadFillLog(); entries.splice(parseInt(btn.dataset.idx,10),1);
+    const entries = loadFillLog();
+    const idx = parseInt(btn.dataset.idx,10);
+    if(entries[idx] && entries[idx].locked){ alert('This entry is locked and cannot be deleted. Unlock it from Data Management first.'); return; }
+    entries.splice(idx,1);
     saveFillLog(entries); renderFillLog(); renderRoster();
   });
 
@@ -1749,7 +1860,10 @@ const GEO_SEED_TYPICALSECTIONS = [{"start":"24+30","end":"48+00","lanes":4,"widt
   $('mi_clear').addEventListener('click', clearMillLog);
   $('mi_tbody').addEventListener('click', (e) => {
     const btn = e.target.closest('.del-btn'); if(!btn) return;
-    const entries = loadMillLog(); entries.splice(parseInt(btn.dataset.idx,10),1);
+    const entries = loadMillLog();
+    const idx = parseInt(btn.dataset.idx,10);
+    if(entries[idx] && entries[idx].locked){ alert('This entry is locked and cannot be deleted. Unlock it from Data Management first.'); return; }
+    entries.splice(idx,1);
     saveMillLog(entries); renderMillLog(); renderRoster();
   });
 
@@ -1759,7 +1873,10 @@ const GEO_SEED_TYPICALSECTIONS = [{"start":"24+30","end":"48+00","lanes":4,"widt
   $('ja_clear').addEventListener('click', clearJointLog);
   $('ja_tbody').addEventListener('click', (e) => {
     const btn = e.target.closest('.del-btn'); if(!btn) return;
-    const entries = loadJointLog(); entries.splice(parseInt(btn.dataset.idx,10),1);
+    const entries = loadJointLog();
+    const idx = parseInt(btn.dataset.idx,10);
+    if(entries[idx] && entries[idx].locked){ alert('This entry is locked and cannot be deleted. Unlock it from Data Management first.'); return; }
+    entries.splice(idx,1);
     saveJointLog(entries); renderJointLog();
   });
 
@@ -1769,7 +1886,10 @@ const GEO_SEED_TYPICALSECTIONS = [{"start":"24+30","end":"48+00","lanes":4,"widt
   $('tac_clear').addEventListener('click', clearTacLog);
   $('tac_tbody').addEventListener('click', (e) => {
     const btn = e.target.closest('.del-btn'); if(!btn) return;
-    const entries = loadTacLog(); entries.splice(parseInt(btn.dataset.idx,10),1);
+    const entries = loadTacLog();
+    const idx = parseInt(btn.dataset.idx,10);
+    if(entries[idx] && entries[idx].locked){ alert('This entry is locked and cannot be deleted. Unlock it from Data Management first.'); return; }
+    entries.splice(idx,1);
     saveTacLog(entries); renderTacLog();
   });
 
@@ -2047,209 +2167,470 @@ const GEO_SEED_TYPICALSECTIONS = [{"start":"24+30","end":"48+00","lanes":4,"widt
   $('drain_sync').addEventListener('click', () => syncOperation('drain', loadDrainLog));
   $('drain_tbody').addEventListener('click', (e) => {
     const btn = e.target.closest('.del-btn'); if(!btn) return;
-    const entries = loadDrainLog(); entries.splice(parseInt(btn.dataset.idx,10),1);
+    const entries = loadDrainLog();
+    const idx = parseInt(btn.dataset.idx,10);
+    if(entries[idx] && entries[idx].locked){ alert('This entry is locked and cannot be deleted. Unlock it from Data Management first.'); return; }
+    entries.splice(idx,1);
     saveDrainLog(entries); renderDrainLog();
   });
   $('drain_inspector') && wireInspectorField('drain');
 
-  /* ================= GEOMETRY REFERENCE ================= */
-  const GEO_INT_KEY = 'millfill_geo_intersections_v1';
-  const GEO_TL_KEY = 'millfill_geo_turnlanes_v1';
-  const GEO_TS_KEY = 'millfill_geo_typicalsections_v1';
-  const GEO_CAL_KEY = 'millfill_geo_calibration_v1';
-  const GEO_SEEDED_KEY = 'millfill_geo_seeded_v1';
+  /* ================= HOME DASHBOARD ================= */
+  let home_currentOp = null;
+  let home_cloudCache = null; // array of {date, inspectorId, data}
 
-  function loadGeoInt(){ try{ return JSON.parse(localStorage.getItem(GEO_INT_KEY))||[]; }catch(e){ return []; } }
-  function saveGeoInt(v){ try{ localStorage.setItem(GEO_INT_KEY, JSON.stringify(v)); }catch(e){} }
-  function loadGeoTL(){ try{ return JSON.parse(localStorage.getItem(GEO_TL_KEY))||[]; }catch(e){ return []; } }
-  function saveGeoTL(v){ try{ localStorage.setItem(GEO_TL_KEY, JSON.stringify(v)); }catch(e){} }
-  function loadGeoTS(){ try{ return JSON.parse(localStorage.getItem(GEO_TS_KEY))||[]; }catch(e){ return []; } }
-  function saveGeoTS(v){ try{ localStorage.setItem(GEO_TS_KEY, JSON.stringify(v)); }catch(e){} }
-
-  function seedGeometryIfEmpty(){
-    if(localStorage.getItem(GEO_SEEDED_KEY)) return;
-    if(loadGeoInt().length===0) saveGeoInt(GEO_SEED_INTERSECTIONS.map(x=>({...x, id:genId()})));
-    if(loadGeoTL().length===0) saveGeoTL(GEO_SEED_TURNLANES.map(x=>({...x, id:genId()})));
-    if(loadGeoTS().length===0) saveGeoTS(GEO_SEED_TYPICALSECTIONS.map(x=>({...x, id:genId()})));
-    localStorage.setItem(GEO_CAL_KEY, '24+30');
-    localStorage.setItem(GEO_SEEDED_KEY, '1');
+  async function fetchAllCloudEntries(){
+    await waitForCloud();
+    if(!window.__millfillCloud || !window.__millfillCloud.getAllDatesAllInspectors){
+      throw new Error('cloud-unreachable');
+    }
+    return await window.__millfillCloud.getAllDatesAllInspectors();
   }
 
-  // ---- Calibration ----
-  function calcGeoCalibration(){
-    const base = parseStation($('geo_baseStation').value);
-    const reading = parseFloat($('geo_checkReading').value);
-    if(base !== null && isFinite(reading)){
-      $('geo_predictedStation').innerHTML = toStation(base + reading);
+  function localTotals(){
+    const fillTons = loadFillLog().reduce((s,e)=>s+(parseFloat(e.tons)||0),0);
+    const millSY = loadMillLog().reduce((s,e)=>s+(parseFloat(e.sy)||0),0);
+    const jointLF = loadJointLog().reduce((s,e)=>s+(parseFloat(e.lf)||0),0);
+    const tacGal = loadTacLog().reduce((s,e)=>s+(parseFloat(e.finalPay)||0),0);
+    const drainCleaned = Object.values(latestStatusPerStructure()).filter(e=>e.cleaned==='Y').length;
+    return { fill: fillTons, mill: millSY, joint: jointLF, tac: tacGal, drain: drainCleaned };
+  }
+
+  function localTodayTotals(){
+    const today = todayStr();
+    const fillTons = loadFillLog().filter(e=>e.date===today).reduce((s,e)=>s+(parseFloat(e.tons)||0),0);
+    const millSY = loadMillLog().filter(e=>e.date===today).reduce((s,e)=>s+(parseFloat(e.sy)||0),0);
+    const jointLF = loadJointLog().filter(e=>e.date===today).reduce((s,e)=>s+(parseFloat(e.lf)||0),0);
+    const tacGal = loadTacLog().filter(e=>e.date===today).reduce((s,e)=>s+(parseFloat(e.finalPay)||0),0);
+    const drainToday = loadDrainLog().filter(e=>e.date===today && e.cleaned==='Y').length;
+    return { fill: fillTons, mill: millSY, joint: jointLF, tac: tacGal, drain: drainToday };
+  }
+
+  function renderTodayCards(today){
+    $('today_mill').textContent = fmt(today.mill,1)+' SY';
+    $('today_fill').textContent = fmt(today.fill,1)+' tons';
+    $('today_joint').textContent = fmt(today.joint,0)+' LF';
+    $('today_tac').textContent = fmt(today.tac,0)+' gal';
+    $('today_drain').textContent = Math.round(today.drain);
+  }
+
+  function checkAttention(cloudOk){
+    const today = todayStr();
+    const issues = [];
+
+    const todayLocalCount = ['fill','mill','joint','tac','drain'].reduce((n, op) => {
+      const loadFn = {fill:loadFillLog, mill:loadMillLog, joint:loadJointLog, tac:loadTacLog, drain:loadDrainLog}[op];
+      return n + loadFn().filter(e=>e.date===today).length;
+    }, 0);
+    if(todayLocalCount > 0){
+      issues.push(`Daily report has ${todayLocalCount} entr${todayLocalCount===1?'y':'ies'} logged today &mdash; review or sync before closing out.`);
+    }
+
+    const flaggedFill = loadFillLog().filter(e=>e.date===today && (e.tempFlag||e.depthFlag)).length;
+    const flaggedMill = loadMillLog().filter(e=>e.date===today && e.depthFlag).length;
+    const flaggedTotal = flaggedFill + flaggedMill;
+    if(flaggedTotal > 0){
+      issues.push(`${flaggedTotal} truck load${flaggedTotal===1?'':'s'} today flagged for QC review (temp or depth out of range).`);
+    }
+
+    if(!cloudOk){
+      issues.push('Cloud unavailable &mdash; entries saved locally only.');
+    }
+
+    if(issues.length === 0){
+      $('home_attention').style.display = 'none';
     } else {
-      $('geo_predictedStation').innerHTML = '&mdash;';
+      $('home_attention').style.display = 'block';
+      $('home_attention_list').innerHTML = issues.map(i=>`<li>${i}</li>`).join('');
     }
   }
 
-  // ---- Intersections ----
-  function calcGeoIntPreview(){
-    const ew=parseFloat($('geo_int_ew').value), el=parseFloat($('geo_int_el').value);
-    const xw=parseFloat($('geo_int_xw').value), xl=parseFloat($('geo_int_xl').value);
-    const override=parseFloat($('geo_int_areaOverride').value);
-    let area;
-    if(isFinite(override)){ area = override; }
+  async function refreshHomeDashboard(){
+    $('home_dateDisplay').textContent = new Date().toLocaleDateString(undefined, {weekday:'short', year:'numeric', month:'short', day:'numeric'});
+    $('home_status').textContent = 'Loading corridor totals\u2026';
+    $('home_syncPill').innerHTML = '&#9729; checking\u2026';
+    let totals, cloudOk;
+    try{
+      const all = await fetchAllCloudEntries();
+      home_cloudCache = all;
+      let fillTons=0, millSY=0, jointLF=0, tacGal=0;
+      const drainStatusMap = {};
+      all.forEach(({data}) => {
+        (data.fill||[]).forEach(e => fillTons += parseFloat(e.tons)||0);
+        (data.mill||[]).forEach(e => millSY += parseFloat(e.sy)||0);
+        (data.joint||[]).forEach(e => jointLF += parseFloat(e.lf)||0);
+        (data.tac||[]).forEach(e => tacGal += parseFloat(e.finalPay)||0);
+        (data.drain||[]).forEach(e => {
+          const prev = drainStatusMap[e.structureId];
+          if(!prev || (e.date||'') >= (prev.date||'')) drainStatusMap[e.structureId] = e;
+        });
+      });
+      const drainCleaned = Object.values(drainStatusMap).filter(e=>e.cleaned==='Y').length;
+      totals = { fill: fillTons, mill: millSY, joint: jointLF, tac: tacGal, drain: drainCleaned };
+      $('home_status').textContent = `Synced across all inspectors, all dates. (${all.length} inspector-day record(s) found.)`;
+      $('home_syncPill').innerHTML = '&#9729; synced';
+      $('home_syncPill').style.color = 'var(--ok-green)';
+      $('home_syncPill').style.borderColor = '#3d7530';
+      cloudOk = true;
+    } catch(err){
+      totals = localTotals();
+      home_cloudCache = null;
+      $('home_status').textContent = 'Cloud unreachable — showing this device\u2019s local totals only.';
+      $('home_syncPill').innerHTML = '&#9729; local only';
+      $('home_syncPill').style.color = 'var(--warn-red)';
+      $('home_syncPill').style.borderColor = '#8a3a2a';
+      cloudOk = false;
+    }
+    renderHomeBars(totals);
+    renderTodayCards(localTodayTotals());
+    checkAttention(cloudOk);
+  }
+
+  function renderHomeBars(totals){
+    ['mill','fill','drain'].forEach(op => {
+      const target = HOME_TARGETS[op];
+      const val = totals[op] || 0;
+      const pct = target > 0 ? Math.min(100, (val/target)*100) : 0;
+      $('home_pct_'+op).textContent = Math.round(pct)+'%';
+      $('home_bar_'+op).style.width = pct+'%';
+      const unit = HOME_UNITS[op];
+      const valStr = op==='drain' ? Math.round(val) : fmt(val,1);
+      const targetStr = op==='drain' ? target : fmt(target,0);
+      $('home_qty_'+op).textContent = `${valStr} / ${targetStr} ${unit}`;
+    });
+    ['joint','tac'].forEach(op => {
+      const val = totals[op] || 0;
+      const unit = HOME_UNITS[op];
+      $('home_bar_'+op).style.width = '0%';
+      $('home_qty_'+op).textContent = `${fmt(val, op==='joint'?0:0)} ${unit} logged \u00b7 target not yet set`;
+    });
+  }
+
+  function showHomeDetail(op){
+    home_currentOp = op;
+    $('home_overview').style.display = 'none';
+    $('home_detail').style.display = 'block';
+    $('home_detail_title').textContent = HOME_LABELS[op];
+    $('home_detail_subtitle').textContent = home_cloudCache
+      ? 'All synced entries across every inspector and date.'
+      : 'Cloud unreachable — showing local entries on this device only.';
+
+    const LOCAL_LOAD = { mill:loadMillLog, fill:loadFillLog, joint:loadJointLog, tac:loadTacLog, drain:loadDrainLog };
+
+    let rows = [];
+    if(home_cloudCache){
+      home_cloudCache.forEach(({date, inspectorId, data}) => {
+        (data[op]||[]).forEach(e => rows.push({ ...e, date: e.date||date, inspectorName: data.inspectorName||inspectorId }));
+      });
+    } else {
+      rows = LOCAL_LOAD[op]().map(e => ({...e, inspectorName: e.inspector||'Unassigned'}));
+    }
+    rows.sort((a,b) => (b.date||'').localeCompare(a.date||''));
+
+    const total = rows.reduce((s,e) => {
+      if(op==='mill') return s+(parseFloat(e.sy)||0);
+      if(op==='fill') return s+(parseFloat(e.tons)||0);
+      if(op==='joint') return s+(parseFloat(e.lf)||0);
+      if(op==='tac') return s+(parseFloat(e.finalPay)||0);
+      return s + (e.cleaned==='Y' ? 1 : 0);
+    }, 0);
+    const target = HOME_TARGETS[op];
+    const unitLabel = {mill:'SY',fill:'Tons',joint:'LF',tac:'Gal',drain:'Structures'}[op];
+
+    if(target !== null){
+      const remaining = Math.max(0,target-total);
+      $('home_detail_stats').innerHTML = `
+        <div class="detail-stat"><div class="v" style="color:${HOME_COLORS[op]};">${op==='drain'?Math.round(total):fmt(total,1)}</div><div class="l">${unitLabel} complete</div></div>
+        <div class="detail-stat"><div class="v">${op==='drain'?Math.round(remaining):fmt(remaining,1)}</div><div class="l">Remaining</div></div>
+      `;
+    } else {
+      $('home_detail_stats').innerHTML = `
+        <div class="detail-stat" style="grid-column:1/-1;"><div class="v" style="color:${HOME_COLORS[op]};">${fmt(total,1)}</div><div class="l">${unitLabel} logged so far &mdash; target not yet set</div></div>
+      `;
+    }
+
+    if(rows.length === 0){
+      $('home_detail_list').innerHTML = '<div class="log-empty">No entries logged yet.</div>';
+      return;
+    }
+    $('home_detail_list').innerHTML = rows.slice(0,50).map(e => {
+      let mainLabel, qtyLabel;
+      if(op==='mill'){ mainLabel = `${e.stA||''} \u2192 ${e.stB||''}`; qtyLabel = `${e.sy||'0'} SY`; }
+      else if(op==='fill'){ mainLabel = `${e.startStation||''} \u2192 ${e.endStation||''}`; qtyLabel = `${e.tons||'0'} tons`; }
+      else if(op==='joint'){ mainLabel = `${e.startStation||''}${e.endStation?' \u2192 '+e.endStation:''}`; qtyLabel = `${e.lf||'0'} LF`; }
+      else if(op==='tac'){ mainLabel = `Ticket ${e.ticket||'\u2014'} \u00b7 ${e.truck||''}`; qtyLabel = `${e.finalPay||'0'} gal`; }
+      else { mainLabel = e.structureId||''; qtyLabel = e.cleaned==='Y' ? 'Cleaned' : 'Skipped'; }
+      return `<div class="detail-row">
+        <div><strong>${e.date||''}</strong> &middot; ${e.inspectorName||''}<br><span style="color:var(--muted);">${mainLabel}</span></div>
+        <div style="text-align:right; color:${HOME_COLORS[op]}; font-weight:600;">${qtyLabel}</div>
+      </div>`;
+    }).join('');
+  }
+
+  document.querySelectorAll('.home-bar-btn').forEach(btn => {
+    btn.addEventListener('click', () => showHomeDetail(btn.dataset.op));
+  });
+  $('home_back').addEventListener('click', () => {
+    $('home_detail').style.display = 'none';
+    $('home_overview').style.display = 'block';
+  });
+  document.querySelectorAll('.home-quickbtn').forEach(btn => {
+    btn.addEventListener('click', () => switchToSection(btn.dataset.goto));
+  });
+
+  $('home_reviewIssues').addEventListener('click', () => {
+    switchToSection('dailyreport');
+    $('dr_date').value = todayStr();
+    loadDailyReport();
+  });
+
+  $('home_retrySync').addEventListener('click', async () => {
+    const today = todayStr();
+    const btn = $('home_retrySync');
+    btn.disabled = true;
+    btn.textContent = 'Syncing\u2026';
+    const jobs = [
+      { key:'fill', load:loadFillLog, label:'Fill' }, { key:'mill', load:loadMillLog, label:'Milling' },
+      { key:'joint', load:loadJointLog, label:'Joint Adhesive' }, { key:'tac', load:loadTacLog, label:'Tack Coat' },
+      { key:'drain', load:loadDrainLog, label:'Drainage' },
+    ];
+    let totalSynced = 0, ranAny = false, hadFailure = false;
+    for(const job of jobs){
+      if(job.load().some(e => e.date === today)){
+        ranAny = true;
+        const result = await syncOperation(job.key, job.load, true);
+        if(result && result.ok) totalSynced += result.syncedCount;
+        else hadFailure = true;
+      }
+    }
+    btn.disabled = false;
+    btn.innerHTML = '&#9729; Retry Sync';
+    if(!ranAny){ alert('No entries logged today — nothing to sync.'); }
+    else if(hadFailure){ alert('Sync attempted, but the cloud is still unreachable. Entries remain saved locally.'); }
+    else{ alert(`Synced ${totalSynced} entr${totalSynced===1?'y':'ies'} across today\u2019s operations.`); }
+    refreshHomeDashboard();
+  });
+
+  /* ================= DATA MANAGEMENT (PIN-GATED LOCK / ERASE) ================= */
+  const DM_PIN = '3450';
+  const DM_UNLOCK_KEY = 'millfill_dmUnlocked';
+  let dm_pinBuffer = '';
+  let dm_results = []; // {source:'local'|'cloud', op, date, inspectorId, inspectorName, entry, storageKey?}
+  let dm_selected = new Set();
+
+  function dmIsUnlocked(){ return sessionStorage.getItem(DM_UNLOCK_KEY) === '1'; }
+  function dmUpdatePinDots(){
+    document.querySelectorAll('#dm_pinDots .pin-dot').forEach((dot,i) => {
+      dot.classList.toggle('filled', i < dm_pinBuffer.length);
+    });
+  }
+  function dmShowUnlockedPanel(){
+    $('dm_gatePanel').style.display = 'none';
+    $('dm_panel').style.display = 'block';
+  }
+  function dmCheckPin(){
+    if(dm_pinBuffer.length === 4){
+      if(dm_pinBuffer === DM_PIN){
+        sessionStorage.setItem(DM_UNLOCK_KEY, '1');
+        $('dm_pinError').style.display = 'none';
+        dmShowUnlockedPanel();
+      } else {
+        $('dm_pinError').style.display = 'block';
+        dm_pinBuffer = '';
+        dmUpdatePinDots();
+        $('dm_pinInput').value = '';
+      }
+    }
+  }
+  $('dm_pinInput').addEventListener('input', () => {
+    dm_pinBuffer = $('dm_pinInput').value.replace(/\D/g,'').slice(0,4);
+    $('dm_pinInput').value = dm_pinBuffer;
+    dmUpdatePinDots();
+    dmCheckPin();
+  });
+
+  $('dm_scope').addEventListener('change', () => {
+    const scope = $('dm_scope').value;
+    if(scope === 'all'){ $('dm_dateWrap').style.display = 'none'; }
     else {
-      area = (isFinite(ew)&&isFinite(el) ? ew*el : 0) + (isFinite(xw)&&isFinite(xl) ? xw*xl : 0);
+      $('dm_dateWrap').style.display = 'grid';
+      $('dm_dateLabel').textContent = scope === 'week' ? 'Week starting' : 'Date';
     }
-    $('geo_int_computed').innerHTML = area>0 ? fmt(area,0)+'<span class="unit">SF</span>' : '&mdash;';
+  });
+
+  const OP_STORAGE = {
+    fill: { load: () => loadFillLog(), save: (v) => saveFillLog(v), key: 'fill' },
+    mill: { load: () => loadMillLog(), save: (v) => saveMillLog(v), key: 'mill' },
+    joint:{ load: () => loadJointLog(), save: (v) => saveJointLog(v), key: 'joint' },
+    tac:  { load: () => loadTacLog(), save: (v) => saveTacLog(v), key: 'tac' },
+    drain:{ load: () => loadDrainLog(), save: (v) => saveDrainLog(v), key: 'drain' }
+  };
+  const OP_LABELS_DM = { fill:'Fill', mill:'Milling', joint:'Joint Adhesive', tac:'TAC Coat', drain:'Drainage' };
+
+  function dmDateMatches(entryDate, scope, refDate){
+    if(scope === 'all') return true;
+    if(!entryDate) return false;
+    if(scope === 'date') return entryDate === refDate;
+    if(scope === 'week'){
+      const start = new Date(refDate+'T00:00:00');
+      const end = new Date(start); end.setDate(end.getDate()+6);
+      const d = new Date(entryDate+'T00:00:00');
+      return d >= start && d <= end;
+    }
+    return false;
   }
 
-  function renderGeoInt(){
-    const list = loadGeoInt();
-    const tbody=$('geo_int_tbody'), table=$('geo_int_table'), empty=$('geo_int_empty');
-    if(list.length===0){ table.style.display='none'; empty.style.display='block'; return; }
-    table.style.display='table'; empty.style.display='none';
-    tbody.innerHTML = list.map((e,i)=>{
-      const area = (e.areaOverride !== null && e.areaOverride !== undefined) ? e.areaOverride : ((e.ew&&e.el?e.ew*e.el:0)+(e.xw&&e.xl?e.xw*e.xl:0));
-      const entering = (e.ew&&e.el) ? `${e.ew}'&times;${e.el}'` : '—';
-      const exiting = (e.xw&&e.xl) ? `${e.xw}'&times;${e.xl}'` : '—';
-      return `<tr>
-        <td>${e.name}</td><td class="station">${e.station||'—'}</td>
-        <td>${entering}</td><td>${exiting}</td>
-        <td class="tons">${fmt(area,0)}</td><td>${e.notes||'—'}</td>
-        <td><button class="del-btn" data-idx="${i}" title="Delete">&#10005;</button></td>
-      </tr>`;
+  function dmEntrySummary(op, e){
+    if(op==='fill') return `${e.startStation||''} \u2192 ${e.endStation||''} \u00b7 ${e.tons||0} tons`;
+    if(op==='mill') return `${e.stA||''} \u2192 ${e.stB||''} \u00b7 ${e.sy||0} SY`;
+    if(op==='joint') return `${e.startStation||''} ${e.endStation?('\u2192 '+e.endStation):''} \u00b7 ${e.lf||0} LF`;
+    if(op==='tac') return `Ticket ${e.ticket||'-'} \u00b7 ${e.gallons||0} gal`;
+    if(op==='drain') return `${e.structureId||''} \u00b7 ${e.cleaned==='Y'?'Cleaned':'Skipped'}`;
+    return '';
+  }
+
+  async function dmSearch(){
+    const opFilter = $('dm_opFilter').value;
+    const scope = $('dm_scope').value;
+    const refDate = $('dm_dateInput').value || todayStr();
+    const ops = opFilter === 'all' ? Object.keys(OP_STORAGE) : [opFilter];
+
+    dm_results = [];
+    dm_selected = new Set();
+
+    // local entries
+    ops.forEach(op => {
+      OP_STORAGE[op].load().forEach(e => {
+        if(dmDateMatches(e.date, scope, refDate)){
+          dm_results.push({ source:'local', op, date: e.date, inspectorName: e.inspector||'Unassigned', entry: e });
+        }
+      });
+    });
+
+    // cloud entries
+    $('dm_status').textContent = 'Searching cloud data\u2026';
+    try{
+      const all = await fetchAllCloudEntries();
+      all.forEach(({date, inspectorId, data}) => {
+        ops.forEach(op => {
+          (data[op]||[]).forEach(e => {
+            const entryDate = e.date || date;
+            if(dmDateMatches(entryDate, scope, refDate)){
+              dm_results.push({ source:'cloud', op, date: entryDate, inspectorId, inspectorName: data.inspectorName||inspectorId, entry: e, cloudDate: date });
+            }
+          });
+        });
+      });
+      $('dm_status').textContent = `${dm_results.length} matching entr${dm_results.length===1?'y':'ies'} found (local + cloud).`;
+    } catch(err){
+      $('dm_status').textContent = `${dm_results.length} matching local entr${dm_results.length===1?'y':'ies'} found. (Cloud unreachable — cloud entries not included.)`;
+    }
+
+    $('dm_resultsPanel').style.display = 'block';
+    dmRenderResults();
+  }
+
+  function dmRenderResults(){
+    if(dm_results.length === 0){
+      $('dm_resultsList').innerHTML = '<div class="log-empty">No matching entries.</div>';
+      return;
+    }
+    $('dm_resultsList').innerHTML = dm_results.map((r,i) => {
+      const locked = !!r.entry.locked;
+      return `<label class="dm-checkrow">
+        <input type="checkbox" data-idx="${i}" ${dm_selected.has(i)?'checked':''}>
+        <div class="meta">
+          <div><strong>${OP_LABELS_DM[r.op]}</strong> \u00b7 ${r.date||''} \u00b7 ${r.inspectorName||''} ${r.source==='cloud'?'<span style="color:var(--caution-yellow);font-size:10px;">(cloud)</span>':'<span style="color:var(--muted);font-size:10px;">(local)</span>'}</div>
+          <div style="color:var(--muted); margin-top:2px;">${dmEntrySummary(r.op, r.entry)}</div>
+        </div>
+        ${locked ? '<span class="lockicon">&#128274;</span>' : ''}
+      </label>`;
     }).join('');
-  }
-
-  function addGeoInt(){
-    const name = $('geo_int_name').value.trim();
-    if(!name){ alert('Enter an intersection name.'); return; }
-    const list = loadGeoInt();
-    list.push({
-      id: genId(),
-      name, station: $('geo_int_station').value.trim(), dir: $('geo_int_dir').value.trim(),
-      ew: parseFloat($('geo_int_ew').value)||null, el: parseFloat($('geo_int_el').value)||null,
-      xw: parseFloat($('geo_int_xw').value)||null, xl: parseFloat($('geo_int_xl').value)||null,
-      areaOverride: parseFloat($('geo_int_areaOverride').value)||null,
-      notes: $('geo_int_notes').value.trim()
+    $('dm_resultsList').querySelectorAll('input[type="checkbox"]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const idx = parseInt(cb.dataset.idx,10);
+        if(cb.checked) dm_selected.add(idx); else dm_selected.delete(idx);
+      });
     });
-    saveGeoInt(list);
-    renderGeoInt();
-    ['geo_int_name','geo_int_station','geo_int_ew','geo_int_el','geo_int_xw','geo_int_xl','geo_int_areaOverride','geo_int_notes'].forEach(id=>$(id).value='');
-    calcGeoIntPreview();
   }
 
-  function exportGeoIntCSV(){
-    const list = loadGeoInt();
-    if(list.length===0){ alert('No intersections to export.'); return; }
-    const headers=['Name','Station','Direction','Entering W','Entering L','Exiting W','Exiting L','Area Override','Computed Area (SF)','Notes'];
-    const rows=list.map(e=>{
-      const area = (e.areaOverride !== null && e.areaOverride !== undefined) ? e.areaOverride : ((e.ew&&e.el?e.ew*e.el:0)+(e.xw&&e.xl?e.xw*e.xl:0));
-      return [e.name,e.station||'',e.dir||'',e.ew||'',e.el||'',e.xw||'',e.xl||'',e.areaOverride||'',area,`"${(e.notes||'').replace(/"/g,'""')}"`];
-    });
-    downloadCSV(headers, rows, 'geometry-intersections');
-  }
-
-  // ---- Turn Lanes ----
-  function renderGeoTL(){
-    const list = loadGeoTL();
-    const tbody=$('geo_tl_tbody'), table=$('geo_tl_table'), empty=$('geo_tl_empty');
-    if(list.length===0){ table.style.display='none'; empty.style.display='block'; return; }
-    table.style.display='table'; empty.style.display='none';
-    tbody.innerHTML = list.map((e,i)=>{
-      const lengths = e.len2 ? `${e.len1}' &amp; ${e.len2}'` : `${e.len1}'`;
-      return `<tr>
-        <td>${e.location}</td><td class="station">${e.station||'—'}</td>
-        <td>${lengths}</td><td>${e.width?e.width+"'":'—'}</td><td>${e.notes||'—'}</td>
-        <td><button class="del-btn" data-idx="${i}" title="Delete">&#10005;</button></td>
-      </tr>`;
-    }).join('');
-  }
-
-  function addGeoTL(){
-    const location = $('geo_tl_location').value.trim();
-    if(!location){ alert('Enter a location name.'); return; }
-    const list = loadGeoTL();
-    list.push({
-      id: genId(),
-      location, station: $('geo_tl_station').value.trim(),
-      len1: parseFloat($('geo_tl_len1').value)||null, len2: parseFloat($('geo_tl_len2').value)||null,
-      width: parseFloat($('geo_tl_width').value)||null,
-      notes: $('geo_tl_notes').value.trim()
-    });
-    saveGeoTL(list);
-    renderGeoTL();
-    ['geo_tl_location','geo_tl_station','geo_tl_len1','geo_tl_len2','geo_tl_width','geo_tl_notes'].forEach(id=>$(id).value='');
-  }
-
-  function exportGeoTLCSV(){
-    const list = loadGeoTL();
-    if(list.length===0){ alert('No turn lanes to export.'); return; }
-    const headers=['Location','Station','Length 1','Length 2','Width','Notes'];
-    const rows=list.map(e=>[e.location,e.station||'',e.len1||'',e.len2||'',e.width||'',`"${(e.notes||'').replace(/"/g,'""')}"`]);
-    downloadCSV(headers, rows, 'geometry-turnlanes');
-  }
-
-  // ---- Typical Sections ----
-  function renderGeoTS(){
-    const list = loadGeoTS();
-    const tbody=$('geo_ts_tbody'), table=$('geo_ts_table'), empty=$('geo_ts_empty');
-    if(list.length===0){ table.style.display='none'; empty.style.display='block'; return; }
-    table.style.display='table'; empty.style.display='none';
-    tbody.innerHTML = list.map((e,i)=>`<tr>
-        <td class="station">${e.start}</td><td class="station">${e.end}</td>
-        <td>${e.lanes}</td><td>${e.width}'</td><td>${e.notes||'—'}</td>
-        <td><button class="del-btn" data-idx="${i}" title="Delete">&#10005;</button></td>
-      </tr>`).join('');
-  }
-
-  function addGeoTS(){
-    const start = $('geo_ts_start').value.trim(), end = $('geo_ts_end').value.trim();
-    if(!start || !end){ alert('Enter both a start and end station.'); return; }
-    const list = loadGeoTS();
-    list.push({
-      id: genId(),
-      start, end, lanes: parseInt($('geo_ts_lanes').value,10)||0,
-      width: parseFloat($('geo_ts_width').value)||0,
-      notes: $('geo_ts_notes').value.trim()
-    });
-    saveGeoTS(list);
-    renderGeoTS();
-    ['geo_ts_start','geo_ts_end','geo_ts_notes'].forEach(id=>$(id).value='');
-  }
-
-  function exportGeoTSCSV(){
-    const list = loadGeoTS();
-    if(list.length===0){ alert('No typical sections to export.'); return; }
-    const headers=['Start Station','End Station','# Lanes','Total Width','Notes'];
-    const rows=list.map(e=>[e.start,e.end,e.lanes,e.width,`"${(e.notes||'').replace(/"/g,'""')}"`]);
-    downloadCSV(headers, rows, 'geometry-typical-sections');
-  }
-
-  document.addEventListener('input', (e) => {
-    if(['geo_baseStation','geo_checkReading'].includes(e.target.id)) calcGeoCalibration();
-    if(['geo_int_ew','geo_int_el','geo_int_xw','geo_int_xl','geo_int_areaOverride'].includes(e.target.id)) calcGeoIntPreview();
+  $('dm_search').addEventListener('click', dmSearch);
+  $('dm_selectAll').addEventListener('click', () => {
+    dm_selected = new Set(dm_results.map((_,i)=>i));
+    dmRenderResults();
+  });
+  $('dm_selectNone').addEventListener('click', () => {
+    dm_selected = new Set();
+    dmRenderResults();
   });
 
-  $('geo_int_add').addEventListener('click', addGeoInt);
-  $('geo_int_export').addEventListener('click', exportGeoIntCSV);
-  $('geo_int_tbody').addEventListener('click', (e) => {
-    const btn = e.target.closest('.del-btn'); if(!btn) return;
-    const list = loadGeoInt(); list.splice(parseInt(btn.dataset.idx,10),1);
-    saveGeoInt(list); renderGeoInt();
-  });
+  async function dmLockSelected(){
+    if(dm_selected.size === 0){ alert('Select at least one entry first.'); return; }
+    let localChanged = {};
+    for(const idx of dm_selected){
+      const r = dm_results[idx];
+      r.entry.locked = true;
+      if(r.source === 'local'){
+        localChanged[r.op] = true;
+      } else {
+        try{
+          const doc = await window.__millfillCloud.getInspectorDoc(r.cloudDate, r.inspectorId);
+          if(doc){
+            const arr = doc[r.op] || [];
+            const target = arr.find(x => x.id === r.entry.id);
+            if(target) target.locked = true;
+            await window.__millfillCloud.setInspectorDoc(r.cloudDate, r.inspectorId, doc);
+          }
+        } catch(err){ alert('Could not lock a cloud entry: ' + err.message); }
+      }
+    }
+    Object.keys(localChanged).forEach(op => OP_STORAGE[op].save(OP_STORAGE[op].load().map(e => {
+      const match = dm_results.find(r => r.source==='local' && r.op===op && r.entry.id===e.id && dm_selected.has(dm_results.indexOf(r)));
+      return match ? {...e, locked:true} : e;
+    })));
+    alert(`Locked ${dm_selected.size} entr${dm_selected.size===1?'y':'ies'}.`);
+    renderFillLog(); renderMillLog(); renderJointLog(); renderTacLog(); renderDrainLog();
+    dmRenderResults();
+    refreshHomeDashboard();
+  }
 
-  $('geo_tl_add').addEventListener('click', addGeoTL);
-  $('geo_tl_export').addEventListener('click', exportGeoTLCSV);
-  $('geo_tl_tbody').addEventListener('click', (e) => {
-    const btn = e.target.closest('.del-btn'); if(!btn) return;
-    const list = loadGeoTL(); list.splice(parseInt(btn.dataset.idx,10),1);
-    saveGeoTL(list); renderGeoTL();
-  });
+  async function dmEraseSelected(){
+    if(dm_selected.size === 0){ alert('Select at least one entry first.'); return; }
+    const confirmPin = prompt(`Erasing is permanent. Re-enter the 4-digit PIN to confirm deleting ${dm_selected.size} entr${dm_selected.size===1?'y':'ies'}:`);
+    if(confirmPin !== DM_PIN){ alert('PIN did not match. Nothing was erased.'); return; }
 
-  $('geo_ts_add').addEventListener('click', addGeoTS);
-  $('geo_ts_export').addEventListener('click', exportGeoTSCSV);
-  $('geo_ts_tbody').addEventListener('click', (e) => {
-    const btn = e.target.closest('.del-btn'); if(!btn) return;
-    const list = loadGeoTS(); list.splice(parseInt(btn.dataset.idx,10),1);
-    saveGeoTS(list); renderGeoTS();
-  });
+    const idxToRemove = new Set(dm_selected);
+    const removeIds = { fill:new Set(), mill:new Set(), joint:new Set(), tac:new Set(), drain:new Set() };
+    for(const idx of idxToRemove){
+      const r = dm_results[idx];
+      if(r.source === 'local'){
+        removeIds[r.op].add(r.entry.id);
+      } else {
+        try{
+          const doc = await window.__millfillCloud.getInspectorDoc(r.cloudDate, r.inspectorId);
+          if(doc){
+            doc[r.op] = (doc[r.op]||[]).filter(x => x.id !== r.entry.id);
+            await window.__millfillCloud.setInspectorDoc(r.cloudDate, r.inspectorId, doc);
+          }
+        } catch(err){ alert('Could not erase a cloud entry: ' + err.message); }
+      }
+    }
+    Object.keys(removeIds).forEach(op => {
+      if(removeIds[op].size === 0) return;
+      const remaining = OP_STORAGE[op].load().filter(e => !removeIds[op].has(e.id));
+      OP_STORAGE[op].save(remaining);
+    });
+
+    alert(`Erased ${dm_selected.size} entr${dm_selected.size===1?'y':'ies'}.`);
+    renderFillLog(); renderMillLog(); renderJointLog(); renderTacLog(); renderDrainLog(); renderRoster();
+    dmSearch();
+    refreshHomeDashboard();
+  }
+
+  $('dm_lockSelected').addEventListener('click', dmLockSelected);
+  $('dm_eraseSelected').addEventListener('click', dmEraseSelected);
+
+  if(dmIsUnlocked()) dmShowUnlockedPanel();
 
   /* ================= INIT ================= */
   $('lg_date').value = todayStr();
@@ -2272,7 +2653,7 @@ const GEO_SEED_TYPICALSECTIONS = [{"start":"24+30","end":"48+00","lanes":4,"widt
   calcMill();
   calcJoint();
   calcTac();
-  updateGlobalConfigVisibility('fill');
+  updateGlobalConfigVisibility('home');
   $('dr_date').value = todayStr();
   updateAdminUI();
 
@@ -2281,18 +2662,15 @@ const GEO_SEED_TYPICALSECTIONS = [{"start":"24+30","end":"48+00","lanes":4,"widt
   seedDrainLogIfEmpty();
   renderDrainLog();
 
-  seedGeometryIfEmpty();
-  $('geo_baseStation').value = localStorage.getItem(GEO_CAL_KEY) || '24+30';
-  renderGeoInt();
-  renderGeoTL();
-  renderGeoTS();
+  $('dm_dateInput').value = todayStr();
+  refreshHomeDashboard();
 })();
 
 </script>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
   import {
-    getFirestore, doc, getDoc, setDoc, collection, getDocs
+    getFirestore, doc, getDoc, setDoc, collection, getDocs, collectionGroup, query
   } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -2332,6 +2710,16 @@ const GEO_SEED_TYPICALSECTIONS = [{"start":"24+30","end":"48+00","lanes":4,"widt
       const snaps = await getDocs(colRef);
       const out = {};
       snaps.forEach(s => { out[s.id] = s.data(); });
+      return out;
+    },
+    async getAllDatesAllInspectors(){
+      const q = query(collectionGroup(db, 'inspectors'));
+      const snaps = await getDocs(q);
+      const out = [];
+      snaps.forEach(s => {
+        const dateId = s.ref.parent.parent ? s.ref.parent.parent.id : null;
+        out.push({ date: dateId, inspectorId: s.id, data: s.data() });
+      });
       return out;
     }
   };
