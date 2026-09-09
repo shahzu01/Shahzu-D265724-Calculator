@@ -1338,12 +1338,15 @@ const DRAIN_STRUCTURES = [{"id":"DS1-1","desc":"SW CORNER OF SUNRISE HWY AND THE
    * Returns the list of selectable lanes at a given station, for a given operation/machine,
    * plus tonight's overall Start/End range (for Lane 0 intersection matching).
    */
-  function getAvailableLanes(stationLF, opType, machine, nightRange){
+  function getAvailableLanes(stationLF, opType, machine, nightRange, direction){
     const options = [];
-    // Lane 0: any intersection within tonight's overall range, not yet fully logged, and (for Milling) only under Mill 2
+    // Lane 0: only intersections the mainline crew has actually reached or passed (station <= current
+    // position, or >= if working in reverse), still within tonight's overall range, not yet fully logged,
+    // and (for Milling) only under Mill 2. Prevents jumping ahead to an intersection not yet physically reached.
     if(nightRange && (opType !== 'mill' || machine === 'Mill 2')){
       const lo = Math.min(nightRange.startLF, nightRange.endLF), hi = Math.max(nightRange.startLF, nightRange.endLF);
-      CROSS_STREET_AREAS.filter(cs => cs[0] >= lo && cs[0] <= hi).forEach(cs => {
+      const reached = direction === 'rev' ? (cs => cs[0] >= stationLF) : (cs => cs[0] <= stationLF);
+      CROSS_STREET_AREAS.filter(cs => cs[0] >= lo && cs[0] <= hi && reached(cs)).forEach(cs => {
         if(!isLane0Complete(cs[1], opType)) options.push({ value:'0:'+cs[1], label:'Lane 0 \u2014 '+cs[1], intersection:cs[1] });
       });
     }
@@ -1560,7 +1563,7 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
       $('lg_lane16_block').style.display='none';
       return;
     }
-    const opts = getAvailableLanes(s, 'fill', null, night);
+    const opts = getAvailableLanes(s, 'fill', null, night, 'fwd');
     if(opts.length===0){
       sel.innerHTML = '<option value="">— No lanes confirmed at this station —</option>';
     } else {
@@ -1592,7 +1595,7 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
     if(!val || val.startsWith('0:')) return null;
     const s = parseStation($('lg_start').value);
     if(s===null) return null;
-    const opts = getAvailableLanes(s, 'fill', null, getNightlyOp('fill'));
+    const opts = getAvailableLanes(s, 'fill', null, getNightlyOp('fill'), 'fwd');
     const match = opts.find(o=>o.value===val);
     return match ? match.width : 12;
   }
@@ -1671,13 +1674,22 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
 
     // Shuttle logic: if tonight's End Point is set and this load reached/passed it, return to Start for the next lane
     const night = getNightlyOp('fill');
-    if(night && e >= night.endLF - 0.5){
+    const wrapped = night && e >= night.endLF - 0.5;
+    if(wrapped){
       $('lg_start').value = toStation(night.startLF);
     } else {
       $('lg_start').value = toStation(e);
     }
     $('lg_ticket').value=''; $('lg_endOverride').value='';
     refreshFillLaneOptions();
+    if(wrapped){
+      const optVals = Array.from($('lg_lane').options).map(o=>o.value);
+      const curIdx = optVals.indexOf(laneVal);
+      if(curIdx >= 0 && curIdx < optVals.length-1){
+        $('lg_lane').value = optVals[curIdx+1];
+        onFillLaneChange();
+      }
+    }
     updateNightlyProgress('fill');
   }
 
@@ -1767,7 +1779,7 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
       $('mi_lane16_block').style.display='none';
       return;
     }
-    const opts = getAvailableLanes(A, 'mill', machine, night);
+    const opts = getAvailableLanes(A, 'mill', machine, night, $('mi_direction').value);
     if(opts.length===0){
       sel.innerHTML = '<option value="">— No lanes confirmed at this station —</option>';
     } else {
@@ -1799,7 +1811,7 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
     if(!val || val.startsWith('0:')) return null;
     const A = parseStation($('mi_stA').value);
     if(A===null) return null;
-    const opts = getAvailableLanes(A, 'mill', $('mi_machine').value, getNightlyOp('mill'));
+    const opts = getAvailableLanes(A, 'mill', $('mi_machine').value, getNightlyOp('mill'), $('mi_direction').value);
     const match = opts.find(o=>o.value===val);
     return match ? match.width : 12;
   }
@@ -1878,8 +1890,9 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
 
     const night = getNightlyOp('mill');
     const reachedEnd = dir==='rev' ? Math.min(A,B) : Math.max(A,B);
+    let atEnd = false;
     if(night){
-      const atEnd = dir==='rev' ? reachedEnd <= night.startLF+0.5 : reachedEnd >= night.endLF-0.5;
+      atEnd = dir==='rev' ? reachedEnd <= night.startLF+0.5 : reachedEnd >= night.endLF-0.5;
       if(atEnd){
         $('mi_stA').value = dir==='rev' ? toStation(night.endLF) : toStation(night.startLF);
       } else {
@@ -1889,6 +1902,14 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
       $('mi_stA').value = toStation(reachedEnd);
     }
     refreshMillLaneOptions();
+    if(atEnd){
+      const optVals = Array.from($('mi_lane').options).map(o=>o.value);
+      const curIdx = optVals.indexOf(laneVal);
+      if(curIdx >= 0 && curIdx < optVals.length-1){
+        $('mi_lane').value = optVals[curIdx+1];
+        onMillLaneChange();
+      }
+    }
     updateNightlyProgress('mill');
   }
 
