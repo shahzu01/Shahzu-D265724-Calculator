@@ -486,6 +486,7 @@
         <div class="field" id="lg_inspector_other_wrap" style="display:none;"><label>Inspector Name</label><input type="text" id="lg_inspector_other" placeholder="Type name"></div>
         <div class="field"><label>Ticket / Receipt #</label><input type="text" id="lg_ticket" placeholder="4471"></div>
         <div class="field"><label>Starting Station (current position)</label><input type="text" id="lg_start" placeholder="Set from Tonight's Target above"></div>
+        <div id="lg_pending_banner" style="display:none; grid-column:1/-1; margin-bottom:10px;"></div>
         <div class="field full"><label>Lane</label>
           <select id="lg_lane"><option value="">— Set Starting Station first —</option></select>
         </div>
@@ -604,6 +605,7 @@
           </select>
         </div>
         <div class="field full"><label>Station A (current position)</label><input type="text" id="mi_stA" placeholder="Set from Tonight's Target above"></div>
+        <div id="mi_pending_banner" style="display:none; grid-column:1/-1; margin-bottom:10px;"></div>
         <div class="field full"><label>Lane</label>
           <select id="mi_lane"><option value="">— Set Station A first —</option></select>
         </div>
@@ -1338,6 +1340,26 @@ const DRAIN_STRUCTURES = [{"id":"DS1-1","desc":"SW CORNER OF SUNRISE HWY AND THE
    * Returns the list of selectable lanes at a given station, for a given operation/machine,
    * plus tonight's overall Start/End range (for Lane 0 intersection matching).
    */
+  /**
+   * Returns the nearest not-yet-completed intersection the crew has already reached (or null).
+   * Used both to decide whether Lane 0 is offered and to BLOCK Lane 1 (the right lane/shoulder,
+   * where every cross street sits) until that intersection is actually handled -- a paver/mill
+   * physically cannot skip a cross street and come back for it later, so the right lane is locked
+   * out until Lane 0 is addressed. Only applies where Lane 0 is even reachable by this machine
+   * (Mill 1 is mainline-only and never does intersections, so it isn't gated by this rule).
+   */
+  function getPendingIntersection(stationLF, opType, machine, nightRange, direction){
+    if(!nightRange) return null;
+    if(opType === 'mill' && machine !== 'Mill 2') return null;
+    const lo = Math.min(nightRange.startLF, nightRange.endLF), hi = Math.max(nightRange.startLF, nightRange.endLF);
+    const reached = direction === 'rev' ? (cs => cs[0] >= stationLF) : (cs => cs[0] <= stationLF);
+    const pending = CROSS_STREET_AREAS.filter(cs => cs[0] >= lo && cs[0] <= hi && reached(cs) && !isLane0Complete(cs[1], opType));
+    if(pending.length === 0) return null;
+    // Closest reached intersection to the current station is the one blocking progress
+    pending.sort((a,b) => Math.abs(a[0]-stationLF) - Math.abs(b[0]-stationLF));
+    return pending[0];
+  }
+
   function getAvailableLanes(stationLF, opType, machine, nightRange, direction){
     const options = [];
     // Lane 0: only intersections the mainline crew has actually reached or passed (station <= current
@@ -1350,13 +1372,20 @@ const DRAIN_STRUCTURES = [{"id":"DS1-1","desc":"SW CORNER OF SUNRISE HWY AND THE
         if(!isLane0Complete(cs[1], opType)) options.push({ value:'0:'+cs[1], label:'Lane 0 \u2014 '+cs[1], intersection:cs[1] });
       });
     }
-    // Lanes 1-4: mainline, based on confirmed lane-count zone at the CURRENT station
+    // Lanes 1-4: mainline, based on confirmed lane-count zone at the CURRENT station.
+    // Lane 1 (Right) is blocked while an already-reached intersection remains unaddressed --
+    // every cross street sits on the right, and the paver/mill has no way to skip it and return.
+    const pendingIntersection = getPendingIntersection(stationLF, opType, machine, nightRange, direction);
     const zone = getLaneZoneAt(stationLF);
     if(zone){
       const laneCount = zone[2].indexOf('4') === 0 ? 4 : (zone[2].indexOf('3') === 0 ? 3 : 0);
       const labels4 = ['R','MR','ML','L'], labels3 = ['R','M','L'];
       const labels = laneCount===4 ? labels4 : (laneCount===3 ? labels3 : []);
-      labels.forEach((lab,i) => options.push({ value:String(i+1), label:`Lane ${i+1} (${lab})`, width:12 }));
+      labels.forEach((lab,i) => {
+        const laneN = i+1;
+        if(laneN === 1 && pendingIntersection) return; // blocked -- must handle Lane 0 first
+        options.push({ value:String(laneN), label:`Lane ${laneN} (${lab})`, width:12 });
+      });
     }
     // Lanes 5/6: turn lanes active at the CURRENT station. Any lane wider than the machine's
     // 12ft cutting width auto-splits into labeled sub-passes (5a, 5b, ...) at the same Start/End.
@@ -1561,7 +1590,16 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
       sel.innerHTML = '<option value="">— Set Starting Station first —</option>';
       $('lg_lane0_block').style.display='none';
       $('lg_lane16_block').style.display='none';
+      $('lg_pending_banner').style.display='none';
       return;
+    }
+    const pending = getPendingIntersection(s, 'fill', null, night, 'fwd');
+    const banner = $('lg_pending_banner');
+    if(pending){
+      banner.style.display='block';
+      banner.innerHTML = `<div class="qc-flag"><span>&#9888;</span><div><strong>Reached ${pending[1]}.</strong> The paver can't skip a cross street and come back \u2014 Lane 1 (Right) is locked until this intersection is logged under Lane 0, even if a truck still has material left.</div></div>`;
+    } else {
+      banner.style.display='none';
     }
     const opts = getAvailableLanes(s, 'fill', null, night, 'fwd');
     if(opts.length===0){
@@ -1771,15 +1809,25 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
     const A = parseStation($('mi_stA').value);
     const machine = $('mi_machine').value;
     const night = getNightlyOp('mill');
+    const dir = $('mi_direction').value;
     const sel = $('mi_lane');
     const prevVal = sel.value;
     if(A === null){
       sel.innerHTML = '<option value="">— Set Station A first —</option>';
       $('mi_lane0_block').style.display='none';
       $('mi_lane16_block').style.display='none';
+      $('mi_pending_banner').style.display='none';
       return;
     }
-    const opts = getAvailableLanes(A, 'mill', machine, night, $('mi_direction').value);
+    const pending = getPendingIntersection(A, 'mill', machine, night, dir);
+    const banner = $('mi_pending_banner');
+    if(pending){
+      banner.style.display='block';
+      banner.innerHTML = `<div class="qc-flag"><span>&#9888;</span><div><strong>Reached ${pending[1]}.</strong> The mill can't skip a cross street and come back \u2014 Lane 1 (Right) is locked until this intersection is logged under Lane 0, even if a truck still has material left.</div></div>`;
+    } else {
+      banner.style.display='none';
+    }
+    const opts = getAvailableLanes(A, 'mill', machine, night, dir);
     if(opts.length===0){
       sel.innerHTML = '<option value="">— No lanes confirmed at this station —</option>';
     } else {
