@@ -1752,15 +1752,44 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
     const entries = loadFillLog();
 
     if(isLane0){
-      const intersection = laneVal.slice(2);
-      const tons = parseFloat($('lg_l0_tons').value);
-      if(!isFinite(tons) || tons<=0){ alert('Enter this truck\'s tons.'); return; }
-      entries.push({
-        id: genId(), locked:false, date, inspector, ticket, truckNum, carrier,
-        lane:'0', intersection, lane0Tons: tons,
-        temp: isFinite(temp)?temp:'', tempFlag,
-        measDepth: isFinite(measDepth)?measDepth:'', depthFlag
-      });
+      let remainingTons = parseFloat($('lg_l0_tons').value);
+      if(!isFinite(remainingTons) || remainingTons<=0){ alert('Enter this truck\'s tons.'); return; }
+      let currentLaneVal = laneVal;
+      const night = getNightlyOp('fill');
+      let iterations = 0, firstEntry = true;
+
+      while(remainingTons > 0.005 && iterations < 20){
+        iterations++;
+        if(!currentLaneVal.startsWith('0:')){
+          alert(`${fmt(remainingTons,1)} tons left on this truck after finishing the last intersection \u2014 switch to Lane ${currentLaneVal} manually to log the remainder on the mainline.`);
+          break;
+        }
+        const intersection = currentLaneVal.slice(2);
+        const target = getLane0TargetTons(intersection, 'fill');
+        const alreadyLogged = getLane0LoggedTons(intersection, 'fill');
+        const remainingNeed = Math.max(0, target - alreadyLogged);
+        const tonsUsed = Math.min(remainingTons, remainingNeed);
+        if(tonsUsed > 0.005){
+          entries.push({
+            id: genId(), locked:false, date, inspector, ticket: firstEntry?ticket:'', truckNum, carrier,
+            lane:'0', intersection, lane0Tons: tonsUsed,
+            temp: isFinite(temp)?temp:'', tempFlag,
+            measDepth: isFinite(measDepth)?measDepth:'', depthFlag
+          });
+          firstEntry = false;
+        }
+        remainingTons -= tonsUsed;
+        const nowComplete = tonsUsed >= remainingNeed - 0.005;
+        if(nowComplete) showToast(`\u2713 ${intersection} reached its target`);
+        if(remainingTons > 0.005){
+          if(!nowComplete) break; // this intersection isn't actually full yet, don't skip ahead
+          const opts = getAvailableLanes(parseStation($('lg_start').value), 'fill', null, night, 'fwd');
+          const optVals = opts.map(o=>o.value);
+          const curIdx = optVals.indexOf(currentLaneVal);
+          if(curIdx >= 0 && curIdx < optVals.length-1){ currentLaneVal = optVals[curIdx+1]; }
+          else break; // nothing left to carry into
+        }
+      }
       saveFillLog(entries);
       rememberInspector('lg');
       renderFillLog(); renderRoster();
