@@ -145,6 +145,18 @@
     background:rgba(95,174,74,0.1); border:1px solid #3d7530; border-radius:6px;
     padding:10px 12px; margin-top:10px; font-size:12px; color:var(--ok-green); display:flex; gap:8px; align-items:center;
   }
+  #toastContainer{
+    position:fixed; top:16px; left:0; right:0; z-index:9999; display:flex; flex-direction:column;
+    align-items:center; gap:8px; pointer-events:none;
+  }
+  .toast{
+    background:var(--asphalt-3); border:1.5px solid var(--safety-orange); border-radius:8px;
+    padding:12px 18px; font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--line-paint);
+    box-shadow:0 4px 16px rgba(0,0,0,0.4); max-width:90vw; text-align:center;
+    opacity:0; transform:translateY(-10px); transition:opacity 0.25s, transform 0.25s;
+  }
+  .toast.show{ opacity:1; transform:translateY(0); }
+  .toast.complete{ border-color:var(--ok-green); color:var(--ok-green); font-weight:600; }
   .checklist label{
     display:flex; align-items:center; gap:8px; padding:9px 4px; border-bottom:0.5px solid var(--concrete); font-size:13px;
   }
@@ -231,6 +243,7 @@
 </head>
 <body>
 <div class="wrap">
+<div id="toastContainer"></div>
 
   <header>
     <h1>ShahzU<span>//</span>D265724</h1>
@@ -262,13 +275,11 @@
 
   <div class="sections" id="sections">
     <button class="section-btn active" data-section="home">Home</button>
-    <button class="section-btn" data-section="fill">Fill (Asphalt)</button>
     <button class="section-btn" data-section="mill">Milling</button>
-    <button class="section-btn" data-section="joint">Joint Adhesive QA</button>
-    <button class="section-btn" data-section="tac">TAC Coat</button>
+    <button class="section-btn" data-section="fill">Filling</button>
+    <button class="section-btn" data-section="drain">Drainage Cleaning</button>
     <button class="section-btn" data-section="roster">Truck Roster</button>
     <button class="section-btn" data-section="dailyreport">Daily Report</button>
-    <button class="section-btn" data-section="drain">Drainage Cleaning</button>
     <button class="section-btn" data-section="datamgmt">Data Management</button>
   </div>
 
@@ -309,32 +320,7 @@
       </div>
 
       <div style="font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em; font-family:'Oswald',sans-serif; margin:20px 0 8px;">Overall Project Progress</div>
-      <div class="home-tiles">
-        <div class="home-tile"><div class="pct" id="home_pct_mill">0%</div><div class="lbl">Milling</div></div>
-        <div class="home-tile"><div class="pct" id="home_pct_fill">0%</div><div class="lbl">Filling</div></div>
-        <div class="home-tile"><div class="pct" id="home_pct_drain">0%</div><div class="lbl">Drainage</div></div>
-      </div>
-
-      <button class="home-bar-btn" data-op="mill">
-        <div class="home-bar-row"><span class="name">Milling</span><span class="qty" id="home_qty_mill">0 / 126,023 SY</span></div>
-        <div class="home-bar-track"><div class="home-bar-fill" id="home_bar_mill" style="width:0%;background:#378ADD;"></div></div>
-      </button>
-      <button class="home-bar-btn" data-op="fill">
-        <div class="home-bar-row"><span class="name">Filling</span><span class="qty" id="home_qty_fill">0 / 13,705 tons</span></div>
-        <div class="home-bar-track"><div class="home-bar-fill" id="home_bar_fill" style="width:0%;background:var(--ok-green);"></div></div>
-      </button>
-      <button class="home-bar-btn" data-op="joint">
-        <div class="home-bar-row"><span class="name">Joint Adhesive</span><span class="qty" id="home_qty_joint">0 LF logged &middot; target not yet set</span></div>
-        <div class="home-bar-track"><div class="home-bar-fill" id="home_bar_joint" style="width:0%;background:#b06de0;"></div></div>
-      </button>
-      <button class="home-bar-btn" data-op="tac">
-        <div class="home-bar-row"><span class="name">Tack Coat</span><span class="qty" id="home_qty_tac">0 gal logged &middot; target not yet set</span></div>
-        <div class="home-bar-track"><div class="home-bar-fill" id="home_bar_tac" style="width:0%;background:#e0a020;"></div></div>
-      </button>
-      <button class="home-bar-btn" data-op="drain">
-        <div class="home-bar-row"><span class="name">Drainage Cleaning</span><span class="qty" id="home_qty_drain">0 / 243 structures</span></div>
-        <div class="home-bar-track"><div class="home-bar-fill" id="home_bar_drain" style="width:0%;background:var(--caution-yellow);"></div></div>
-      </button>
+      <div id="home_bars_container"></div>
 
       <div id="home_status" style="font-size:11px; color:var(--muted); margin-top:10px;">Loading corridor totals&hellip;</div>
 
@@ -348,18 +334,181 @@
       </div>
     </div>
 
-    <div class="panel" id="home_detail" style="display:none;">
-      <button class="btn" id="home_back" style="margin-bottom:14px;">&larr; Back to overview</button>
-      <h2 id="home_detail_title">&nbsp;</h2>
-      <div class="desc" id="home_detail_subtitle"></div>
-      <div class="grid2" id="home_detail_stats"></div>
-      <div style="font-size:11px; color:var(--muted); margin:14px 0 8px;">Synced entries (most recent first)</div>
-      <div id="home_detail_list"></div>
+    <div class="panel" id="home_daylist" style="display:none;">
+      <button class="btn" id="home_daylist_back" style="margin-bottom:14px;">&larr; Back to overview</button>
+      <h2 id="home_daylist_title">&nbsp;</h2>
+      <div class="desc" id="home_daylist_subtitle"></div>
+      <div class="grid2" id="home_daylist_stats"></div>
+      <div style="font-size:11px; color:var(--muted); margin:14px 0 8px;">Tap a date to open that day's full Daily Report</div>
+      <div id="home_daylist_rows"></div>
     </div>
   </div>
 
-  <!-- ============ FILL SECTION ============ -->
+  <!-- ============ MILLING SECTION ============ -->
+  <div class="section-content" id="section-mill" style="display:none;">
+    <div class="stations" id="millMainTabs">
+      <button class="stop active" data-maintab="mill">Mill</button>
+      <button class="stop" data-maintab="sawcut">Saw Cut</button>
+      <button class="stop" data-maintab="asphaltpatch">Asphalt Patch</button>
+      <button class="stop" data-maintab="utilityadjust">Utility Adjustment</button>
+    </div>
+
+    <div class="mill-maintab-panel" id="millmain-mill">
+    <div class="panel">
+      <h2>Milling Log</h2>
+      <div class="desc">Enter tonight's Start and End Station. The app breaks the total down using confirmed corridor data — straight lanes, turn lanes (left and right), and any cross streets in range — then each piece can be saved to the report separately.</div>
+      <div class="grid2">
+        <div class="field"><label>Inspector</label>
+          <select id="mi_inspector"></select>
+        </div>
+        <div class="field" id="mi_inspector_other_wrap" style="display:none;"><label>Inspector Name</label><input type="text" id="mi_inspector_other" placeholder="Type name"></div>
+        <div class="field"><label>Start Station</label><input type="text" id="mi_stA" placeholder="24+30"></div>
+        <div class="field"><label>End Station</label><input type="text" id="mi_stB" placeholder="86+00"></div>
+      </div>
+      <button class="btn primary" id="mi_calc" style="width:100%;">Calculate</button>
+
+      <div id="mi_breakdown"></div>
+
+      <div class="grid2" style="margin-top:14px;">
+        <div class="field"><label>Field Measured Depth (in)</label><input type="number" id="mi_measDepth" placeholder="2.0" step="0.05" inputmode="decimal"></div>
+        <div class="field"><label>Date</label><input type="date" id="mi_date"></div>
+      </div>
+      <div id="mi_qc_flags"></div>
+      <div class="log-toolbar" style="margin-top:14px;">
+        <button class="btn primary" id="mi_add">+ Add to Report</button>
+      </div>
+      <div class="log-count" id="mi_count">0 entries logged</div>
+      <div class="log-toolbar">
+        <button class="btn" id="mi_export">Export CSV</button>
+        <button class="btn primary" id="mi_sync">&#9729; Sync to Cloud</button>
+        <button class="btn danger" id="mi_clear">Clear Report</button>
+      </div>
+      <div class="log-table-wrap">
+        <table class="log" id="mi_table">
+          <thead><tr>
+            <th>Date</th><th>Inspector</th><th>Category</th><th>Detail</th><th>SY</th><th>Meas. Depth</th><th>QC</th><th></th>
+          </tr></thead>
+          <tbody id="mi_tbody"></tbody>
+        </table>
+        <div class="log-empty" id="mi_empty">No entries yet — calculate and add above.</div>
+      </div>
+    </div>
+    </div>
+
+    <div class="mill-maintab-panel" id="millmain-sawcut" style="display:none;">
+      <div class="panel">
+        <h2>Saw Cut</h2>
+        <div class="desc">Right behind the mill, saw cut squares off intersections/cross streets to 90&deg; so they're easy to pave. Tracked and paid by linear foot.</div>
+        <div class="grid2">
+          <div class="field"><label>Inspector</label>
+            <select id="sc_inspector"></select>
+          </div>
+          <div class="field" id="sc_inspector_other_wrap" style="display:none;"><label>Inspector Name</label><input type="text" id="sc_inspector_other" placeholder="Type name"></div>
+          <div class="field"><label>Location</label>
+            <select id="sc_location"><option value="">— Select cross street —</option><option value="__other__">Other (type in)</option></select>
+          </div>
+          <div class="field" id="sc_location_other_wrap" style="display:none;"><label>Location (type in)</label><input type="text" id="sc_location_other" placeholder="e.g. Driveway near 45+00"></div>
+          <div class="field"><label>LF of Saw Cut</label><input type="number" id="sc_lf" placeholder="85" inputmode="decimal"></div>
+          <div class="field"><label>Date</label><input type="date" id="sc_date"></div>
+        </div>
+        <div class="log-toolbar" style="margin-top:14px;">
+          <button class="btn primary" id="sc_add">+ Add to Report</button>
+        </div>
+        <div class="log-count" id="sc_count">0 entries logged</div>
+        <div class="log-toolbar">
+          <button class="btn" id="sc_export">Export CSV</button>
+          <button class="btn primary" id="sc_sync">&#9729; Sync to Cloud</button>
+          <button class="btn danger" id="sc_clear">Clear Report</button>
+        </div>
+        <div class="log-table-wrap">
+          <table class="log" id="sc_table">
+            <thead><tr><th>Date</th><th>Inspector</th><th>Location</th><th>LF</th><th></th></tr></thead>
+            <tbody id="sc_tbody"></tbody>
+          </table>
+          <div class="log-empty" id="sc_empty">No entries yet — add a saw cut above.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mill-maintab-panel" id="millmain-asphaltpatch" style="display:none;">
+      <div class="panel">
+        <h2>Asphalt Patch</h2>
+        <div class="desc">Patching manholes, drainage structures, and water structures on the temporary unpaved road to prevent vehicle damage. Tracked and paid by tons delivered per ticket.</div>
+        <div class="grid2">
+          <div class="field"><label>Inspector</label>
+            <select id="ap_inspector"></select>
+          </div>
+          <div class="field" id="ap_inspector_other_wrap" style="display:none;"><label>Inspector Name</label><input type="text" id="ap_inspector_other" placeholder="Type name"></div>
+          <div class="field"><label>Ticket #</label><input type="text" id="ap_ticket" placeholder="4471"></div>
+          <div class="field"><label>Truck</label>
+            <select id="ap_truck"><option value="">— Select truck —</option></select>
+          </div>
+          <div class="field"><label>Carrier</label><input type="text" id="ap_carrier" placeholder="Auto-fills from truck" readonly></div>
+          <div class="field full"><label>Structure / Location</label><input type="text" id="ap_structure" placeholder="e.g. MH-12, or nearest station"></div>
+          <div class="field"><label>Tons</label><input type="number" id="ap_tons" placeholder="2.5" inputmode="decimal"></div>
+          <div class="field"><label>Date</label><input type="date" id="ap_date"></div>
+        </div>
+        <div class="log-toolbar" style="margin-top:14px;">
+          <button class="btn primary" id="ap_add">+ Add to Report</button>
+        </div>
+        <div class="log-count" id="ap_count">0 entries logged</div>
+        <div class="log-toolbar">
+          <button class="btn" id="ap_export">Export CSV</button>
+          <button class="btn primary" id="ap_sync">&#9729; Sync to Cloud</button>
+          <button class="btn danger" id="ap_clear">Clear Report</button>
+        </div>
+        <div class="log-table-wrap">
+          <table class="log" id="ap_table">
+            <thead><tr><th>Date</th><th>Inspector</th><th>Ticket</th><th>Truck</th><th>Carrier</th><th>Structure</th><th>Tons</th><th></th></tr></thead>
+            <tbody id="ap_tbody"></tbody>
+          </table>
+          <div class="log-empty" id="ap_empty">No entries yet — add a patch above.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mill-maintab-panel" id="millmain-utilityadjust" style="display:none;">
+      <div class="panel">
+        <h2>Utility Adjustment</h2>
+        <div class="desc">Offsetting utility holes, water holes, or other structures that the contractor adjusts while milling. Tracked and paid by count of structures adjusted.</div>
+        <div class="grid2">
+          <div class="field"><label>Inspector</label>
+            <select id="ua_inspector"></select>
+          </div>
+          <div class="field" id="ua_inspector_other_wrap" style="display:none;"><label>Inspector Name</label><input type="text" id="ua_inspector_other" placeholder="Type name"></div>
+          <div class="field full"><label>Structure / Location</label><input type="text" id="ua_structure" placeholder="e.g. Water valve near 45+00"></div>
+          <div class="field"><label>Count</label><input type="number" id="ua_count" value="1" inputmode="numeric"></div>
+          <div class="field"><label>Date</label><input type="date" id="ua_date"></div>
+        </div>
+        <div class="log-toolbar" style="margin-top:14px;">
+          <button class="btn primary" id="ua_add">+ Add to Report</button>
+        </div>
+        <div class="log-count" id="ua_count_display">0 entries logged</div>
+        <div class="log-toolbar">
+          <button class="btn" id="ua_export">Export CSV</button>
+          <button class="btn primary" id="ua_sync">&#9729; Sync to Cloud</button>
+          <button class="btn danger" id="ua_clear">Clear Report</button>
+        </div>
+        <div class="log-table-wrap">
+          <table class="log" id="ua_table">
+            <thead><tr><th>Date</th><th>Inspector</th><th>Structure</th><th>Count</th><th></th></tr></thead>
+            <tbody id="ua_tbody"></tbody>
+          </table>
+          <div class="log-empty" id="ua_empty">No entries yet — add an adjustment above.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ FILLING SECTION ============ -->
   <div class="section-content" id="section-fill" style="display:none;">
+    <div class="stations" id="fillMainTabs">
+      <button class="stop active" data-maintab="asphalt">Asphalt</button>
+      <button class="stop" data-maintab="joint">Joint Adhesive</button>
+      <button class="stop" data-maintab="tac">TAC Coat</button>
+    </div>
+
+    <div class="fill-maintab-panel" id="fillmain-asphalt">
     <div class="stations" id="fillTabs">
       <button class="stop active" data-tab="log"><span class="num">01</span>Log &amp; QA</button>
       <button class="stop" data-tab="tonnage"><span class="num">02</span>Tonnage</button>
@@ -549,121 +698,9 @@
       <div class="xsec-label">Live pavement cross-section (mat width &times; depth, to scale)</div>
       <div class="xsec"><svg id="xsecSvg" viewBox="0 0 640 140" xmlns="http://www.w3.org/2000/svg"></svg></div>
     </div>
-  </div>
-
-  <!-- ============ MILLING SECTION ============ -->
-  <div class="section-content" id="section-mill" style="display:none;">
-    <div class="panel">
-      <h2>Tonight's Milling Operation</h2>
-      <div class="desc">Set tonight's Start and End Point once. The app looks up the actual confirmed width along that stretch (accounting for any width changes) and tells you the real SY target and how many 12ft passes are needed to hit it.</div>
-      <div class="grid2">
-        <div class="field"><label>Start Point</label><input type="text" id="mi_night_start" placeholder="155+00"></div>
-        <div class="field"><label>End Point</label><input type="text" id="mi_night_end" placeholder="209+75"></div>
-      </div>
-      <button class="btn primary" id="mi_night_calc" style="width:100%;">Calculate Tonight's Target</button>
-      <div id="mi_night_result"></div>
-      <div id="mi_night_progress" style="display:none; margin-top:14px;">
-        <div class="home-bar-row"><span class="name">Tonight's progress</span><span class="qty" id="mi_night_progressQty"></span></div>
-        <div class="home-bar-track"><div class="home-bar-fill" id="mi_night_progressBar" style="width:0%;background:#378ADD;"></div></div>
-      </div>
     </div>
 
-    <div class="panel">
-      <h2>Milling Area (quick calculator)</h2>
-      <div class="desc">SY = (LF &times; W) &divide; 9. Station order doesn't matter — absolute distance is used. This is a standalone quick calculator, separate from the Log Milling Pass form below.</div>
-      <div class="grid2">
-        <div class="field"><label>Station A</label><input type="text" id="mi_calc_stA" placeholder="300+00"></div>
-        <div class="field"><label>Station B</label><input type="text" id="mi_calc_stB" placeholder="164+00"></div>
-        <div class="field"><label>Width (ft)</label><input type="number" id="mi_calc_W" value="12" inputmode="decimal"></div>
-        <div class="field"><label>Spec Milling Depth (in)</label><input type="number" id="mi_calc_D" value="2" step="0.25" inputmode="decimal"></div>
-      </div>
-      <div class="result">
-        <div class="label">Square yards</div>
-        <div class="value" id="mi_calc_out">&mdash;</div>
-        <div class="station" id="mi_calc_lf"></div>
-      </div>
-    </div>
-
-    <div class="panel">
-      <h2>Log Milling Pass &rarr; QA &amp; Report</h2>
-      <div class="desc">Field-verify milled depth against your target &plusmn; tolerance. Lane options update automatically based on Station A and tonight's range. Set tonight's Start/End above first.</div>
-      <div class="grid2">
-        <div class="field"><label>Inspector</label>
-          <select id="mi_inspector"></select>
-        </div>
-        <div class="field" id="mi_inspector_other_wrap" style="display:none;"><label>Inspector Name</label><input type="text" id="mi_inspector_other" placeholder="Type name"></div>
-        <div class="field"><label>Machine</label>
-          <select id="mi_machine">
-            <option value="Mill 1">Mill 1 (mainline only)</option>
-            <option value="Mill 2">Mill 2 (+ side streets)</option>
-          </select>
-        </div>
-        <div class="field"><label>Direction</label>
-          <select id="mi_direction">
-            <option value="fwd">Forward (Start &rarr; End)</option>
-            <option value="rev">Reverse (End &rarr; Start, 2nd pass)</option>
-          </select>
-        </div>
-        <div class="field full"><label>Station A (current position)</label><input type="text" id="mi_stA" placeholder="Set from Tonight's Target above"></div>
-        <div id="mi_pending_banner" style="display:none; grid-column:1/-1; margin-bottom:10px;"></div>
-        <div class="field full"><label>Lane</label>
-          <select id="mi_lane"><option value="">— Set Station A first —</option></select>
-        </div>
-      </div>
-
-      <div id="mi_lane0_block" style="display:none;">
-        <div class="spec-box">
-          <div class="locked-row"><span class="k">Target</span><span class="v" id="mi_l0_target">&mdash;</span></div>
-          <div class="locked-row"><span class="k">Logged so far</span><span class="v" id="mi_l0_logged">&mdash;</span></div>
-          <div class="locked-row"><span class="k">Remaining</span><span class="v" id="mi_l0_remaining">&mdash;</span></div>
-        </div>
-        <div class="field"><label>This truck's tons</label><input type="number" id="mi_l0_tons" value="28" inputmode="decimal"></div>
-      </div>
-
-      <div id="mi_lane16_block" style="display:none;">
-        <div class="grid2">
-          <div class="field"><label>Truck Tons (low boy, ~26-30)</label><input type="number" id="mi_truckTons" value="28" inputmode="decimal"></div>
-          <div class="field"><label>Spec Depth (in)</label><input type="number" id="mi_D" value="2" step="0.25" inputmode="decimal"></div>
-        </div>
-        <div class="result">
-          <div class="label">This truck covers</div>
-          <div class="value" id="mi_pass_out">&mdash;</div>
-          <div class="station" id="mi_pass_station"></div>
-        </div>
-      </div>
-
-      <div class="grid2" style="margin-top:12px;">
-        <div class="field"><label>Truck</label>
-          <select id="mi_truck"><option value="">— Select truck —</option></select>
-        </div>
-        <div class="field"><label>Carrier</label><input type="text" id="mi_carrier" placeholder="Auto-fills from truck" readonly></div>
-        <div class="field"><label>Field Measured Depth (in)</label><input type="number" id="mi_measDepth" placeholder="2.0" step="0.05" inputmode="decimal"></div>
-        <div class="field"><label>Date</label><input type="date" id="mi_date"></div>
-      </div>
-      <div id="mi_qc_flags"></div>
-      <div class="log-toolbar" style="margin-top:14px;">
-        <button class="btn primary" id="mi_add">+ Add to Report</button>
-      </div>
-      <div class="log-count" id="mi_count">0 entries logged</div>
-      <div class="log-toolbar">
-        <button class="btn" id="mi_export">Export CSV</button>
-        <button class="btn primary" id="mi_sync">&#9729; Sync to Cloud</button>
-        <button class="btn danger" id="mi_clear">Clear Report</button>
-      </div>
-      <div class="log-table-wrap">
-        <table class="log" id="mi_table">
-          <thead><tr>
-            <th>Date</th><th>Inspector</th><th>Machine</th><th>Lane</th><th>Dir</th><th>Truck</th><th>Carrier</th><th>Detail</th><th>Qty</th><th>Meas. Depth</th><th>QC</th><th></th>
-          </tr></thead>
-          <tbody id="mi_tbody"></tbody>
-        </table>
-        <div class="log-empty" id="mi_empty">No entries yet — add a pass above.</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ============ JOINT ADHESIVE QA SECTION ============ -->
-  <div class="section-content" id="section-joint" style="display:none;">
+    <div class="fill-maintab-panel" id="fillmain-joint" style="display:none;">
     <div class="panel">
       <h2>Joint Adhesive QA/QC</h2>
       <div class="desc">Section 418 &middot; Item 418.7603 &middot; measured by linear foot of joint furnished and installed.</div>
@@ -761,10 +798,9 @@
         <div class="log-empty" id="ja_empty">No entries yet — add a joint segment above.</div>
       </div>
     </div>
-  </div>
+    </div>
 
-  <!-- ============ TAC COAT SECTION ============ -->
-  <div class="section-content" id="section-tac" style="display:none;">
+    <div class="fill-maintab-panel" id="fillmain-tac" style="display:none;">
     <div class="panel">
       <h2>Diluted Tack Coat Payment</h2>
       <div class="desc">Section 407-4. Only <strong>delivered gallons</strong> and <strong>gauge temperature</strong> are entered — every other figure is calculated automatically.</div>
@@ -822,7 +858,9 @@
         <div class="log-empty" id="tac_empty">No tickets logged yet.</div>
       </div>
     </div>
+    </div>
   </div>
+
 
   <!-- ============ TRUCK ROSTER SECTION ============ -->
   <div class="section-content" id="section-roster" style="display:none;">
@@ -1055,6 +1093,21 @@
     return (crypto.randomUUID ? crypto.randomUUID() : (Date.now()+'_'+Math.random().toString(36).slice(2)));
   }
 
+  /** Brief, non-blocking notification. Auto-dismisses after durationMs (default ~2.2s). */
+  function showToast(message, opts){
+    opts = opts || {};
+    const el = document.createElement('div');
+    el.className = 'toast' + (opts.complete ? ' complete' : '');
+    el.textContent = message;
+    $('toastContainer').appendChild(el);
+    requestAnimationFrame(() => el.classList.add('show'));
+    const duration = opts.duration || 2200;
+    setTimeout(() => {
+      el.classList.remove('show');
+      setTimeout(() => el.remove(), 300);
+    }, duration);
+  }
+
   /* ================= ADMIN / CLOUD SYNC ================= */
   const ADMIN_NAME = 'ulfat shahzad';
   const ADMIN_KEY = 'millfill_isAdmin';
@@ -1179,6 +1232,24 @@
     document.querySelectorAll('.fill-tab-panel').forEach(p=>p.style.display='none');
     document.getElementById('panel-'+btn.dataset.tab).style.display='block';
     calcAll();
+  });
+
+  document.getElementById('fillMainTabs').addEventListener('click', (e) => {
+    const btn = e.target.closest('.stop');
+    if(!btn) return;
+    document.querySelectorAll('#fillMainTabs .stop').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.fill-maintab-panel').forEach(p=>p.style.display='none');
+    document.getElementById('fillmain-'+btn.dataset.maintab).style.display='block';
+  });
+
+  document.getElementById('millMainTabs').addEventListener('click', (e) => {
+    const btn = e.target.closest('.stop');
+    if(!btn) return;
+    document.querySelectorAll('#millMainTabs .stop').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.mill-maintab-panel').forEach(p=>p.style.display='none');
+    document.getElementById('millmain-'+btn.dataset.maintab).style.display='block';
   });
 
   /* ================= FILL CALCULATORS ================= */
@@ -1325,6 +1396,8 @@ const DRAIN_STRUCTURES = [{"id":"DS1-1","desc":"SW CORNER OF SUNRISE HWY AND THE
   const LANE_ZONES = [[2430, 9600, "4 lanes", "Confirmed", "Stated explicitly across Day 1 (24+30-96+00): 'same 4 lanes continuing', 'Hicks to S. Franklin are 4 lanes'"], [9600, 10350, "3 lanes", "Confirmed - genuine exception", "S. Franklin to Rockaway: 30ft / 3 lanes, 10ft each, no shoulder"], [10420, 17135, "4 lanes", "Confirmed", "Rockaway to 4th St: explicit 4 lanes. 4th St to before Peninsula: '3 lanes+shoulder constant' = 4 lanes by shoulder-as-lane rule"], [17135, 17875, "3 lanes", "Confirmed - genuine exception", "Narrow stretch after Peninsula (34ft, no room for 4 lanes) continuing through 'Left turn+3 lanes' to Broadway, no shoulder"], [17875, 23250, "4 lanes", "Confirmed", "Broadway to exit ramp start: '3 lanes+shoulder constant' = 4 lanes by shoulder-as-lane rule"], [23250, 25200, "3 lanes", "Confirmed - genuine exception", "Merrick Rd bridge crossing: shoulder splits off into the exit ramp at 232+50, leaving 3 lanes only through the bridge and past N Center Ave, until N Village Ave"], [25200, 36410, "4 lanes", "Confirmed", "N Village Ave to End of Limits: '3 lanes+shoulder' = 4 lanes by shoulder-as-lane rule"]];
   // Turn lane table: [startLF, lengthLF, width_ft, name, laneCountAtThisSpot]
   const TURN_LANES_TABLE = [[4800, 348, 12, "Target Entrance", 1], [5350, 418, 12, "S. Terrace", 1], [7250, 1070, 13, "Mill Rd Lane 5", 1], [7250, 1160, 13, "Mill Rd Lane 4", 1], [8600, 365, 17, "Hicks St", 1], [11900, 450, 12, "Satterie St", 1], [13150, 456, 88, "Horton Ave (avg incl. odd right lanes)", 1], [14700, 316, 52, "Bixley Heath", 1], [15800, 195, 9.5, "Reyam Rd", 1], [16750, 307, 5.25, "Peninsula Blvd (2 lanes)", 2], [17650, 315, 12, "Broadway", 1], [18400, 300, 12, "Atlantic Ave", 1], [19550, 120, 10, "Earle Ave", 1], [19850, 244, 10, "Vincent Ave", 1], [20200, 230, 12, "Denton Ave", 1], [21350, 258, 12, "Rocklyn Ave", 1], [22400, 379, 16.5, "Ocean Ave", 1], [24923, 229, 10, "N Center Ave", 1], [25200, 244, 10, "N Village Ave", 1], [26950, 293, 10, "Morris Ave", 1], [28050, 202, 9, "N Forest Ave", 1], [29450, 365, 8, "Long Beach Rd", 1], [29950, 75, 11, "Oceanside Rd", 1], [31000, 458, 14, "Yorktown", 1], [32100, 463, 14, "Charring Cross Rd", 1], [33300, 238, 13, "Croydon Dr", 1], [34315, 275, 19, "Chestnut St", 1], [35650, 485, 13, "Grand Ave", 1]];
+  // Right turn lanes: [startLF, lengthLF, width_ft, name, count]. Width = total width minus 4x12ft standard through-lanes.
+  const RIGHT_TURN_LANES_TABLE = [[2430, 160, 10, "Theatre Rd", 1]];
 
   function getLaneZoneAt(lf){
     let z = LANE_ZONES.find(z => lf >= z[0] && lf < z[1]);
@@ -1473,10 +1546,11 @@ const DRAIN_STRUCTURES = [{"id":"DS1-1","desc":"SW CORNER OF SUNRISE HWY AND THE
 const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-05"},{"structureId":"DS1-163","desc":"NE CORNER OF N LONG BEACH RD AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-05"},{"structureId":"DS1-166","desc":"175 FEET FROM DS1-165 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-05"},{"structureId":"DS1-167","desc":"250 FEET FROM DS1-166 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-05"},{"structureId":"DS1-168","desc":"415 FEET FROM DS1-167 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-05"},{"structureId":"DS1-169","desc":"102 FEET FROM DS1-168 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-05"},{"structureId":"DS1-170","desc":"240 FEET FROM DS1-169 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-05"},{"structureId":"DS1-171","desc":"222 FEET FROM DS1-170 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-05"},{"structureId":"DS1-172","desc":"NE CORNER OF N FOREST AVE AND SUNRISE HWY","dir":"WB","inspector":"Ajit Dharmashin","date":"2026-08-07"},{"structureId":"DS1-173","desc":"NW CORNER OF N FOREST AVE AND SUNRISE HWY","dir":"WB","inspector":"Ajit Dharmashin","date":"2026-08-07"},{"structureId":"DS1-174","desc":"500 FEET FROM DS1-173 ON SUNRISE HWY","dir":"WB","inspector":"Ajit Dharmashin","date":"2026-08-07"},{"structureId":"DS1-175","desc":"210 FEET FROM DS1-174 ON SUNRISE HWY","dir":"WB","inspector":"Ajit Dharmashin","date":"2026-08-07"},{"structureId":"DS1-176","desc":"150 FEET FROM DS1-175 ON SUNRISE HWY","dir":"WB","inspector":"Ajit Dharmashin","date":"2026-08-07"},{"structureId":"DS1-179","desc":"135 FEET FROM NW CORNER ON MORRIS AVE AND SUNRISE HWY","dir":"WB","inspector":"Ajit Dharmashin","date":"2026-08-07"},{"structureId":"DS1-180","desc":"352 FEET FROM DS1-179 ON SUNRISE HWY","dir":"WB","inspector":"Ajit Dharmashin","date":"2026-08-07"},{"structureId":"DS1-181","desc":"150 FEET FROM NW CORNER OF N PARK AVE AND SUNRISE HWY","dir":"WB","inspector":"Ajit Dharmashin","date":"2026-08-07"},{"structureId":"DS1-182","desc":"170 FEET FROM DS1-181 ON SUNRISE HWY","dir":"WB","inspector":"Ajit Dharmashin","date":"2026-08-07"},{"structureId":"DS1-183","desc":"NE CORNER OF N VILLAGE AVE AND SUNRISE HWY","dir":"WB","inspector":"Ajit Dharmashin","date":"2026-08-07"},{"structureId":"DS1-184","desc":"200 FEET FROM NW CORNER OF N VILLAGE AVE AND SUNRISE HWY","dir":"WB","inspector":"Ajit Dharmashin","date":"2026-08-07"},{"structureId":"DS1-185","desc":"NE CORNER OF N CENTRE AVE AND SUNRISE HWY","dir":"WB","inspector":"Ajit Dharmashin","date":"2026-08-07"},{"structureId":"DS1-215A","desc":"ADD-ON STRUCTURE (not in original plan set) - located between DS1-215 and DS1-216 on Sunrise Hwy","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-14"},{"structureId":"DS1-216","desc":"NE CORNER OF BROADWAY AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-14"},{"structureId":"DS1-217","desc":"NW CORNER OF BROADWAY AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-14"},{"structureId":"DS1-218","desc":"170 FEET FROM DS1-217 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-14"},{"structureId":"DS1-219","desc":"80 FEET FROM DS1-218 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-14"},{"structureId":"DS1-220","desc":"300 FEET FROM DS1-219 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-14"},{"structureId":"DS1-221","desc":"2 FEET FROM DS1-220 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-14"},{"structureId":"DS1-222","desc":"50 FEET FROM NE CORNER OF HORTON AVE AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-14"},{"structureId":"DS1-223","desc":"25 FEET FROM NE CORNER OF HORTON AVE AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-14"},{"structureId":"DS1-224","desc":"60 FEET FROM NW CORNER OF HORTON AVE AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-17"},{"structureId":"DS1-225","desc":"60 FEET FROM DS1-224 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-17"},{"structureId":"DS1-226","desc":"150 FEET FROM DS1-225 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-17"},{"structureId":"DS1-227","desc":"300 FEET FROM DS1-226 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-17"},{"structureId":"DS1-228","desc":"300 FEET FROM DS1-227 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-17"},{"structureId":"DS1-229","desc":"NE CORNER OF SATTERIE AVE AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-17"},{"structureId":"DS1-230","desc":"NW CORNER OF SATTERIE AVE AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-18"},{"structureId":"DS1-231","desc":"2 FEET IN FRONT OF DS1-230 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-18"},{"structureId":"DS1-232","desc":"110 FEET FROM DS1-231 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-18"},{"structureId":"DS1-233","desc":"915 FEET FROM DS1-232 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-18"},{"structureId":"DS1-234","desc":"NE CORNER OF 4TH STREET AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-18"},{"structureId":"DS1-235","desc":"NW CORNER OF 4TH STREET AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-19"},{"structureId":"DS1-236","desc":"NE CORNER OF ROCKAWAY AVE AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-19"},{"structureId":"DS1-237","desc":"NW CORNER OF ROCKAWAY AVE AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-19"},{"structureId":"DS1-238","desc":"190 FEET FROM DS1-237 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-19"},{"structureId":"DS1-239","desc":"140 FEET FROM DS1-238 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-19"},{"structureId":"DS1-240","desc":"150 FEET FROM DS1-239 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-19"},{"structureId":"DS1-241","desc":"NW CORNER OF S FRANKLIN AVE AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-19"},{"structureId":"DS1-242","desc":"1670 FEET FROM THE NW RAMP OF S TERRACE PLACE AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-19"}];
 
   /* ================= HOME DASHBOARD TARGETS ================= */
-  const HOME_TARGETS = { mill: 126023.1, fill: 13705.0, drain: DRAIN_STRUCTURES.length, joint: null, tac: null };
-  const HOME_COLORS = { mill:'#378ADD', fill:'#5fae4a', drain:'#ffc72c', joint:'#b06de0', tac:'#e0a020' };
-  const HOME_LABELS = { mill:'Milling', fill:'Filling', drain:'Drainage Cleaning', joint:'Joint Adhesive', tac:'Tack Coat' };
-  const HOME_UNITS = { mill:'SY', fill:'tons', drain:'structures', joint:'LF', tac:'gal' };
+  const HOME_OPS = ['mill','sawcut','asphaltpatch','utiladj','fill','joint','tac','drain'];
+  const HOME_TARGETS = { mill: 121515.7, sawcut: null, asphaltpatch: null, utiladj: null, fill: 13705.0, joint: null, tac: null, drain: DRAIN_STRUCTURES.length };
+  const HOME_COLORS = { mill:'#378ADD', sawcut:'#e0705a', asphaltpatch:'#8a6dd0', utiladj:'#5ac8c8', fill:'#5fae4a', joint:'#b06de0', tac:'#e0a020', drain:'#ffc72c' };
+  const HOME_LABELS = { mill:'Milling', sawcut:'Saw Cut', asphaltpatch:'Asphalt Patch', utiladj:'Utility Adjustment', fill:'Filling', joint:'Joint Adhesive', tac:'Tack Coat', drain:'Drainage Cleaning' };
+  const HOME_UNITS = { mill:'SY', sawcut:'LF', asphaltpatch:'tons', utiladj:'each', fill:'tons', joint:'LF', tac:'gal', drain:'structures' };
 
 
   const LAST_INSPECTOR_KEY = 'millfill_lastInspector';
@@ -1563,7 +1637,7 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
   function populateTruckDropdowns(){
     const list = loadRoster();
     const opts = '<option value="">— Select truck —</option>' + list.map((t,i)=>`<option value="${i}">${t.num} — ${t.carrier}</option>`).join('');
-    ['lg_truck','mi_truck'].forEach(id=>{
+    ['lg_truck','ap_truck'].forEach(id=>{
       const sel = $(id); const cur = sel.value;
       sel.innerHTML = opts;
       if(cur) sel.value = cur;
@@ -1628,6 +1702,14 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
     }
   }
 
+  /** Looks up a specific lane's width at a given station, without depending on the currently-selected dropdown value. */
+  function getLaneWidthByValue(stationLF, opType, machine, night, direction, laneVal){
+    if(!laneVal || laneVal.startsWith('0:')) return null;
+    const opts = getAvailableLanes(stationLF, opType, machine, night, direction);
+    const match = opts.find(o=>o.value===laneVal);
+    return match ? match.width : null;
+  }
+
   function currentFillLaneWidth(){
     const val = $('lg_lane').value;
     if(!val || val.startsWith('0:')) return null;
@@ -1689,45 +1771,76 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
     }
 
     const rho = density();
-    const width = currentFillLaneWidth();
     const depth = parseFloat($('lg_D').value) || 2;
-    const tons = parseFloat($('lg_tons').value);
-    const s = parseStation($('lg_start').value);
+    let remainingTons = parseFloat($('lg_tons').value);
+    let currentPos = parseStation($('lg_start').value);
+    let currentLaneVal = laneVal;
     const endOverride = $('lg_endOverride').value.trim();
-    if(s===null || !isFinite(tons) || !width){ alert('Fill in Starting Station and truck tons.'); return; }
-    const lf = (tons*24000)/(width*depth*rho);
-    const e = s + lf;
-    const endStationLabel = endOverride ? endOverride : toStation(e);
+    if(currentPos===null || !isFinite(remainingTons) || remainingTons<=0){ alert('Fill in Starting Station and truck tons.'); return; }
+    const night = getNightlyOp('fill');
 
-    entries.push({
-      id: genId(), locked:false, date, inspector, ticket, truckNum, carrier,
-      lane: laneVal, startStation: toStation(s), endStation: endStationLabel,
-      lf: lf.toFixed(0), tons: tons.toFixed(2), width, depth, density:rho,
-      temp: isFinite(temp)?temp:'', tempFlag,
-      measDepth: isFinite(measDepth)?measDepth:'', depthFlag
-    });
+    let iterations = 0, firstEntry = true;
+    while(remainingTons > 0.005 && iterations < 20){
+      iterations++;
+      const width = getLaneWidthByValue(currentPos, 'fill', null, night, 'fwd', currentLaneVal);
+      if(!width) break; // no valid lane at this station -- stop, leave remainder for manual handling
+      const maxLF = (remainingTons*24000)/(width*depth*rho);
+      let cappedLF = maxLF, tonsUsed = remainingTons, hitEnd = false;
+      if(night){
+        const distToEnd = night.endLF - currentPos;
+        if(maxLF >= distToEnd - 0.5){
+          cappedLF = Math.max(0, distToEnd);
+          tonsUsed = (cappedLF*width*depth*rho)/24000;
+          hitEnd = true;
+        }
+      }
+      const endPos = currentPos + cappedLF;
+      const endLabel = (firstEntry && endOverride) ? endOverride : toStation(endPos);
+
+      entries.push({
+        id: genId(), locked:false, date, inspector, ticket: firstEntry?ticket:'', truckNum, carrier,
+        lane: currentLaneVal, startStation: toStation(currentPos), endStation: endLabel,
+        lf: cappedLF.toFixed(0), tons: tonsUsed.toFixed(2), width, depth, density:rho,
+        temp: isFinite(temp)?temp:'', tempFlag,
+        measDepth: isFinite(measDepth)?measDepth:'', depthFlag
+      });
+      firstEntry = false;
+      remainingTons -= tonsUsed;
+
+      if(hitEnd){
+        const laneLabel = currentLaneVal.startsWith('0:') ? currentLaneVal.slice(2) : ('Lane '+currentLaneVal);
+        showToast(`\u2713 ${laneLabel} reached its end point`);
+      }
+
+      if(hitEnd && remainingTons > 0.005){
+        const nextPos = night.startLF;
+        const opts = getAvailableLanes(nextPos, 'fill', null, night, 'fwd');
+        const optVals = opts.map(o=>o.value);
+        const curIdx = optVals.indexOf(currentLaneVal);
+        if(curIdx >= 0 && curIdx < optVals.length-1){
+          currentLaneVal = optVals[curIdx+1];
+          currentPos = nextPos;
+        } else {
+          break; // no next lane available -- stop, remaining tons left unlogged for this truck
+        }
+      } else {
+        currentPos = endPos;
+        break;
+      }
+    }
     saveFillLog(entries);
     rememberInspector('lg');
     renderFillLog(); renderRoster();
 
-    // Shuttle logic: if tonight's End Point is set and this load reached/passed it, return to Start for the next lane
-    const night = getNightlyOp('fill');
-    const wrapped = night && e >= night.endLF - 0.5;
-    if(wrapped){
-      $('lg_start').value = toStation(night.startLF);
-    } else {
-      $('lg_start').value = toStation(e);
-    }
+    // Reflect the loop's final position/lane in the form for the next truck.
+    // If that lane got blocked (e.g. a pending intersection was just passed), leave the
+    // dropdown at whatever refresh naturally resolves to, rather than forcing an invalid value.
+    $('lg_start').value = toStation(currentPos);
     $('lg_ticket').value=''; $('lg_endOverride').value='';
     refreshFillLaneOptions();
-    if(wrapped){
-      const optVals = Array.from($('lg_lane').options).map(o=>o.value);
-      const curIdx = optVals.indexOf(laneVal);
-      if(curIdx >= 0 && curIdx < optVals.length-1){
-        $('lg_lane').value = optVals[curIdx+1];
-        onFillLaneChange();
-      }
-    }
+    const stillValid = Array.from($('lg_lane').options).some(o=>o.value===currentLaneVal);
+    if(stillValid){ $('lg_lane').value = currentLaneVal; }
+    onFillLaneChange();
     updateNightlyProgress('fill');
   }
 
@@ -1776,19 +1889,6 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
   }
 
   /* ================= MILLING ================= */
-  function calcMill(){
-    const A=parseStation($('mi_calc_stA').value), B=parseStation($('mi_calc_stB').value);
-    const W=parseFloat($('mi_calc_W').value);
-    if(A!==null && B!==null){
-      const lf=Math.abs(B-A);
-      const sy=(lf*W)/9;
-      $('mi_calc_out').innerHTML = isFinite(sy) ? fmt(sy,1)+'<span class="unit">SY</span>' : '&mdash;';
-      $('mi_calc_lf').textContent = fmt(lf,0)+' LF';
-    } else {
-      $('mi_calc_out').innerHTML='&mdash;'; $('mi_calc_lf').textContent='';
-    }
-  }
-
   function renderMillQcPreview(){
     const measDepth = parseFloat($('mi_measDepth').value);
     const el = $('mi_qc_flags');
@@ -1805,160 +1905,135 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
   function saveMillLog(entries){ try{ localStorage.setItem(MILL_LOG_KEY, JSON.stringify(entries)); }catch(e){} }
 
   /* ---- Lane dropdown, station-aware, refreshed on Station A / Machine change ---- */
-  function refreshMillLaneOptions(){
-    const A = parseStation($('mi_stA').value);
-    const machine = $('mi_machine').value;
-    const night = getNightlyOp('mill');
-    const dir = $('mi_direction').value;
-    const sel = $('mi_lane');
-    const prevVal = sel.value;
-    if(A === null){
-      sel.innerHTML = '<option value="">— Set Station A first —</option>';
-      $('mi_lane0_block').style.display='none';
-      $('mi_lane16_block').style.display='none';
-      $('mi_pending_banner').style.display='none';
+  function overlapLF(lo, hi, segStart, segEnd){
+    return Math.max(0, Math.min(hi,segEnd) - Math.max(lo,segStart));
+  }
+
+  /**
+   * Computes the full Milling breakdown for a Start/End range: straight lanes (split by
+   * lane-count zone), left/right turn lanes overlapping the range, and cross streets within it.
+   */
+  function computeMillBreakdown(startLF, endLF){
+    const lo = Math.min(startLF, endLF), hi = Math.max(startLF, endLF);
+    const totalLF = hi - lo;
+
+    const breakpoints = new Set([lo, hi]);
+    LANE_ZONES.forEach(z => { if(z[0]>lo && z[0]<hi) breakpoints.add(z[0]); if(z[1]>lo && z[1]<hi) breakpoints.add(z[1]); });
+    const pts = Array.from(breakpoints).sort((a,b)=>a-b);
+
+    let lf4 = 0, lf3 = 0, lfUnknown = 0;
+    for(let i=0;i<pts.length-1;i++){
+      const segLF = pts[i+1]-pts[i];
+      const mid = (pts[i]+pts[i+1])/2;
+      const zone = getLaneZoneAt(mid);
+      if(!zone){ lfUnknown += segLF; continue; }
+      if(zone[2].indexOf('4')===0) lf4 += segLF; else lf3 += segLF;
+    }
+
+    const straightLanes = [];
+    straightLanes.push({ name:'L', sy:(lf4+lf3)*12/9 });
+    if(lf4>0) straightLanes.push({ name:'LM', sy: lf4*12/9 });
+    if(lf3>0) straightLanes.push({ name:'M', sy: lf3*12/9 });
+    if(lf4>0) straightLanes.push({ name:'RM', sy: lf4*12/9 });
+    straightLanes.push({ name:'R', sy:(lf4+lf3)*12/9 });
+
+    const leftTurns = TURN_LANES_TABLE.map(t => {
+      const ov = overlapLF(lo,hi,t[0],t[0]+t[1]);
+      return ov>0.5 ? { name:t[3], lf:ov, width:t[2], sy: ov*t[2]/9 } : null;
+    }).filter(Boolean);
+
+    const rightTurns = RIGHT_TURN_LANES_TABLE.map(t => {
+      const ov = overlapLF(lo,hi,t[0],t[0]+t[1]);
+      return ov>0.5 ? { name:t[3], lf:ov, width:t[2], sy: ov*t[2]/9 } : null;
+    }).filter(Boolean);
+
+    const crossStreets = CROSS_STREET_AREAS.filter(cs => cs[0]>=lo && cs[0]<=hi)
+      .map(cs => ({ name:cs[1], areaSF:cs[2], sy:cs[2]/9 }));
+
+    return { totalLF, lfUnknown, straightLanes, leftTurns, rightTurns, crossStreets };
+  }
+
+  function renderMillBreakdown(){
+    const A = parseStation($('mi_stA').value), B = parseStation($('mi_stB').value);
+    if(A===null || B===null || A===B){
+      $('mi_breakdown').innerHTML = '<div class="qc-flag"><span>&#9888;</span><div>Enter both a Start Station and a different End Station.</div></div>';
       return;
     }
-    const pending = getPendingIntersection(A, 'mill', machine, night, dir);
-    const banner = $('mi_pending_banner');
-    if(pending){
-      banner.style.display='block';
-      banner.innerHTML = `<div class="qc-flag"><span>&#9888;</span><div><strong>Reached ${pending[1]}.</strong> The mill can't skip a cross street and come back \u2014 Lane 1 (Right) is locked until this intersection is logged under Lane 0, even if a truck still has material left.</div></div>`;
-    } else {
-      banner.style.display='none';
-    }
-    const opts = getAvailableLanes(A, 'mill', machine, night, dir);
-    if(opts.length===0){
-      sel.innerHTML = '<option value="">— No lanes confirmed at this station —</option>';
-    } else {
-      sel.innerHTML = opts.map(o=>`<option value="${o.value}">${o.label}</option>`).join('');
-      if(opts.some(o=>o.value===prevVal)) sel.value = prevVal;
-    }
-    onMillLaneChange();
-  }
+    const bd = computeMillBreakdown(A, B);
+    const alreadyLogged = loadMillLog().filter(e=>e.category==='cross').map(e=>e.detail);
 
-  function onMillLaneChange(){
-    const val = $('mi_lane').value;
-    const isLane0 = val.startsWith('0:');
-    $('mi_lane0_block').style.display = isLane0 ? 'block' : 'none';
-    $('mi_lane16_block').style.display = (!isLane0 && val!=='') ? 'block' : 'none';
-    if(isLane0){
-      const intersection = val.slice(2);
-      const target = getLane0TargetTons(intersection, 'mill');
-      const logged = getLane0LoggedTons(intersection, 'mill');
-      $('mi_l0_target').textContent = fmt(target,1)+' tons';
-      $('mi_l0_logged').textContent = fmt(logged,1)+' tons';
-      $('mi_l0_remaining').textContent = fmt(Math.max(0,target-logged),1)+' tons';
-    } else if(val !== ''){
-      calcMillPass();
-    }
-  }
+    const straightSY = bd.straightLanes.reduce((s,l)=>s+l.sy,0);
+    const turnsSY = bd.leftTurns.reduce((s,l)=>s+l.sy,0) + bd.rightTurns.reduce((s,l)=>s+l.sy,0);
+    const crossSY = bd.crossStreets.reduce((s,c)=>s+c.sy,0);
+    const grandTotal = straightSY + turnsSY + crossSY;
 
-  function currentLaneWidth(){
-    const val = $('mi_lane').value;
-    if(!val || val.startsWith('0:')) return null;
-    const A = parseStation($('mi_stA').value);
-    if(A===null) return null;
-    const opts = getAvailableLanes(A, 'mill', $('mi_machine').value, getNightlyOp('mill'), $('mi_direction').value);
-    const match = opts.find(o=>o.value===val);
-    return match ? match.width : 12;
-  }
+    const rows = (arr, isCross) => arr.map(l => {
+      const dup = isCross && alreadyLogged.includes(l.name);
+      return `<div class="locked-row"><span class="k">${l.name}${dup?' (already logged)':''}</span><span class="v"${dup?' style="color:var(--muted);"':''}>${fmt(l.sy,1)} SY</span></div>`;
+    }).join('');
 
-  function calcMillPass(){
-    const tons = parseFloat($('mi_truckTons').value);
-    const width = currentLaneWidth();
-    const depth = parseFloat($('mi_D').value) || 2;
-    const density = 115;
-    if(!isFinite(tons) || !width){ $('mi_pass_out').innerHTML='&mdash;'; $('mi_pass_station').textContent=''; return; }
-    const lf = (tons*24000)/(width*depth*density);
-    $('mi_pass_out').innerHTML = fmt(lf,0)+'<span class="unit">LF</span>';
-    const A = parseStation($('mi_stA').value);
-    const dir = $('mi_direction').value;
-    if(A!==null){
-      const B = dir==='rev' ? A - lf : A + lf;
-      $('mi_pass_station').textContent = toStation(A)+'  \u2192  '+toStation(B);
-    }
+    const gapNote = bd.lfUnknown>0.5
+      ? `<div class="qc-flag" style="margin-top:10px;"><span>&#9888;</span><div>${fmt(bd.lfUnknown,0)} LF of this stretch has no confirmed lane-count on file \u2014 straight-lane totals may be understated.</div></div>` : '';
+
+    $('mi_breakdown').innerHTML = `
+      <div class="spec-box" style="margin-top:14px;">
+        <div class="spec-title">Straight Lanes (${fmt(bd.totalLF,0)} LF)</div>
+        ${rows(bd.straightLanes,false)}
+      </div>
+      ${(bd.leftTurns.length||bd.rightTurns.length) ? `
+      <div class="spec-box">
+        <div class="spec-title">Turning Lanes</div>
+        ${rows(bd.leftTurns.map(l=>({name:'Left Turning \u2014 '+l.name, sy:l.sy})),false)}
+        ${rows(bd.rightTurns.map(l=>({name:'Right Turning \u2014 '+l.name, sy:l.sy})),false)}
+      </div>` : ''}
+      ${bd.crossStreets.length ? `
+      <div class="spec-box">
+        <div class="spec-title">Cross Streets</div>
+        ${rows(bd.crossStreets,true)}
+      </div>` : ''}
+      ${gapNote}
+      <div class="result" style="margin-top:10px;">
+        <div class="label">Summary</div>
+        <div class="locked-row"><span class="k">Mainline (straight lanes)</span><span class="v">${fmt(straightSY,1)} SY</span></div>
+        <div class="locked-row"><span class="k">Turning Lanes</span><span class="v">${fmt(turnsSY,1)} SY</span></div>
+        <div class="locked-row"><span class="k">Cross Streets</span><span class="v">${fmt(crossSY,1)} SY</span></div>
+        <div class="value" style="margin-top:10px; color:var(--caution-yellow);">${fmt(grandTotal,1)}<span class="unit">SY grand total</span></div>
+      </div>`;
   }
 
   function addMillLogEntry(){
-    const laneVal = $('mi_lane').value;
-    if(!laneVal){ alert('Select a lane first.'); return; }
-    const isLane0 = laneVal.startsWith('0:');
-    const truckIdx=$('mi_truck').value;
-    const roster=loadRoster();
-    const truckNum = truckIdx!=='' ? roster[truckIdx].num : '';
-    const carrier = $('mi_carrier').value;
+    const A = parseStation($('mi_stA').value), B = parseStation($('mi_stB').value);
+    if(A===null || B===null || A===B){ alert('Enter both a Start Station and a different End Station, then Calculate.'); return; }
     const date = $('mi_date').value || todayStr();
     const measDepth = parseFloat($('mi_measDepth').value);
     const inspector = getInspectorValue('mi');
-    const machine = $('mi_machine').value;
     if(!inspector){ alert('Please select or type in the inspector name.'); return; }
     const tgt=targetDepth(), tol=depthTol();
     const depthFlag = isFinite(measDepth) && Math.abs(measDepth-tgt)>tol;
+
+    const bd = computeMillBreakdown(A, B);
     const entries = loadMillLog();
+    const alreadyLogged = entries.filter(e=>e.category==='cross').map(e=>e.detail);
+    let added = 0, skipped = [];
 
-    if(isLane0){
-      const intersection = laneVal.slice(2);
-      const tons = parseFloat($('mi_l0_tons').value);
-      if(!isFinite(tons) || tons<=0){ alert('Enter this truck\'s tons.'); return; }
-      entries.push({
-        id: genId(), locked:false, date, inspector, truckNum, carrier, machine,
-        lane:'0', intersection, lane0Tons: tons,
-        measDepth: isFinite(measDepth)?measDepth:'', depthFlag
-      });
-      saveMillLog(entries);
-      rememberInspector('mi');
-      renderMillLog(); renderRoster();
-      refreshMillLaneOptions(); // intersection may now be complete -> drops off the list
-      updateNightlyProgress('mill');
-      return;
-    }
-
-    const width = currentLaneWidth();
-    const depth = parseFloat($('mi_D').value) || 2;
-    const tons = parseFloat($('mi_truckTons').value);
-    const A = parseStation($('mi_stA').value);
-    const dir = $('mi_direction').value;
-    if(A===null || !isFinite(tons) || !width){ alert('Fill in Station A and truck tons.'); return; }
-    const density = 115;
-    const lf = (tons*24000)/(width*depth*density);
-    const B = dir==='rev' ? A - lf : A + lf;
-    const sy = (lf*width)/9;
-
-    entries.push({
-      id: genId(), locked:false, date, inspector, truckNum, carrier, machine,
-      lane: laneVal, direction: dir,
-      stA: toStation(A), stB: toStation(B), lf: lf.toFixed(0),
-      sy: sy.toFixed(1), width, depth,
-      measDepth: isFinite(measDepth)?measDepth:'', depthFlag
+    const pushEntry = (category, detail, sy) => {
+      entries.push({ id: genId(), locked:false, date, inspector, category, detail, sy: sy.toFixed(1), measDepth: isFinite(measDepth)?measDepth:'', depthFlag });
+      added++;
+    };
+    bd.straightLanes.forEach(l => pushEntry('straight', l.name, l.sy));
+    bd.leftTurns.forEach(l => pushEntry('turn-left', l.name, l.sy));
+    bd.rightTurns.forEach(l => pushEntry('turn-right', l.name, l.sy));
+    bd.crossStreets.forEach(c => {
+      if(alreadyLogged.includes(c.name)){ skipped.push(c.name); return; }
+      pushEntry('cross', c.name, c.sy);
     });
+
     saveMillLog(entries);
     rememberInspector('mi');
     renderMillLog(); renderRoster();
-
-    const night = getNightlyOp('mill');
-    const reachedEnd = dir==='rev' ? Math.min(A,B) : Math.max(A,B);
-    let atEnd = false;
-    if(night){
-      atEnd = dir==='rev' ? reachedEnd <= night.startLF+0.5 : reachedEnd >= night.endLF-0.5;
-      if(atEnd){
-        $('mi_stA').value = dir==='rev' ? toStation(night.endLF) : toStation(night.startLF);
-      } else {
-        $('mi_stA').value = toStation(reachedEnd);
-      }
-    } else {
-      $('mi_stA').value = toStation(reachedEnd);
-    }
-    refreshMillLaneOptions();
-    if(atEnd){
-      const optVals = Array.from($('mi_lane').options).map(o=>o.value);
-      const curIdx = optVals.indexOf(laneVal);
-      if(curIdx >= 0 && curIdx < optVals.length-1){
-        $('mi_lane').value = optVals[curIdx+1];
-        onMillLaneChange();
-      }
-    }
-    updateNightlyProgress('mill');
+    showToast(`\u2713 Added ${added} entr${added===1?'y':'ies'} to the report`);
+    if(skipped.length) alert(`Already logged, skipped: ${skipped.join(', ')}`);
+    renderMillBreakdown(); // refresh so newly-logged cross streets show "(already logged)"
   }
 
   function renderMillLog(){
@@ -1967,17 +2042,13 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
     $('mi_count').textContent = entries.length + (entries.length===1?' entry logged':' entries logged');
     if(entries.length===0){ table.style.display='none'; empty.style.display='block'; return; }
     table.style.display='table'; empty.style.display='none';
+    const categoryLabels = { straight:'Straight Lane', 'turn-left':'Left Turning', 'turn-right':'Right Turning', cross:'Cross Street' };
     tbody.innerHTML = entries.map((e,i)=>{
       const qc = e.depthFlag ? '<span style="color:var(--warn-red);font-weight:600;">FLAGGED</span>' : '<span style="color:var(--ok-green);font-weight:600;">OK</span>';
       const lockTag = e.locked ? ' &#128274;' : '';
-      const isL0 = e.lane==='0';
-      const laneLabel = isL0 ? 'Lane 0' : ('Lane '+e.lane);
-      const detail = isL0 ? (e.intersection||'') : `${e.stA} \u2192 ${e.stB}`;
-      const qty = isL0 ? `${fmt(e.lane0Tons,1)} tons` : `${e.sy} SY`;
-      const dir = isL0 ? '—' : (e.direction==='rev' ? 'Rev' : 'Fwd');
       return `<tr>
-        <td>${e.date||''}</td><td>${e.inspector||''}</td><td>${e.machine||'—'}</td><td>${laneLabel}</td><td>${dir}</td><td>${e.truckNum||''}</td><td>${e.carrier||''}</td>
-        <td class="station">${detail}</td><td class="tons">${qty}</td>
+        <td>${e.date||''}</td><td>${e.inspector||''}</td><td>${categoryLabels[e.category]||e.category}</td>
+        <td class="station">${e.detail}</td><td class="tons">${e.sy} SY</td>
         <td class="${e.depthFlag?'flag':''}">${e.measDepth!==''?e.measDepth:'—'}</td>
         <td>${qc}${lockTag}</td>
         <td><button class="del-btn" data-idx="${i}" title="Delete">&#10005;</button></td>
@@ -2002,16 +2073,13 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
   }
 
   function calcNightlyTarget(op){
-    const startEl = op==='mill' ? 'mi_night_start' : 'lg_night_start';
-    const endEl = op==='mill' ? 'mi_night_end' : 'lg_night_end';
-    const resultEl = op==='mill' ? 'mi_night_result' : 'lg_night_result';
-    const s = parseStation($(startEl).value), e = parseStation($(endEl).value);
+    const s = parseStation($('lg_night_start').value), e = parseStation($('lg_night_end').value);
     if(s===null || e===null || s===e){
-      $(resultEl).innerHTML = '<div class="qc-flag"><span>&#9888;</span><div>Enter both a Start Point and a different End Point.</div></div>';
+      $('lg_night_result').innerHTML = '<div class="qc-flag"><span>&#9888;</span><div>Enter both a Start Point and a different End Point.</div></div>';
       return;
     }
-    const calc = computeNightlyTarget(s, e, op);
-    const unit = op==='mill' ? 'SY' : 'tons';
+    const calc = computeNightlyTarget(s, e, 'fill');
+    const unit = 'tons';
     const gapNote = calc.hasGap
       ? `<div class="qc-flag" style="margin-top:10px;"><span>&#9888;</span><div>${fmt(calc.gapLF,0)} LF of this stretch has no confirmed width on file \u2014 target may be understated. Field-verify that portion.</div></div>`
       : '';
@@ -2026,7 +2094,7 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
         </div>`;
     }
 
-    $(resultEl).innerHTML = `
+    $('lg_night_result').innerHTML = `
       <div class="result" style="margin-top:14px;">
         <div class="label">Mainline target</div>
         <div class="value">${fmt(calc.totalQty,1)}<span class="unit">${unit}</span></div>
@@ -2036,51 +2104,224 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
         <div class="label">Tonight's combined target</div>
         <div class="value" style="color:var(--caution-yellow);">${fmt(calc.grandTotalQty,1)}<span class="unit">${unit}</span></div>
       </div>`;
-    saveNightlyOp(op, {
+    saveNightlyOp('fill', {
       date: todayStr(), startLF: Math.min(s,e), endLF: Math.max(s,e),
       totalLF: calc.totalLF, targetQty: calc.grandTotalQty, passesNeeded: calc.passesNeeded
     });
-    // Pre-fill the log form's starting station/Station A with tonight's Start Point
-    if(op==='fill'){ $('lg_start').value = toStation(Math.min(s,e)); refreshFillLaneOptions(); }
-    else { $('mi_stA').value = toStation(Math.min(s,e)); refreshMillLaneOptions(); }
-    updateNightlyProgress(op);
+    $('lg_start').value = toStation(Math.min(s,e)); refreshFillLaneOptions();
+    updateNightlyProgress('fill');
   }
 
   function updateNightlyProgress(op){
-    const night = getNightlyOp(op);
-    const progressEl = op==='mill' ? 'mi_night_progress' : 'lg_night_progress';
-    if(!night){ $(progressEl).style.display = 'none'; return; }
+    const night = getNightlyOp('fill');
+    const addBtn = $('lg_add');
+    if(!night){ $('lg_night_progress').style.display = 'none'; addBtn.disabled = false; addBtn.textContent = '+ Add to Report'; return; }
     const today = todayStr();
-    const entries = (op==='mill' ? loadMillLog() : loadFillLog()).filter(e=>e.date===today);
-    const doneQty = entries.reduce((s,e)=> s + (parseFloat(op==='mill'?e.sy:e.tons)||0), 0);
+    const entries = loadFillLog().filter(e=>e.date===today);
+    const doneQty = entries.reduce((s,e)=> s + (parseFloat(e.lane==='0' ? e.lane0Tons : e.tons)||0), 0);
+    const isComplete = night.targetQty > 0 && doneQty >= night.targetQty - 0.05;
     const pct = night.targetQty>0 ? Math.min(100,(doneQty/night.targetQty)*100) : 0;
-    const unit = op==='mill' ? 'SY' : 'tons';
-    $(progressEl).style.display = 'block';
-    $(op==='mill'?'mi_night_progressQty':'lg_night_progressQty').textContent = `${fmt(doneQty,1)} / ${fmt(night.targetQty,1)} ${unit}`;
-    $(op==='mill'?'mi_night_progressBar':'lg_night_progressBar').style.width = pct+'%';
+    const displayQty = isComplete ? night.targetQty : doneQty;
+    $('lg_night_progress').style.display = 'block';
+    $('lg_night_progressQty').textContent =
+      isComplete ? `100 / 100 \u2014 COMPLETE` : `${fmt(displayQty,1)} / ${fmt(night.targetQty,1)} tons`;
+    $('lg_night_progressBar').style.width = (isComplete?100:pct)+'%';
+
+    const wasComplete = addBtn.disabled;
+    if(isComplete){
+      addBtn.disabled = true;
+      addBtn.textContent = '\u2713 Tonight\'s Target Complete \u2014 100/100';
+      if(!wasComplete){
+        showToast(`\u2713 Tonight's filling target is 100% complete!`, {complete:true, duration:3000});
+      }
+    } else {
+      addBtn.disabled = false;
+      addBtn.textContent = '+ Add to Report';
+    }
   }
 
-  $('mi_night_calc').addEventListener('click', () => calcNightlyTarget('mill'));
   $('lg_night_calc').addEventListener('click', () => calcNightlyTarget('fill'));
 
   function exportMillCSV(){
     const entries = loadMillLog();
     if(entries.length===0){ alert('No entries to export yet.'); return; }
-    const headers=['Date','Inspector','Machine','Lane','Direction','Truck #','Carrier','Detail','Linear Feet','SY/Tons','Measured Depth','Depth Flag'];
-    const rows=entries.map(e=>{
-      const isL0 = e.lane==='0';
-      const detail = isL0 ? e.intersection : `${e.stA} -> ${e.stB}`;
-      const qty = isL0 ? e.lane0Tons : e.sy;
-      const dir = isL0 ? '' : (e.direction==='rev'?'Rev':'Fwd');
-      return [e.date,e.inspector||'',e.machine||'',isL0?'Lane 0':('Lane '+e.lane),dir,e.truckNum,e.carrier,detail,e.lf||'',qty,e.measDepth,e.depthFlag?'FLAG':'OK'];
-    });
+    const categoryLabels = { straight:'Straight Lane', 'turn-left':'Left Turning', 'turn-right':'Right Turning', cross:'Cross Street' };
+    const headers=['Date','Inspector','Category','Detail','SY','Measured Depth','Depth Flag'];
+    const rows=entries.map(e=>[e.date,e.inspector||'',categoryLabels[e.category]||e.category,e.detail,e.sy,e.measDepth,e.depthFlag?'FLAG':'OK']);
     let sumSY=0;
-    entries.forEach(e=>{ sumSY+=parseFloat(e.lane==='0'?e.lane0Tons:e.sy)||0; });
-    rows.push(['TOTAL','','','','','','','','',sumSY.toFixed(1),'','']);
+    entries.forEach(e=>{ sumSY+=parseFloat(e.sy)||0; });
+    rows.push(['TOTAL','','','',sumSY.toFixed(1),'','']);
     downloadCSV(headers, rows, 'milling-report');
   }
   function clearMillLog(){
     if(confirm('Clear all Milling report entries? This cannot be undone.')){ saveMillLog([]); renderMillLog(); renderRoster(); }
+  }
+
+  /* ================= SAW CUT ================= */
+  const SAWCUT_LOG_KEY = 'millfill_sawcutlog_v1';
+  function loadSawCutLog(){ try{ return JSON.parse(localStorage.getItem(SAWCUT_LOG_KEY))||[]; }catch(e){ return []; } }
+  function saveSawCutLog(v){ try{ localStorage.setItem(SAWCUT_LOG_KEY, JSON.stringify(v)); }catch(e){} }
+
+  function populateSawCutLocations(){
+    const sel = $('sc_location');
+    const cur = sel.value;
+    const opts = '<option value="">— Select cross street —</option>' +
+      CROSS_STREET_AREAS.map(cs=>`<option value="${cs[1]}">${cs[1]}</option>`).join('') +
+      '<option value="__other__">Other (type in)</option>';
+    sel.innerHTML = opts;
+    if(cur) sel.value = cur;
+  }
+  function getSawCutLocation(){
+    const sel = $('sc_location');
+    if(sel.value==='__other__') return $('sc_location_other').value.trim();
+    return sel.value;
+  }
+
+  function addSawCutEntry(){
+    const inspector = getInspectorValue('sc');
+    const location = getSawCutLocation();
+    const lf = parseFloat($('sc_lf').value);
+    if(!inspector){ alert('Please select or type in the inspector name.'); return; }
+    if(!location){ alert('Enter a location for this saw cut.'); return; }
+    if(!isFinite(lf) || lf<=0){ alert('Enter the LF of saw cut.'); return; }
+    const entries = loadSawCutLog();
+    entries.push({ id: genId(), locked:false, date: $('sc_date').value || todayStr(), inspector, location, lf });
+    saveSawCutLog(entries);
+    rememberInspector('sc');
+    renderSawCutLog();
+    $('sc_lf').value = '';
+    showToast('\u2713 Saw cut added to the report');
+  }
+
+  function renderSawCutLog(){
+    const entries = loadSawCutLog();
+    const tbody=$('sc_tbody'), table=$('sc_table'), empty=$('sc_empty');
+    $('sc_count').textContent = entries.length + (entries.length===1?' entry logged':' entries logged');
+    if(entries.length===0){ table.style.display='none'; empty.style.display='block'; return; }
+    table.style.display='table'; empty.style.display='none';
+    tbody.innerHTML = entries.map((e,i)=>{
+      const lockTag = e.locked ? ' &#128274;' : '';
+      return `<tr>
+        <td>${e.date||''}</td><td>${e.inspector||''}</td><td class="station">${e.location}</td><td class="tons">${e.lf} LF${lockTag}</td>
+        <td><button class="del-btn" data-idx="${i}" title="Delete">&#10005;</button></td>
+      </tr>`;
+    }).join('');
+  }
+
+  function exportSawCutCSV(){
+    const entries = loadSawCutLog();
+    if(entries.length===0){ alert('No entries to export yet.'); return; }
+    const headers=['Date','Inspector','Location','LF'];
+    const rows=entries.map(e=>[e.date,e.inspector||'',e.location,e.lf]);
+    let sumLF=0; entries.forEach(e=>sumLF+=parseFloat(e.lf)||0);
+    rows.push(['TOTAL','','',sumLF.toFixed(0)]);
+    downloadCSV(headers, rows, 'sawcut-report');
+  }
+  function clearSawCutLog(){
+    if(confirm('Clear all Saw Cut report entries? This cannot be undone.')){ saveSawCutLog([]); renderSawCutLog(); }
+  }
+
+  /* ================= ASPHALT PATCH ================= */
+  const ASPHALTPATCH_LOG_KEY = 'millfill_asphaltpatchlog_v1';
+  function loadAsphaltPatchLog(){ try{ return JSON.parse(localStorage.getItem(ASPHALTPATCH_LOG_KEY))||[]; }catch(e){ return []; } }
+  function saveAsphaltPatchLog(v){ try{ localStorage.setItem(ASPHALTPATCH_LOG_KEY, JSON.stringify(v)); }catch(e){} }
+
+  function addAsphaltPatchEntry(){
+    const inspector = getInspectorValue('ap');
+    const structure = $('ap_structure').value.trim();
+    const tons = parseFloat($('ap_tons').value);
+    const truckIdx = $('ap_truck').value;
+    const roster = loadRoster();
+    const truckNum = truckIdx!=='' ? roster[truckIdx].num : '';
+    const carrier = $('ap_carrier').value;
+    if(!inspector){ alert('Please select or type in the inspector name.'); return; }
+    if(!structure){ alert('Enter the structure/location being patched.'); return; }
+    if(!isFinite(tons) || tons<=0){ alert('Enter tons delivered.'); return; }
+    const entries = loadAsphaltPatchLog();
+    entries.push({ id: genId(), locked:false, date: $('ap_date').value || todayStr(), inspector, ticket: $('ap_ticket').value.trim(), truckNum, carrier, structure, tons });
+    saveAsphaltPatchLog(entries);
+    rememberInspector('ap');
+    renderAsphaltPatchLog(); renderRoster();
+    $('ap_ticket').value=''; $('ap_structure').value=''; $('ap_tons').value='';
+    showToast('\u2713 Asphalt patch added to the report');
+  }
+
+  function renderAsphaltPatchLog(){
+    const entries = loadAsphaltPatchLog();
+    const tbody=$('ap_tbody'), table=$('ap_table'), empty=$('ap_empty');
+    $('ap_count').textContent = entries.length + (entries.length===1?' entry logged':' entries logged');
+    if(entries.length===0){ table.style.display='none'; empty.style.display='block'; return; }
+    table.style.display='table'; empty.style.display='none';
+    tbody.innerHTML = entries.map((e,i)=>{
+      const lockTag = e.locked ? ' &#128274;' : '';
+      return `<tr>
+        <td>${e.date||''}</td><td>${e.inspector||''}</td><td>${e.ticket||''}</td><td>${e.truckNum||''}</td><td>${e.carrier||''}</td>
+        <td class="station">${e.structure}</td><td class="tons">${e.tons}${lockTag}</td>
+        <td><button class="del-btn" data-idx="${i}" title="Delete">&#10005;</button></td>
+      </tr>`;
+    }).join('');
+  }
+
+  function exportAsphaltPatchCSV(){
+    const entries = loadAsphaltPatchLog();
+    if(entries.length===0){ alert('No entries to export yet.'); return; }
+    const headers=['Date','Inspector','Ticket','Truck','Carrier','Structure','Tons'];
+    const rows=entries.map(e=>[e.date,e.inspector||'',e.ticket||'',e.truckNum,e.carrier,e.structure,e.tons]);
+    let sumTons=0; entries.forEach(e=>sumTons+=parseFloat(e.tons)||0);
+    rows.push(['TOTAL','','','','','',sumTons.toFixed(2)]);
+    downloadCSV(headers, rows, 'asphaltpatch-report');
+  }
+  function clearAsphaltPatchLog(){
+    if(confirm('Clear all Asphalt Patch report entries? This cannot be undone.')){ saveAsphaltPatchLog([]); renderAsphaltPatchLog(); renderRoster(); }
+  }
+
+  /* ================= UTILITY ADJUSTMENT ================= */
+  const UTILADJ_LOG_KEY = 'millfill_utiladjlog_v1';
+  function loadUtilAdjLog(){ try{ return JSON.parse(localStorage.getItem(UTILADJ_LOG_KEY))||[]; }catch(e){ return []; } }
+  function saveUtilAdjLog(v){ try{ localStorage.setItem(UTILADJ_LOG_KEY, JSON.stringify(v)); }catch(e){} }
+
+  function addUtilAdjEntry(){
+    const inspector = getInspectorValue('ua');
+    const structure = $('ua_structure').value.trim();
+    const count = parseInt($('ua_count').value,10);
+    if(!inspector){ alert('Please select or type in the inspector name.'); return; }
+    if(!structure){ alert('Enter the structure/location adjusted.'); return; }
+    if(!isFinite(count) || count<=0){ alert('Enter a valid count.'); return; }
+    const entries = loadUtilAdjLog();
+    entries.push({ id: genId(), locked:false, date: $('ua_date').value || todayStr(), inspector, structure, count });
+    saveUtilAdjLog(entries);
+    rememberInspector('ua');
+    renderUtilAdjLog();
+    $('ua_structure').value=''; $('ua_count').value='1';
+    showToast('\u2713 Utility adjustment added to the report');
+  }
+
+  function renderUtilAdjLog(){
+    const entries = loadUtilAdjLog();
+    const tbody=$('ua_tbody'), table=$('ua_table'), empty=$('ua_empty');
+    $('ua_count_display').textContent = entries.length + (entries.length===1?' entry logged':' entries logged');
+    if(entries.length===0){ table.style.display='none'; empty.style.display='block'; return; }
+    table.style.display='table'; empty.style.display='none';
+    tbody.innerHTML = entries.map((e,i)=>{
+      const lockTag = e.locked ? ' &#128274;' : '';
+      return `<tr>
+        <td>${e.date||''}</td><td>${e.inspector||''}</td><td class="station">${e.structure}</td><td class="tons">${e.count}${lockTag}</td>
+        <td><button class="del-btn" data-idx="${i}" title="Delete">&#10005;</button></td>
+      </tr>`;
+    }).join('');
+  }
+
+  function exportUtilAdjCSV(){
+    const entries = loadUtilAdjLog();
+    if(entries.length===0){ alert('No entries to export yet.'); return; }
+    const headers=['Date','Inspector','Structure','Count'];
+    const rows=entries.map(e=>[e.date,e.inspector||'',e.structure,e.count]);
+    let sumCount=0; entries.forEach(e=>sumCount+=parseInt(e.count)||0);
+    rows.push(['TOTAL','','',sumCount]);
+    downloadCSV(headers, rows, 'utilityadjustment-report');
+  }
+  function clearUtilAdjLog(){
+    if(confirm('Clear all Utility Adjustment report entries? This cannot be undone.')){ saveUtilAdjLog([]); renderUtilAdjLog(); }
   }
 
   /* ================= JOINT ADHESIVE QA ================= */
@@ -2379,7 +2620,7 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
 
   /* ================= EVENT WIRING ================= */
   document.addEventListener('input', (e) => {
-    calcFill(); calcMill(); calcJoint(); calcTac();
+    calcFill(); calcJoint(); calcTac();
     if(e.target.id === 'targetDepth' || e.target.id === 'depthTol'){
       renderMillQcPreview(); renderFillQcPreview();
     }
@@ -2409,18 +2650,10 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
   $('lg_lane').addEventListener('change', onFillLaneChange);
   $('lg_tons').addEventListener('input', calcFillPass);
   $('lg_D').addEventListener('input', calcFillPass);
-  $('mi_truck').addEventListener('change', () => {
-    const idx=$('mi_truck').value, roster=loadRoster();
-    $('mi_carrier').value = idx!=='' ? roster[idx].carrier : '';
-  });
 
-  $('mi_stA').addEventListener('input', refreshMillLaneOptions);
-  $('mi_machine').addEventListener('change', refreshMillLaneOptions);
-  $('mi_lane').addEventListener('change', onMillLaneChange);
-  $('mi_direction').addEventListener('change', calcMillPass);
-  $('mi_truckTons').addEventListener('input', calcMillPass);
-  $('mi_D').addEventListener('input', calcMillPass);
-  $('mi_l0_tons').addEventListener('input', () => {});
+  $('mi_calc').addEventListener('click', renderMillBreakdown);
+  $('mi_stA').addEventListener('input', renderMillBreakdown);
+  $('mi_stB').addEventListener('input', renderMillBreakdown);
 
   $('lg_add').addEventListener('click', addFillLogEntry);
   $('lg_export').addEventListener('click', exportFillCSV);
@@ -2446,6 +2679,52 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
     if(entries[idx] && entries[idx].locked){ alert('This entry is locked and cannot be deleted. Unlock it from Data Management first.'); return; }
     entries.splice(idx,1);
     saveMillLog(entries); renderMillLog(); renderRoster();
+  });
+
+  $('sc_location').addEventListener('change', () => {
+    $('sc_location_other_wrap').style.display = $('sc_location').value==='__other__' ? 'block' : 'none';
+  });
+  $('sc_add').addEventListener('click', addSawCutEntry);
+  $('sc_export').addEventListener('click', exportSawCutCSV);
+  $('sc_sync').addEventListener('click', () => syncOperation('sawcut', loadSawCutLog));
+  $('sc_clear').addEventListener('click', clearSawCutLog);
+  $('sc_tbody').addEventListener('click', (e) => {
+    const btn = e.target.closest('.del-btn'); if(!btn) return;
+    const entries = loadSawCutLog();
+    const idx = parseInt(btn.dataset.idx,10);
+    if(entries[idx] && entries[idx].locked){ alert('This entry is locked and cannot be deleted. Unlock it from Data Management first.'); return; }
+    entries.splice(idx,1);
+    saveSawCutLog(entries); renderSawCutLog();
+  });
+
+  $('ap_truck').addEventListener('change', () => {
+    const idx=$('ap_truck').value, roster=loadRoster();
+    $('ap_carrier').value = idx!=='' ? roster[idx].carrier : '';
+  });
+  $('ap_add').addEventListener('click', addAsphaltPatchEntry);
+  $('ap_export').addEventListener('click', exportAsphaltPatchCSV);
+  $('ap_sync').addEventListener('click', () => syncOperation('asphaltpatch', loadAsphaltPatchLog));
+  $('ap_clear').addEventListener('click', clearAsphaltPatchLog);
+  $('ap_tbody').addEventListener('click', (e) => {
+    const btn = e.target.closest('.del-btn'); if(!btn) return;
+    const entries = loadAsphaltPatchLog();
+    const idx = parseInt(btn.dataset.idx,10);
+    if(entries[idx] && entries[idx].locked){ alert('This entry is locked and cannot be deleted. Unlock it from Data Management first.'); return; }
+    entries.splice(idx,1);
+    saveAsphaltPatchLog(entries); renderAsphaltPatchLog(); renderRoster();
+  });
+
+  $('ua_add').addEventListener('click', addUtilAdjEntry);
+  $('ua_export').addEventListener('click', exportUtilAdjCSV);
+  $('ua_sync').addEventListener('click', () => syncOperation('utiladj', loadUtilAdjLog));
+  $('ua_clear').addEventListener('click', clearUtilAdjLog);
+  $('ua_tbody').addEventListener('click', (e) => {
+    const btn = e.target.closest('.del-btn'); if(!btn) return;
+    const entries = loadUtilAdjLog();
+    const idx = parseInt(btn.dataset.idx,10);
+    if(entries[idx] && entries[idx].locked){ alert('This entry is locked and cannot be deleted. Unlock it from Data Management first.'); return; }
+    entries.splice(idx,1);
+    saveUtilAdjLog(entries); renderUtilAdjLog();
   });
 
   $('ja_add').addEventListener('click', addJointLogEntry);
@@ -2768,23 +3047,49 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
     return await window.__millfillCloud.getAllDatesAllInspectors();
   }
 
+  function getEntryQty(op, e){
+    if(op==='mill') return parseFloat(e.sy)||0;
+    if(op==='sawcut') return parseFloat(e.lf)||0;
+    if(op==='asphaltpatch') return parseFloat(e.tons)||0;
+    if(op==='utiladj') return parseFloat(e.count)||0;
+    if(op==='fill') return parseFloat(e.lane==='0' ? e.lane0Tons : e.tons)||0;
+    if(op==='joint') return parseFloat(e.lf)||0;
+    if(op==='tac') return parseFloat(e.finalPay)||0;
+    return 0;
+  }
+
+  const HOME_LOCAL_LOAD = { mill:loadMillLog, sawcut:loadSawCutLog, asphaltpatch:loadAsphaltPatchLog, utiladj:loadUtilAdjLog, fill:loadFillLog, joint:loadJointLog, tac:loadTacLog, drain:loadDrainLog };
+
+  /** Dedupe drainage rows to latest status per structure, returns {byDate: {date: count}, total: n} */
+  function drainDedup(rows){
+    const latest = {};
+    rows.forEach(e => {
+      const prev = latest[e.structureId];
+      if(!prev || (e.date||'') >= (prev.date||'')) latest[e.structureId] = e;
+    });
+    const cleaned = Object.values(latest).filter(e=>e.cleaned==='Y');
+    const byDate = {};
+    cleaned.forEach(e => { byDate[e.date] = (byDate[e.date]||0) + 1; });
+    return { total: cleaned.length, byDate };
+  }
+
   function localTotals(){
-    const fillTons = loadFillLog().reduce((s,e)=>s+(parseFloat(e.tons)||0),0);
-    const millSY = loadMillLog().reduce((s,e)=>s+(parseFloat(e.sy)||0),0);
-    const jointLF = loadJointLog().reduce((s,e)=>s+(parseFloat(e.lf)||0),0);
-    const tacGal = loadTacLog().reduce((s,e)=>s+(parseFloat(e.finalPay)||0),0);
-    const drainCleaned = Object.values(latestStatusPerStructure()).filter(e=>e.cleaned==='Y').length;
-    return { fill: fillTons, mill: millSY, joint: jointLF, tac: tacGal, drain: drainCleaned };
+    const out = {};
+    HOME_OPS.forEach(op => {
+      if(op==='drain'){ out.drain = drainDedup(loadDrainLog()).total; return; }
+      out[op] = HOME_LOCAL_LOAD[op]().reduce((s,e)=>s+getEntryQty(op,e),0);
+    });
+    return out;
   }
 
   function localTodayTotals(){
     const today = todayStr();
-    const fillTons = loadFillLog().filter(e=>e.date===today).reduce((s,e)=>s+(parseFloat(e.tons)||0),0);
-    const millSY = loadMillLog().filter(e=>e.date===today).reduce((s,e)=>s+(parseFloat(e.sy)||0),0);
-    const jointLF = loadJointLog().filter(e=>e.date===today).reduce((s,e)=>s+(parseFloat(e.lf)||0),0);
-    const tacGal = loadTacLog().filter(e=>e.date===today).reduce((s,e)=>s+(parseFloat(e.finalPay)||0),0);
-    const drainToday = loadDrainLog().filter(e=>e.date===today && e.cleaned==='Y').length;
-    return { fill: fillTons, mill: millSY, joint: jointLF, tac: tacGal, drain: drainToday };
+    const out = {};
+    HOME_OPS.forEach(op => {
+      if(op==='drain'){ out.drain = loadDrainLog().filter(e=>e.date===today && e.cleaned==='Y').length; return; }
+      out[op] = HOME_LOCAL_LOAD[op]().filter(e=>e.date===today).reduce((s,e)=>s+getEntryQty(op,e),0);
+    });
+    return out;
   }
 
   function renderTodayCards(today){
@@ -2798,29 +3103,21 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
   function checkAttention(cloudOk){
     const today = todayStr();
     const issues = [];
-
-    const todayLocalCount = ['fill','mill','joint','tac','drain'].reduce((n, op) => {
-      const loadFn = {fill:loadFillLog, mill:loadMillLog, joint:loadJointLog, tac:loadTacLog, drain:loadDrainLog}[op];
-      return n + loadFn().filter(e=>e.date===today).length;
-    }, 0);
+    const todayLocalCount = HOME_OPS.reduce((n, op) => n + HOME_LOCAL_LOAD[op]().filter(e=>e.date===today).length, 0);
     if(todayLocalCount > 0){
       issues.push(`Daily report has ${todayLocalCount} entr${todayLocalCount===1?'y':'ies'} logged today &mdash; review or sync before closing out.`);
     }
-
     const flaggedFill = loadFillLog().filter(e=>e.date===today && (e.tempFlag||e.depthFlag)).length;
     const flaggedMill = loadMillLog().filter(e=>e.date===today && e.depthFlag).length;
     const flaggedTotal = flaggedFill + flaggedMill;
     if(flaggedTotal > 0){
-      issues.push(`${flaggedTotal} truck load${flaggedTotal===1?'':'s'} today flagged for QC review (temp or depth out of range).`);
+      issues.push(`${flaggedTotal} entr${flaggedTotal===1?'y':'ies'} today flagged for QC review (temp or depth out of range).`);
     }
-
     if(!cloudOk){
       issues.push('Cloud unavailable &mdash; entries saved locally only.');
     }
-
-    if(issues.length === 0){
-      $('home_attention').style.display = 'none';
-    } else {
+    if(issues.length === 0){ $('home_attention').style.display = 'none'; }
+    else {
       $('home_attention').style.display = 'block';
       $('home_attention_list').innerHTML = issues.map(i=>`<li>${i}</li>`).join('');
     }
@@ -2834,20 +3131,17 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
     try{
       const all = await fetchAllCloudEntries();
       home_cloudCache = all;
-      let fillTons=0, millSY=0, jointLF=0, tacGal=0;
-      const drainStatusMap = {};
+      totals = {};
+      HOME_OPS.forEach(op => totals[op] = 0);
+      const drainRows = [];
       all.forEach(({data}) => {
-        (data.fill||[]).forEach(e => fillTons += parseFloat(e.tons)||0);
-        (data.mill||[]).forEach(e => millSY += parseFloat(e.sy)||0);
-        (data.joint||[]).forEach(e => jointLF += parseFloat(e.lf)||0);
-        (data.tac||[]).forEach(e => tacGal += parseFloat(e.finalPay)||0);
-        (data.drain||[]).forEach(e => {
-          const prev = drainStatusMap[e.structureId];
-          if(!prev || (e.date||'') >= (prev.date||'')) drainStatusMap[e.structureId] = e;
+        HOME_OPS.forEach(op => {
+          if(op==='drain') return;
+          (data[op]||[]).forEach(e => totals[op] += getEntryQty(op,e));
         });
+        (data.drain||[]).forEach(e => drainRows.push(e));
       });
-      const drainCleaned = Object.values(drainStatusMap).filter(e=>e.cleaned==='Y').length;
-      totals = { fill: fillTons, mill: millSY, joint: jointLF, tac: tacGal, drain: drainCleaned };
+      totals.drain = drainDedup(drainRows).total;
       $('home_status').textContent = `Synced across all inspectors, all dates. (${all.length} inspector-day record(s) found.)`;
       $('home_syncPill').innerHTML = '&#9729; synced';
       $('home_syncPill').style.color = 'var(--ok-green)';
@@ -2868,93 +3162,109 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
   }
 
   function renderHomeBars(totals){
-    ['mill','fill','drain'].forEach(op => {
+    $('home_bars_container').innerHTML = HOME_OPS.map(op => {
       const target = HOME_TARGETS[op];
       const val = totals[op] || 0;
-      const pct = target > 0 ? Math.min(100, (val/target)*100) : 0;
-      $('home_pct_'+op).textContent = Math.round(pct)+'%';
-      $('home_bar_'+op).style.width = pct+'%';
       const unit = HOME_UNITS[op];
-      const valStr = op==='drain' ? Math.round(val) : fmt(val,1);
-      const targetStr = op==='drain' ? target : fmt(target,0);
-      $('home_qty_'+op).textContent = `${valStr} / ${targetStr} ${unit}`;
-    });
-    ['joint','tac'].forEach(op => {
-      const val = totals[op] || 0;
-      const unit = HOME_UNITS[op];
-      $('home_bar_'+op).style.width = '0%';
-      $('home_qty_'+op).textContent = `${fmt(val, op==='joint'?0:0)} ${unit} logged \u00b7 target not yet set`;
+      const isCount = (op==='drain');
+      const valStr = isCount ? Math.round(val) : fmt(val,1);
+      let qtyText;
+      if(target !== null){
+        const targetStr = isCount ? target : fmt(target,0);
+        qtyText = `${valStr} / ${targetStr} ${unit}`;
+      } else {
+        qtyText = `${valStr} ${unit} logged \u00b7 no target set`;
+      }
+      const pct = target > 0 ? Math.min(100,(val/target)*100) : 0;
+      return `<button class="home-bar-btn" data-op="${op}">
+        <div class="home-bar-row"><span class="name">${HOME_LABELS[op]}</span><span class="qty">${qtyText}</span></div>
+        <div class="home-bar-track"><div class="home-bar-fill" style="width:${pct}%;background:${HOME_COLORS[op]};"></div></div>
+      </button>`;
+    }).join('');
+    document.querySelectorAll('.home-bar-btn').forEach(btn => {
+      btn.addEventListener('click', () => showHomeDaylist(btn.dataset.op));
     });
   }
 
-  function showHomeDetail(op){
-    home_currentOp = op;
-    $('home_overview').style.display = 'none';
-    $('home_detail').style.display = 'block';
-    $('home_detail_title').textContent = HOME_LABELS[op];
-    $('home_detail_subtitle').textContent = home_cloudCache
-      ? 'All synced entries across every inspector and date.'
-      : 'Cloud unreachable — showing local entries on this device only.';
-
-    const LOCAL_LOAD = { mill:loadMillLog, fill:loadFillLog, joint:loadJointLog, tac:loadTacLog, drain:loadDrainLog };
-
+  /** Builds a per-day breakdown for an operation: list of {date, qty, count} sorted most-recent-first. */
+  function computeDailyBreakdown(op){
     let rows = [];
     if(home_cloudCache){
-      home_cloudCache.forEach(({date, inspectorId, data}) => {
-        (data[op]||[]).forEach(e => rows.push({ ...e, date: e.date||date, inspectorName: data.inspectorName||inspectorId }));
+      home_cloudCache.forEach(({date, data}) => {
+        (data[op]||[]).forEach(e => rows.push({ ...e, date: e.date||date }));
       });
     } else {
-      rows = LOCAL_LOAD[op]().map(e => ({...e, inspectorName: e.inspector||'Unassigned'}));
+      rows = HOME_LOCAL_LOAD[op]();
     }
-    rows.sort((a,b) => (b.date||'').localeCompare(a.date||''));
-
-    const total = rows.reduce((s,e) => {
-      if(op==='mill') return s+(parseFloat(e.sy)||0);
-      if(op==='fill') return s+(parseFloat(e.tons)||0);
-      if(op==='joint') return s+(parseFloat(e.lf)||0);
-      if(op==='tac') return s+(parseFloat(e.finalPay)||0);
-      return s + (e.cleaned==='Y' ? 1 : 0);
-    }, 0);
-    const target = HOME_TARGETS[op];
-    const unitLabel = {mill:'SY',fill:'Tons',joint:'LF',tac:'Gal',drain:'Structures'}[op];
-
-    if(target !== null){
-      const remaining = Math.max(0,target-total);
-      $('home_detail_stats').innerHTML = `
-        <div class="detail-stat"><div class="v" style="color:${HOME_COLORS[op]};">${op==='drain'?Math.round(total):fmt(total,1)}</div><div class="l">${unitLabel} complete</div></div>
-        <div class="detail-stat"><div class="v">${op==='drain'?Math.round(remaining):fmt(remaining,1)}</div><div class="l">Remaining</div></div>
-      `;
+    const byDate = {};
+    if(op==='drain'){
+      const dedup = drainDedup(rows);
+      Object.entries(dedup.byDate).forEach(([date,count]) => { byDate[date] = { qty: count, count }; });
     } else {
-      $('home_detail_stats').innerHTML = `
-        <div class="detail-stat" style="grid-column:1/-1;"><div class="v" style="color:${HOME_COLORS[op]};">${fmt(total,1)}</div><div class="l">${unitLabel} logged so far &mdash; target not yet set</div></div>
-      `;
+      rows.forEach(e => {
+        const d = e.date || 'Unknown';
+        if(!byDate[d]) byDate[d] = { qty:0, count:0 };
+        byDate[d].qty += getEntryQty(op, e);
+        byDate[d].count += 1;
+      });
     }
-
-    if(rows.length === 0){
-      $('home_detail_list').innerHTML = '<div class="log-empty">No entries logged yet.</div>';
-      return;
-    }
-    $('home_detail_list').innerHTML = rows.slice(0,50).map(e => {
-      let mainLabel, qtyLabel;
-      if(op==='mill'){ mainLabel = `${e.stA||''} \u2192 ${e.stB||''}`; qtyLabel = `${e.sy||'0'} SY`; }
-      else if(op==='fill'){ mainLabel = `${e.startStation||''} \u2192 ${e.endStation||''}`; qtyLabel = `${e.tons||'0'} tons`; }
-      else if(op==='joint'){ mainLabel = `${e.startStation||''}${e.endStation?' \u2192 '+e.endStation:''}`; qtyLabel = `${e.lf||'0'} LF`; }
-      else if(op==='tac'){ mainLabel = `Ticket ${e.ticket||'\u2014'} \u00b7 ${e.truck||''}`; qtyLabel = `${e.finalPay||'0'} gal`; }
-      else { mainLabel = e.structureId||''; qtyLabel = e.cleaned==='Y' ? 'Cleaned' : 'Skipped'; }
-      return `<div class="detail-row">
-        <div><strong>${e.date||''}</strong> &middot; ${e.inspectorName||''}<br><span style="color:var(--muted);">${mainLabel}</span></div>
-        <div style="text-align:right; color:${HOME_COLORS[op]}; font-weight:600;">${qtyLabel}</div>
-      </div>`;
-    }).join('');
+    return Object.entries(byDate)
+      .map(([date, v]) => ({ date, qty:v.qty, count:v.count }))
+      .sort((a,b) => (b.date||'').localeCompare(a.date||''));
   }
 
-  document.querySelectorAll('.home-bar-btn').forEach(btn => {
-    btn.addEventListener('click', () => showHomeDetail(btn.dataset.op));
-  });
-  $('home_back').addEventListener('click', () => {
-    $('home_detail').style.display = 'none';
+  function showHomeDaylist(op){
+    home_currentOp = op;
+    $('home_overview').style.display = 'none';
+    $('home_daylist').style.display = 'block';
+    $('home_daylist_title').textContent = HOME_LABELS[op];
+    $('home_daylist_subtitle').textContent = home_cloudCache
+      ? 'All synced entries across every inspector, grouped by date.'
+      : 'Cloud unreachable — showing local entries on this device only, grouped by date.';
+
+    const days = computeDailyBreakdown(op);
+    const total = days.reduce((s,d)=>s+d.qty,0);
+    const target = HOME_TARGETS[op];
+    const unit = HOME_UNITS[op];
+    const isCount = (op==='drain');
+
+    if(target !== null){
+      const remaining = Math.max(0, target-total);
+      $('home_daylist_stats').innerHTML = `
+        <div class="detail-stat"><div class="v" style="color:${HOME_COLORS[op]};">${isCount?Math.round(total):fmt(total,1)}</div><div class="l">${unit} complete</div></div>
+        <div class="detail-stat"><div class="v">${isCount?Math.round(remaining):fmt(remaining,1)}</div><div class="l">Remaining</div></div>
+      `;
+    } else {
+      $('home_daylist_stats').innerHTML = `
+        <div class="detail-stat" style="grid-column:1/-1;"><div class="v" style="color:${HOME_COLORS[op]};">${fmt(total,1)}</div><div class="l">${unit} logged so far &mdash; no target set</div></div>
+      `;
+    }
+
+    if(days.length === 0){
+      $('home_daylist_rows').innerHTML = '<div class="log-empty">No entries logged yet for this operation.</div>';
+      return;
+    }
+    $('home_daylist_rows').innerHTML = days.map(d => `
+      <button class="home-bar-btn" data-date="${d.date}" style="text-align:left;">
+        <div class="home-bar-row">
+          <span class="name">${d.date}</span>
+          <span class="qty" style="color:${HOME_COLORS[op]}; font-weight:600;">${isCount?Math.round(d.qty):fmt(d.qty,1)} ${unit} &middot; ${d.count} entr${d.count===1?'y':'ies'}</span>
+        </div>
+      </button>`).join('');
+    document.querySelectorAll('#home_daylist_rows .home-bar-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        switchToSection('dailyreport');
+        $('dr_date').value = btn.dataset.date;
+        loadDailyReport();
+      });
+    });
+  }
+
+  $('home_daylist_back').addEventListener('click', () => {
+    $('home_daylist').style.display = 'none';
     $('home_overview').style.display = 'block';
   });
+
   document.querySelectorAll('.home-quickbtn').forEach(btn => {
     btn.addEventListener('click', () => switchToSection(btn.dataset.goto));
   });
@@ -3225,33 +3535,35 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
   wireInspectorField('mi');
   wireInspectorField('ja');
   wireInspectorField('tac');
+  wireInspectorField('sc');
+  wireInspectorField('ap');
+  wireInspectorField('ua');
+  populateSawCutLocations();
+  $('sc_date').value = todayStr();
+  $('ap_date').value = todayStr();
+  $('ua_date').value = todayStr();
   renderRoster();
   renderFillLog();
   renderMillLog();
   renderJointLog();
   renderTacLog();
+  renderSawCutLog();
+  renderAsphaltPatchLog();
+  renderUtilAdjLog();
   calcFill();
-  calcMill();
   calcJoint();
   calcTac();
 
-  // Restore tonight's operation state if already set earlier today
-  ['mill','fill'].forEach(op => {
-    const night = getNightlyOp(op);
+  // Restore tonight's Filling operation state if already set earlier today (Milling no longer persists one)
+  (() => {
+    const night = getNightlyOp('fill');
     if(night){
-      if(op==='mill'){
-        $('mi_night_start').value = toStation(night.startLF); $('mi_night_end').value = toStation(night.endLF);
-        if(!$('mi_stA').value) $('mi_stA').value = toStation(night.startLF);
-        refreshMillLaneOptions();
-      }
-      else {
-        $('lg_night_start').value = toStation(night.startLF); $('lg_night_end').value = toStation(night.endLF);
-        if(!$('lg_start').value) $('lg_start').value = toStation(night.startLF);
-        refreshFillLaneOptions();
-      }
-      updateNightlyProgress(op);
+      $('lg_night_start').value = toStation(night.startLF); $('lg_night_end').value = toStation(night.endLF);
+      if(!$('lg_start').value) $('lg_start').value = toStation(night.startLF);
+      refreshFillLaneOptions();
+      updateNightlyProgress('fill');
     }
-  });
+  })();
 
   updateGlobalConfigVisibility('home');
   $('dr_date').value = todayStr();
