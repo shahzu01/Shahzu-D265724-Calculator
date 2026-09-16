@@ -280,6 +280,7 @@
     <button class="section-btn" data-section="drain">Drainage Cleaning</button>
     <button class="section-btn" data-section="roster">Truck Roster</button>
     <button class="section-btn" data-section="dailyreport">Daily Report</button>
+    <button class="section-btn" data-section="fulldepth">Full Depth Repair</button>
     <button class="section-btn" data-section="datamgmt">Data Management</button>
   </div>
 
@@ -996,6 +997,402 @@
   </div>
 
   <!-- ============ DATA MANAGEMENT (PIN-GATED LOCK/ERASE) ============ -->
+  <!-- ============ FULL DEPTH REPAIR / SINK HOLE SECTION ============ -->
+  <div class="section-content" id="section-fulldepth" style="display:none;">
+    <div class="stations" id="fdMainTabs">
+      <button class="stop active" data-maintab="repairlog">Repair Log</button>
+      <button class="stop" data-maintab="labor">Labor</button>
+      <button class="stop" data-maintab="equipment">Equipment</button>
+      <button class="stop" data-maintab="concdelivery">Concrete Delivery</button>
+      <button class="stop" data-maintab="conctest">Concrete Testing</button>
+      <button class="stop" data-maintab="asphaltverify">Asphalt Verification</button>
+      <button class="stop" data-maintab="sawcutqa">Saw Cutting QA</button>
+      <button class="stop" data-maintab="subbasecomp">Subbase Compaction</button>
+      <button class="stop" data-maintab="dowelqa">Dowel Installation QA</button>
+    </div>
+
+    <div class="fd-maintab-panel" id="fdmain-repairlog">
+      <div class="panel">
+        <h2>Sink Hole / Full-Depth Repair Log</h2>
+        <div class="desc">Full-depth pavement repair to fix a sink hole. Tracks excavation dimensions, placement depths, and the 9 associated pay items.</div>
+        <div class="grid2">
+          <div class="field"><label>Inspector</label><select id="fd_rl_inspector"></select></div>
+          <div class="field" id="fd_rl_inspector_other_wrap" style="display:none;"><label>Inspector Name</label><input type="text" id="fd_rl_inspector_other" placeholder="Type name"></div>
+          <div class="field"><label>Repair ID</label><input type="text" id="fd_rl_repairid" placeholder="SH-001"></div>
+          <div class="field"><label>Location / Station</label><input type="text" id="fd_rl_location" placeholder="e.g. 145+20 RT lane"></div>
+          <div class="field"><label>Date</label><input type="date" id="fd_rl_date"></div>
+        </div>
+
+        <div style="font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em; margin:16px 0 8px;">Excavation</div>
+        <div class="grid2">
+          <div class="field"><label>Length (ft)</label><input type="number" id="fd_rl_exL" inputmode="decimal"></div>
+          <div class="field"><label>Width (ft)</label><input type="number" id="fd_rl_exW" inputmode="decimal"></div>
+          <div class="field"><label>Depth (ft)</label><input type="number" id="fd_rl_exD" inputmode="decimal"></div>
+        </div>
+
+        <div style="font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em; margin:16px 0 8px;">Placement Depths</div>
+        <div class="grid2">
+          <div class="field"><label>Concrete Depth Placed (ft)</label><input type="number" id="fd_rl_concD" inputmode="decimal"></div>
+          <div class="field"><label>Asphalt Depth Placed (ft)</label><input type="number" id="fd_rl_asphD" inputmode="decimal"></div>
+        </div>
+
+        <div style="font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em; margin:16px 0 8px;">Pay Items</div>
+        <div class="grid2">
+          <div class="field"><label>304.10119917 &mdash; Subbase Course Type 1011-2 (CY)</label><input type="number" id="fd_rl_subbase" inputmode="decimal"></div>
+          <div class="field"><label>404.1969 &mdash; 19F9 Binder Course Asphalt (TON)</label><input type="number" id="fd_rl_binder" inputmode="decimal"></div>
+          <div class="field"><label>407.0102 &mdash; Diluted Tack Coat (GAL)</label><input type="number" id="fd_rl_tack" inputmode="decimal"></div>
+          <div class="field"><label>510.02210018 &mdash; PCC Full-Depth Repair (CY)</label><input type="number" id="fd_rl_pccrepair" inputmode="decimal"></div>
+          <div class="field"><label>510.20000018 &mdash; PCC Pavement Lift Out (SY)</label><input type="number" id="fd_rl_pccliftout" inputmode="decimal"></div>
+          <div class="field"><label>510.81000018 &mdash; Drill &amp; Anchor Dowels (EACH)</label><input type="number" id="fd_rl_dowels" inputmode="numeric"></div>
+          <div class="field"><label>510.91000018 &mdash; Transverse Joints (LF)</label><input type="number" id="fd_rl_transjoints" inputmode="decimal"></div>
+          <div class="field"><label>520.09000010 &mdash; Saw Cutting Asphalt Concrete (LF)</label><input type="number" id="fd_rl_sawcut" inputmode="decimal"></div>
+          <div class="field"><label>619.01 &mdash; Work Zone Traffic Control (LS)</label>
+            <select id="fd_rl_trafficcontrol"><option value="">&mdash; Select &mdash;</option><option value="Included">Included</option></select>
+          </div>
+        </div>
+
+        <div style="font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em; margin:16px 0 8px;">Subbase</div>
+        <div class="grid2">
+          <div class="field"><label># of Lifts</label><input type="number" id="fd_rl_subbaseLifts" inputmode="numeric"></div>
+          <div class="field"><label>Ticket #</label><input type="text" id="fd_rl_subbaseTicket"></div>
+          <div class="field"><label>Quantity Delivered (CY)</label><input type="number" id="fd_rl_subbaseDelivered" inputmode="decimal"></div>
+          <div class="field"><label>Calculated Quantity (CY)</label><input type="text" id="fd_rl_subbaseCalc" readonly placeholder="Auto: L x W x Depth / 27"></div>
+        </div>
+
+        <div class="result" style="margin-top:14px;">
+          <div class="label">Calculated Cross-Checks</div>
+          <div class="locked-row"><span class="k">Concrete (calc, L&times;W&times;concrete depth /27)</span><span class="v" id="fd_rl_concCalc">&mdash;</span></div>
+          <div class="locked-row"><span class="k">Asphalt (calc, L&times;W&times;asphalt depth, tons)</span><span class="v" id="fd_rl_asphCalc">&mdash;</span></div>
+        </div>
+
+        <div class="log-toolbar" style="margin-top:14px;"><button class="btn primary" id="fd_rl_add">+ Add to Report</button></div>
+        <div class="log-count" id="fd_rl_count">0 entries logged</div>
+        <div class="log-toolbar">
+          <button class="btn" id="fd_rl_export">Export CSV</button>
+          <button class="btn primary" id="fd_rl_sync">&#9729; Sync to Cloud</button>
+          <button class="btn danger" id="fd_rl_clear">Clear Report</button>
+        </div>
+        <div class="log-table-wrap">
+          <table class="log" id="fd_rl_table">
+            <thead><tr><th>Date</th><th>Inspector</th><th>Repair ID</th><th>Location</th><th>Excavation (LxWxD)</th><th>Subbase</th><th>Binder</th><th>Tack</th><th>PCC Repair</th><th>PCC Liftout</th><th>Dowels</th><th>Trans. Joints</th><th>Saw Cut</th><th></th></tr></thead>
+            <tbody id="fd_rl_tbody"></tbody>
+          </table>
+          <div class="log-empty" id="fd_rl_empty">No entries yet.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="fd-maintab-panel" id="fdmain-labor" style="display:none;">
+      <div class="panel">
+        <h2>Labor</h2>
+        <div class="desc">One row per person, per repair.</div>
+        <div class="grid2">
+          <div class="field"><label>Inspector</label><select id="fd_lb_inspector"></select></div>
+          <div class="field" id="fd_lb_inspector_other_wrap" style="display:none;"><label>Inspector Name</label><input type="text" id="fd_lb_inspector_other" placeholder="Type name"></div>
+          <div class="field"><label>Repair ID</label><input type="text" id="fd_lb_repairid" placeholder="SH-001"></div>
+          <div class="field"><label>Role</label>
+            <select id="fd_lb_role">
+              <option value="">&mdash; Select role &mdash;</option>
+              <option value="Laborer Foreman">Laborer Foreman</option>
+              <option value="Laborer Apprentice">Laborer Apprentice</option>
+              <option value="Laborer Operator">Laborer Operator</option>
+              <option value="Laborer Journeyman">Laborer Journeyman</option>
+            </select>
+          </div>
+          <div class="field"><label>Name</label><input type="text" id="fd_lb_name" placeholder="Type name"></div>
+          <div class="field"><label>Date</label><input type="date" id="fd_lb_date"></div>
+        </div>
+        <div class="log-toolbar" style="margin-top:14px;"><button class="btn primary" id="fd_lb_add">+ Add to Report</button></div>
+        <div class="log-count" id="fd_lb_count">0 entries logged</div>
+        <div class="log-toolbar">
+          <button class="btn" id="fd_lb_export">Export CSV</button>
+          <button class="btn primary" id="fd_lb_sync">&#9729; Sync to Cloud</button>
+          <button class="btn danger" id="fd_lb_clear">Clear Report</button>
+        </div>
+        <div class="log-table-wrap">
+          <table class="log" id="fd_lb_table">
+            <thead><tr><th>Date</th><th>Inspector</th><th>Repair ID</th><th>Role</th><th>Name</th><th></th></tr></thead>
+            <tbody id="fd_lb_tbody"></tbody>
+          </table>
+          <div class="log-empty" id="fd_lb_empty">No entries yet.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="fd-maintab-panel" id="fdmain-equipment" style="display:none;">
+      <div class="panel">
+        <h2>Equipment</h2>
+        <div class="desc">One row per piece of equipment, per repair.</div>
+        <div class="grid2">
+          <div class="field"><label>Inspector</label><select id="fd_eq_inspector"></select></div>
+          <div class="field" id="fd_eq_inspector_other_wrap" style="display:none;"><label>Inspector Name</label><input type="text" id="fd_eq_inspector_other" placeholder="Type name"></div>
+          <div class="field"><label>Repair ID</label><input type="text" id="fd_eq_repairid" placeholder="SH-001"></div>
+          <div class="field"><label>Equipment Type</label>
+            <select id="fd_eq_type">
+              <option value="">&mdash; Select type &mdash;</option>
+              <option value="Attenuator Truck (IMP C)">Attenuator Truck (IMP C)</option>
+              <option value="Heavy Duty Pickup Truck">Heavy Duty Pickup Truck</option>
+              <option value="Light Duty Pickup Truck">Light Duty Pickup Truck</option>
+              <option value="Light Tower">Light Tower</option>
+              <option value="Backhoe">Backhoe</option>
+              <option value="Excavator">Excavator</option>
+              <option value="Generator">Generator</option>
+              <option value="Dowel EZ Drill">Dowel EZ Drill</option>
+              <option value="Dump Truck">Dump Truck</option>
+              <option value="Asphalt Truck">Asphalt Truck</option>
+            </select>
+          </div>
+          <div class="field"><label>Quantity</label><input type="number" id="fd_eq_qty" value="1" inputmode="numeric"></div>
+          <div class="field"><label>Equipment # (optional)</label><input type="text" id="fd_eq_num"></div>
+          <div class="field" id="fd_eq_ticket_wrap" style="display:none;"><label>Ticket #</label><input type="text" id="fd_eq_ticket"></div>
+          <div class="field"><label>Date</label><input type="date" id="fd_eq_date"></div>
+        </div>
+        <div class="log-toolbar" style="margin-top:14px;"><button class="btn primary" id="fd_eq_add">+ Add to Report</button></div>
+        <div class="log-count" id="fd_eq_count">0 entries logged</div>
+        <div class="log-toolbar">
+          <button class="btn" id="fd_eq_export">Export CSV</button>
+          <button class="btn primary" id="fd_eq_sync">&#9729; Sync to Cloud</button>
+          <button class="btn danger" id="fd_eq_clear">Clear Report</button>
+        </div>
+        <div class="log-table-wrap">
+          <table class="log" id="fd_eq_table">
+            <thead><tr><th>Date</th><th>Inspector</th><th>Repair ID</th><th>Type</th><th>Qty</th><th>Equip #</th><th>Ticket</th><th></th></tr></thead>
+            <tbody id="fd_eq_tbody"></tbody>
+          </table>
+          <div class="log-empty" id="fd_eq_empty">No entries yet.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="fd-maintab-panel" id="fdmain-concdelivery" style="display:none;">
+      <div class="panel">
+        <h2>Concrete Delivery</h2>
+        <div class="desc">Subcontractor: ELM Transit Mix Transportation. Placement deadline is auto-calculated as 90 minutes from arrival.</div>
+        <div class="grid2">
+          <div class="field"><label>Inspector</label><select id="fd_cd_inspector"></select></div>
+          <div class="field" id="fd_cd_inspector_other_wrap" style="display:none;"><label>Inspector Name</label><input type="text" id="fd_cd_inspector_other" placeholder="Type name"></div>
+          <div class="field"><label>Repair ID</label><input type="text" id="fd_cd_repairid" placeholder="SH-001"></div>
+          <div class="field"><label>Ticket #</label><input type="text" id="fd_cd_ticket"></div>
+          <div class="field"><label>Mix Design Correct?</label>
+            <select id="fd_cd_mixcorrect"><option value="">&mdash; Select &mdash;</option><option value="Y">Yes</option><option value="N">No</option></select>
+          </div>
+          <div class="field"><label>Time Left Plant</label><input type="time" id="fd_cd_timeLeft"></div>
+          <div class="field"><label>Time Arrived at Site</label><input type="time" id="fd_cd_timeArrived"></div>
+          <div class="field"><label>Date</label><input type="date" id="fd_cd_date"></div>
+        </div>
+        <div class="result" style="margin-top:10px;">
+          <div class="label">Placement Deadline (Arrival + 90 min)</div>
+          <div class="value" id="fd_cd_deadline">&mdash;</div>
+        </div>
+        <div class="log-toolbar" style="margin-top:14px;"><button class="btn primary" id="fd_cd_add">+ Add to Report</button></div>
+        <div class="log-count" id="fd_cd_count">0 entries logged</div>
+        <div class="log-toolbar">
+          <button class="btn" id="fd_cd_export">Export CSV</button>
+          <button class="btn primary" id="fd_cd_sync">&#9729; Sync to Cloud</button>
+          <button class="btn danger" id="fd_cd_clear">Clear Report</button>
+        </div>
+        <div class="log-table-wrap">
+          <table class="log" id="fd_cd_table">
+            <thead><tr><th>Date</th><th>Inspector</th><th>Repair ID</th><th>Ticket</th><th>Mix OK</th><th>Left Plant</th><th>Arrived</th><th>Deadline</th><th></th></tr></thead>
+            <tbody id="fd_cd_tbody"></tbody>
+          </table>
+          <div class="log-empty" id="fd_cd_empty">No entries yet.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="fd-maintab-panel" id="fdmain-conctest" style="display:none;">
+      <div class="panel">
+        <h2>Concrete Testing</h2>
+        <div class="desc">Subcontractor: Universal Concrete Testing.</div>
+        <div class="grid2">
+          <div class="field"><label>Inspector</label><select id="fd_ct_inspector"></select></div>
+          <div class="field" id="fd_ct_inspector_other_wrap" style="display:none;"><label>Inspector Name</label><input type="text" id="fd_ct_inspector_other" placeholder="Type name"></div>
+          <div class="field"><label>Repair ID</label><input type="text" id="fd_ct_repairid" placeholder="SH-001"></div>
+          <div class="field"><label>Hours Since Placement</label><input type="number" id="fd_ct_hours" value="3" inputmode="decimal"></div>
+          <div class="field"><label>Strength (PSI)</label><input type="number" id="fd_ct_psi" inputmode="numeric"></div>
+          <div class="field"><label>Slump (in)</label><input type="number" id="fd_ct_slump" inputmode="decimal"></div>
+          <div class="field"><label>Temperature (&deg;F)</label><input type="number" id="fd_ct_temp" inputmode="numeric"></div>
+          <div class="field"><label>Date</label><input type="date" id="fd_ct_date"></div>
+        </div>
+        <div class="log-toolbar" style="margin-top:14px;"><button class="btn primary" id="fd_ct_add">+ Add to Report</button></div>
+        <div class="log-count" id="fd_ct_count">0 entries logged</div>
+        <div class="log-toolbar">
+          <button class="btn" id="fd_ct_export">Export CSV</button>
+          <button class="btn primary" id="fd_ct_sync">&#9729; Sync to Cloud</button>
+          <button class="btn danger" id="fd_ct_clear">Clear Report</button>
+        </div>
+        <div class="log-table-wrap">
+          <table class="log" id="fd_ct_table">
+            <thead><tr><th>Date</th><th>Inspector</th><th>Repair ID</th><th>Hours</th><th>PSI</th><th>Slump</th><th>Temp</th><th></th></tr></thead>
+            <tbody id="fd_ct_tbody"></tbody>
+          </table>
+          <div class="log-empty" id="fd_ct_empty">No entries yet.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="fd-maintab-panel" id="fdmain-asphaltverify" style="display:none;">
+      <div class="panel">
+        <h2>Asphalt Verification</h2>
+        <div class="desc">19F9 Binder Course Asphalt, 60 Series Compaction &mdash; ticket and temperature verification.</div>
+        <div class="grid2">
+          <div class="field"><label>Inspector</label><select id="fd_av_inspector"></select></div>
+          <div class="field" id="fd_av_inspector_other_wrap" style="display:none;"><label>Inspector Name</label><input type="text" id="fd_av_inspector_other" placeholder="Type name"></div>
+          <div class="field"><label>Repair ID</label><input type="text" id="fd_av_repairid" placeholder="SH-001"></div>
+          <div class="field"><label>Ticket #</label><input type="text" id="fd_av_ticket"></div>
+          <div class="field"><label>Temperature (&deg;F)</label><input type="number" id="fd_av_temp" inputmode="numeric"></div>
+          <div class="field"><label>Date</label><input type="date" id="fd_av_date"></div>
+        </div>
+        <div class="log-toolbar" style="margin-top:14px;"><button class="btn primary" id="fd_av_add">+ Add to Report</button></div>
+        <div class="log-count" id="fd_av_count">0 entries logged</div>
+        <div class="log-toolbar">
+          <button class="btn" id="fd_av_export">Export CSV</button>
+          <button class="btn primary" id="fd_av_sync">&#9729; Sync to Cloud</button>
+          <button class="btn danger" id="fd_av_clear">Clear Report</button>
+        </div>
+        <div class="log-table-wrap">
+          <table class="log" id="fd_av_table">
+            <thead><tr><th>Date</th><th>Inspector</th><th>Repair ID</th><th>Ticket</th><th>Temp</th><th></th></tr></thead>
+            <tbody id="fd_av_tbody"></tbody>
+          </table>
+          <div class="log-empty" id="fd_av_empty">No entries yet.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="fd-maintab-panel" id="fdmain-sawcutqa" style="display:none;">
+      <div class="panel">
+        <h2>Saw Cutting QA</h2>
+        <div class="desc">Subcontractor: Island Pavement Cutting Corp Inc.</div>
+        <div class="grid2">
+          <div class="field"><label>Inspector</label><select id="fd_sc_inspector"></select></div>
+          <div class="field" id="fd_sc_inspector_other_wrap" style="display:none;"><label>Inspector Name</label><input type="text" id="fd_sc_inspector_other" placeholder="Type name"></div>
+          <div class="field"><label>Repair ID</label><input type="text" id="fd_sc_repairid" placeholder="SH-001"></div>
+          <div class="field"><label>Laborer</label>
+            <select id="fd_sc_laborer"><option value="Bill Grandorf">Bill Grandorf</option><option value="__other__">Other (type in)</option></select>
+          </div>
+          <div class="field" id="fd_sc_laborer_other_wrap" style="display:none;"><label>Laborer Name</label><input type="text" id="fd_sc_laborer_other"></div>
+          <div class="field"><label>Date</label><input type="date" id="fd_sc_date"></div>
+        </div>
+        <div class="log-toolbar" style="margin-top:14px;"><button class="btn primary" id="fd_sc_add">+ Add to Report</button></div>
+        <div class="log-count" id="fd_sc_count">0 entries logged</div>
+        <div class="log-toolbar">
+          <button class="btn" id="fd_sc_export">Export CSV</button>
+          <button class="btn primary" id="fd_sc_sync">&#9729; Sync to Cloud</button>
+          <button class="btn danger" id="fd_sc_clear">Clear Report</button>
+        </div>
+        <div class="log-table-wrap">
+          <table class="log" id="fd_sc_table">
+            <thead><tr><th>Date</th><th>Inspector</th><th>Repair ID</th><th>Subcontractor</th><th>Laborer</th><th></th></tr></thead>
+            <tbody id="fd_sc_tbody"></tbody>
+          </table>
+          <div class="log-empty" id="fd_sc_empty">No entries yet.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="fd-maintab-panel" id="fdmain-subbasecomp" style="display:none;">
+      <div class="panel">
+        <h2>Subbase Compaction</h2>
+        <div class="grid2">
+          <div class="field"><label>Inspector</label><select id="fd_sb_inspector"></select></div>
+          <div class="field" id="fd_sb_inspector_other_wrap" style="display:none;"><label>Inspector Name</label><input type="text" id="fd_sb_inspector_other" placeholder="Type name"></div>
+          <div class="field"><label>Repair ID</label><input type="text" id="fd_sb_repairid" placeholder="SH-001"></div>
+          <div class="field"><label>Compaction</label>
+            <select id="fd_sb_result"><option value="">&mdash; Select &mdash;</option><option value="Pass">Pass</option><option value="Fail">Fail</option></select>
+          </div>
+          <div class="field"><label>Date</label><input type="date" id="fd_sb_date"></div>
+        </div>
+        <div class="log-toolbar" style="margin-top:14px;"><button class="btn primary" id="fd_sb_add">+ Add to Report</button></div>
+        <div class="log-count" id="fd_sb_count">0 entries logged</div>
+        <div class="log-toolbar">
+          <button class="btn" id="fd_sb_export">Export CSV</button>
+          <button class="btn primary" id="fd_sb_sync">&#9729; Sync to Cloud</button>
+          <button class="btn danger" id="fd_sb_clear">Clear Report</button>
+        </div>
+        <div class="log-table-wrap">
+          <table class="log" id="fd_sb_table">
+            <thead><tr><th>Date</th><th>Inspector</th><th>Repair ID</th><th>Result</th><th></th></tr></thead>
+            <tbody id="fd_sb_tbody"></tbody>
+          </table>
+          <div class="log-empty" id="fd_sb_empty">No entries yet.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="fd-maintab-panel" id="fdmain-dowelqa" style="display:none;">
+      <div class="panel">
+        <h2>Dowel Installation QA</h2>
+        <div class="desc">Reference: hole depth 7" (+3/8"/-0"), dowel protrusion 6.5"-7" from saw cut face, alignment within &plusmn;1/8" of centerline/surface/each other. All checks Pass/Fail.</div>
+        <div class="grid2">
+          <div class="field"><label>Inspector</label><select id="fd_dq_inspector"></select></div>
+          <div class="field" id="fd_dq_inspector_other_wrap" style="display:none;"><label>Inspector Name</label><input type="text" id="fd_dq_inspector_other" placeholder="Type name"></div>
+          <div class="field"><label>Repair ID</label><input type="text" id="fd_dq_repairid" placeholder="SH-001"></div>
+          <div class="field"><label>Date</label><input type="date" id="fd_dq_date"></div>
+        </div>
+        <div id="fd_dq_checks" style="margin-top:10px;">
+          <div class="field full" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding:10px 0;">
+            <label style="margin:0;">Hole diameter correct (per anchoring manufacturer spec)</label>
+            <select id="fd_dq_holeDiameter" style="width:120px;"><option value="">&mdash;</option><option value="Pass">Pass</option><option value="Fail">Fail</option></select>
+          </div>
+          <div class="field full" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding:10px 0;">
+            <label style="margin:0;">Hole depth correct (ref: 7" +3/8"/-0")</label>
+            <select id="fd_dq_holeDepth" style="width:120px;"><option value="">&mdash;</option><option value="Pass">Pass</option><option value="Fail">Fail</option></select>
+          </div>
+          <div class="field full" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding:10px 0;">
+            <label style="margin:0;">Hole spacing/count correct (ref: 4/wheelpath, 8/lane, 12" o.c.)</label>
+            <select id="fd_dq_holeSpacing" style="width:120px;"><option value="">&mdash;</option><option value="Pass">Pass</option><option value="Fail">Fail</option></select>
+          </div>
+          <div class="field full" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding:10px 0;">
+            <label style="margin:0;">Dust blown out of hole (compressed air)</label>
+            <select id="fd_dq_dustBlown" style="width:120px;"><option value="">&mdash;</option><option value="Pass">Pass</option><option value="Fail">Fail</option></select>
+          </div>
+          <div class="field full" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding:10px 0;">
+            <label style="margin:0;">Anchoring material uniformly mixed before use</label>
+            <select id="fd_dq_materialMixed" style="width:120px;"><option value="">&mdash;</option><option value="Pass">Pass</option><option value="Fail">Fail</option></select>
+          </div>
+          <div class="field full" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding:10px 0;">
+            <label style="margin:0;">Epoxy/anchoring material placed correctly</label>
+            <select id="fd_dq_epoxyPlaced" style="width:120px;"><option value="">&mdash;</option><option value="Pass">Pass</option><option value="Fail">Fail</option></select>
+          </div>
+          <div class="field full" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding:10px 0;">
+            <label style="margin:0;">Dowel protrusion correct (ref: 6.5"-7" from saw cut face)</label>
+            <select id="fd_dq_protrusion" style="width:120px;"><option value="">&mdash;</option><option value="Pass">Pass</option><option value="Fail">Fail</option></select>
+          </div>
+          <div class="field full" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding:10px 0;">
+            <label style="margin:0;">Alignment correct (ref: parallel, &plusmn;1/8")</label>
+            <select id="fd_dq_alignment" style="width:120px;"><option value="">&mdash;</option><option value="Pass">Pass</option><option value="Fail">Fail</option></select>
+          </div>
+          <div class="field full" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding:10px 0;">
+            <label style="margin:0;">Grout retention disk placed (tight against face)</label>
+            <select id="fd_dq_groutDisk" style="width:120px;"><option value="">&mdash;</option><option value="Pass">Pass</option><option value="Fail">Fail</option></select>
+          </div>
+        </div>
+        <div class="grid2" style="margin-top:10px;">
+          <div class="field"><label>Cage of dowels used?</label>
+            <select id="fd_dq_cageUsed"><option value="">&mdash; Select &mdash;</option><option value="Y">Yes</option><option value="N">No</option></select>
+          </div>
+          <div class="field" id="fd_dq_cageCount_wrap" style="display:none;"><label>Dowels per cage</label><input type="number" id="fd_dq_cageCount" inputmode="numeric"></div>
+        </div>
+        <div class="log-toolbar" style="margin-top:14px;"><button class="btn primary" id="fd_dq_add">+ Add to Report</button></div>
+        <div class="log-count" id="fd_dq_count">0 entries logged</div>
+        <div class="log-toolbar">
+          <button class="btn" id="fd_dq_export">Export CSV</button>
+          <button class="btn primary" id="fd_dq_sync">&#9729; Sync to Cloud</button>
+          <button class="btn danger" id="fd_dq_clear">Clear Report</button>
+        </div>
+        <div class="log-table-wrap">
+          <table class="log" id="fd_dq_table">
+            <thead><tr><th>Date</th><th>Inspector</th><th>Repair ID</th><th>Overall</th><th>Cage</th><th></th></tr></thead>
+            <tbody id="fd_dq_tbody"></tbody>
+          </table>
+          <div class="log-empty" id="fd_dq_empty">No entries yet.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="section-content" id="section-datamgmt" style="display:none;">
     <div class="panel" id="dm_gatePanel">
       <h2>Data Management</h2>
@@ -1252,6 +1649,15 @@
     document.getElementById('millmain-'+btn.dataset.maintab).style.display='block';
   });
 
+  document.getElementById('fdMainTabs').addEventListener('click', (e) => {
+    const btn = e.target.closest('.stop');
+    if(!btn) return;
+    document.querySelectorAll('#fdMainTabs .stop').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.fd-maintab-panel').forEach(p=>p.style.display='none');
+    document.getElementById('fdmain-'+btn.dataset.maintab).style.display='block';
+  });
+
   /* ================= FILL CALCULATORS ================= */
   function calcFill(){
     const rho = density();
@@ -1381,22 +1787,48 @@
   }
 
   /* ================= INSPECTORS ================= */
-  const INSPECTORS = ['John Lopera','Ajit Dharmashin','Jason White','Ulfat Shahzad'];
+  const INSPECTORS = ['John Lopera','Ajit Dhanesan','Jason White','Ulfat Shahzad'];
 
   /* ================= DRAINAGE STRUCTURE DATA (from project tracker) ================= */
 const DRAIN_STRUCTURES = [{"id":"DS1-1","desc":"SW CORNER OF SUNRISE HWY AND THEATER RD","dir":"EB"},{"id":"DS1-2","desc":"FAR RIGHT LANE ON SUNRISE HWY BY THEATER RD","dir":"EB"},{"id":"DS1-3","desc":"ON SUNRISE HWY 330 FEET FROM THEATER RD","dir":"EB"},{"id":"DS1-4","desc":"75 FEET FROM DS1-3 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-5","desc":"45 FEET FROM SE CORNER OF GREEN ACRES RD WEST ON SUNRISE HWY","dir":"EB"},{"id":"DS1-6","desc":"290 FEET FROM DS1-5 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-7","desc":"125 FEET FROM SE CORNER OF MARKE RD AND SUNRISE HWY","dir":"EB"},{"id":"DS1-8","desc":"182 FEET FROM DS1-7 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-9","desc":"230 FEET FROM DS1-8 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-10","desc":"250 FEET FROM DS1-9 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-11","desc":"251 FEET FROM DS1-10 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-12","desc":"188 FEET FROM SE CORNER ON SUNRISE HWY AND TARGET ENTRANCE","dir":"EB"},{"id":"DS1-13","desc":"240 FEET FROM DS1-12 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-14","desc":"45 FEET FROM SE CORNER ON S TERRACE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-15","desc":"190 FEET FROM DS1-14 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-16","desc":"175 FEET FROM DS1-15 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-17","desc":"70 FEET FROM SW CORNER OF GREEN ACRES RD E AND SUNRISE HWY","dir":"EB"},{"id":"DS1-18","desc":"65 FEET FROM SE CORNER OF GREEN ACRES RD E AND SUNRISE HWY","dir":"EB"},{"id":"DS1-19","desc":"250 FEET FROM DS1-18 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-20","desc":"250 FEET FROM DS1-19 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-21","desc":"250 FEET FROM DS1-20 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-22","desc":"250 FEET FROM DS1-21 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-23","desc":"190 FEET FROM THE SE CORNER OF MILL RD AND SUNRISE HWY","dir":"EB"},{"id":"DS1-24","desc":"290 FEET FROM DS1-23 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-25","desc":"290 FEET FROM DS1-24 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-26","desc":"290 FEET FROM DS1-25 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-27","desc":"225 FEET FROM DS1-26 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-28","desc":"SW CORNER OF S FRANKLIN RD AND SUNRISE HWY","dir":"EB"},{"id":"DS1-29","desc":"SW CORNER OF 1ST STREET AND SUNRISE HWY","dir":"EB"},{"id":"DS1-30","desc":"SW CORNER OF LEGION PL AND SUNRISE HWY","dir":"EB"},{"id":"DS1-31","desc":"SE CORNER OF LEGION PL AND SUNRISE HWY","dir":"EB"},{"id":"DS1-32","desc":"45 FEET FROM DS1-31 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-33","desc":"45 FEET FROM DS1-32 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-34","desc":"155 FEET FROM FROM DS1-33 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-35","desc":"140 FEET FROM FROM DS1-34 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-36","desc":"SE CORNER OF ROCKAWAY BLVD AND SUNRISE HWY","dir":"EB"},{"id":"DS1-37","desc":"65 FEET FROM SW CORNER OF 4TH STREET AND SUNRISE HWY","dir":"EB"},{"id":"DS1-38","desc":"SE CORNER OF 4TH STREET AND SUNRISE HWY","dir":"EB"},{"id":"DS1-39","desc":"SE CORNER OF 5TH STREET AND SUNRISE HWY","dir":"EB"},{"id":"DS1-40","desc":"160 FEET FROM DS1-39 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-41","desc":"SE CORNER OF 6TH STREET AND SUNRISE HWY","dir":"EB"},{"id":"DS1-42","desc":"190 FEET FROM DS1-41 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-43","desc":"60 FEET FROM DS1-42 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-44","desc":"SW CORNER OF BROOKSIDE RD AND SUNRISE HWY","dir":"EB"},{"id":"DS1-45","desc":"205 FEET FROM DS1-44 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-46","desc":"SW CORNER OF BROOKLYN AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-47","desc":"50 FEET FROM SE CORNER OF BROOKLYN AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-48","desc":"SE CORNER OF ASTOR PLACE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-49","desc":"50 FEET FROM SE CORNER OF WOODLAWN AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-50","desc":"SE CORNER OF SCRANTON AVE AND BISMARK RD","dir":"EB"},{"id":"DS1-51","desc":"SW CORNER OF SCRANTON AVE AND BISMARK RD","dir":"EB"},{"id":"DS1-52","desc":"SE CORNER OF HORTON AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-53","desc":"190 FEET FROM DS1-52 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-54","desc":"170 FEET FROM SE CORNER OF RODGER AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-55","desc":"SE CORNER OF RODGERS AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-56","desc":"215 FEET FROM RODGERS AVE ON SUNRISE HWY","dir":"EB"},{"id":"DS1-57","desc":"SE CORNER OF BIXLEY AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-58","desc":"SW CORNER OF BIXLEY AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-59","desc":"SW CORNER OF FREER AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-60","desc":"SE CORNER OF FREER AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-61","desc":"90 FEET FROM DS1-60 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-62","desc":"SE CORNER OF NORMAN ST AND SUNRISE HWY","dir":"EB"},{"id":"DS1-63","desc":"SE CORNER OF REYAM RD AND SUNRISE HWY","dir":"EB"},{"id":"DS1-64","desc":"205 FEET FROM SE CORNER OF REYAM RD AND SUNRISE HWY","dir":"EB"},{"id":"DS1-65","desc":"97 FEET FROM DS1-64 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-66","desc":"270 FEET FROM DS1-65 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-67","desc":"140 FEET FROM DS1-66 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-68","desc":"150 FEET FROM DS1-67 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-69","desc":"300 FEET FROM SE CORNER OF ENDVIEW AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-70","desc":"WEST SIDE OF SW RAMP ON BROADWAY AND SUNRISE HWY","dir":"EB"},{"id":"DS1-71","desc":"SOUTH SIDE OF SW RAMP ON BROADWAY AND SUNRISE HWY","dir":"EB"},{"id":"DS1-72","desc":"SW CORNER OF ROOSEVELT AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-73","desc":"SE CORNER OF ROOSEVELT AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-74","desc":"65 FEET FROM SW CORNER OF FOREST AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-75","desc":"80 FEET FROM SE CORNER OF FOREST AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-76","desc":"145 FEET FROM THE SE CORNER OF RANDALL AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-77","desc":"SW CORNER OF EARLE AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-78","desc":"130 FEET FROM THE SE CORNER OF EARLE AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-79","desc":"SW CORNER OF VINCENT AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-80","desc":"SE CORNER OF VINCENT AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-81","desc":"120 FEET FROM DS1-80 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-82","desc":"SE CORNER OF DENTON AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-83","desc":"330 FEET FROM DS1-82 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-84","desc":"SW CORNER OF SHEPARD AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-85","desc":"SE CORNER OF SHEPARD AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-86","desc":"170 FEET FROM DS1-85 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-87","desc":"45 FEET FROM SE CORNER ON ROCKLYN AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-88","desc":"85 FEET FROM SE CORNER OF WYOMING AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-89","desc":"30 FEET FROM SW CORNER OF EXETER ST AND SUNRISE HWY","dir":"EB"},{"id":"DS1-90","desc":"30 FEET FROM SE CORNER OF EXETER ST AND SUNRISE HWY","dir":"EB"},{"id":"DS1-91","desc":"30 FEET FROM SW CORNER OF LAKEWOOD BLVD AND SUNRISE HWY","dir":"EB"},{"id":"DS1-92","desc":"180 FEET FROM SE CORNER OF LAKEWOOD BLVD AND SUNRISE HWY","dir":"EB"},{"id":"DS1-93","desc":"210 FEET FROM THE SE CORNER OF OCEAN AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-94","desc":"175 FEET FROM DS1-93 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-95","desc":"160 FEET FROM DS1-94 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-96","desc":"330 FEET FROM DS1-95 ON SUNRISE HWY ON MEDIAN AFTER STRIPING","dir":"EB"},{"id":"DS1-97","desc":"130 FEET FROM DS1-96 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-98","desc":"100 FEET FROM DS1-97 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-99","desc":"1000 FEET FROM DS1-98 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-100","desc":"150 FEET FROM DS1-99 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-101","desc":"405 FEET FROM SW CORNER OF N CENTRE AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-102","desc":"170 FEET FROM SW CORNER OF N CENTRE AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-103","desc":"SE CORNER OF N CENTRE AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-104","desc":"200 FEET FROM DS1-103 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-105","desc":"SE CORNER OF N VILLAGE AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-106","desc":"200 FEET FROM DS1-105 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-107","desc":"200 FEET FROM DS1-106 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-108","desc":"92 FEET FROM DS1-107 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-109","desc":"SW CORNER OF N PARK AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-110","desc":"100 FEET FROM SE CORNER OF N PARK AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-111","desc":"200 FEET FROM DS1-110 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-112","desc":"350 FEET FROM DS1-111 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-113","desc":"135 FEET FROM SW CORNER ON MORRIS AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-114","desc":"SE CORNER OF MORRIS AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-115","desc":"100 FEET FROM DS1-114 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-116","desc":"SW CORNER OF N MARION PL AND SUNRISE HWY","dir":"EB"},{"id":"DS1-117","desc":"SE CORNER OF N MARION PL AND SUNRISE HWY","dir":"EB"},{"id":"DS1-118","desc":"140 FEET FROM CROSSWALK ON MORRIS AVE ON EAST SIDE OF MEDIAN","dir":"EB"},{"id":"DS1-119","desc":"140 FEET FROM DS1-118 ON EAST SIDE OF MEDIAN ON SUNRISE HWY","dir":"EB"},{"id":"DS1-120","desc":"60 FEET FROM DS1-119 ON EAST SIDE OF MEDIAN ON SUNRISE HWY","dir":"EB"},{"id":"DS1-121","desc":"85 FEET FROM DS1-120 ON EAST SIDE OF MEDIAN ON SUNRISE HWY","dir":"EB"},{"id":"DS1-122","desc":"100 FEET FROM DS1-121 ON EAST SIDE OF MEDIAN ON SUNRISE HWY","dir":"EB"},{"id":"DS1-123","desc":"SE CORNER OF N KENSINGTON AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-124","desc":"SW CORNER OF MONTAUK AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-125","desc":"310 FEET FROM SE CORNER OF MONTAUK AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-126","desc":"SW CORNER OF N LONG BEACH ROAD AND SUNRISE HWY","dir":"EB"},{"id":"DS1-127","desc":"SE CORNER OF N LONG BEACH ROAD AND SUNRISE HWY","dir":"EB"},{"id":"DS1-128","desc":"235 FEET FROM SW CORNER OF N OCEANSIDE ROAD AND SUNRISE HWY","dir":"EB"},{"id":"DS1-129","desc":"SW CORNER OF CHESTNUT ST AND SUNRISE HWY","dir":"EB"},{"id":"DS1-130","desc":"105 FEET FROM SE CORNER OF CHESTNUT ST AND SUNRISE HWY","dir":"EB"},{"id":"DS1-131","desc":"SE CORNER OF STATE ST AND SUNRISE HWY","dir":"EB"},{"id":"DS1-132","desc":"SE STREET OF CONCORD ST AND SUNRISE HWY","dir":"EB"},{"id":"DS1-133","desc":"SW CORNER OF YORKTOWN ST AND SUNRISE HWY","dir":"EB"},{"id":"DS1-134","desc":"SE CORNER OF YORKTOWN ST AND SUNRISE HWY","dir":"EB"},{"id":"DS1-135","desc":"415 FEET FROM DS1-134 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-136","desc":"235 FEET FROM DS1-135 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-137","desc":"100 FEET FROM SE CORNER OF CHARING CROSS RD AND SUNRISE HWY","dir":"EB"},{"id":"DS1-138","desc":"SE CORNER OF DERBY RD AND SUNRISE HWY","dir":"EB"},{"id":"DS1-139","desc":"205 FEET FROM DS1-138 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-140","desc":"SE CORNER OF CROYDON DR AND SUNRISE HWY","dir":"EB"},{"id":"DS1-141","desc":"SW CORNER OF CROYDON DR AND SUNRISE HWY","dir":"EB"},{"id":"DS1-142","desc":"SW CORNER OF LANCASTER AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-143","desc":"SE CORNER OF LANCASTER AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-144","desc":"200 FEET FROM SE CORNER OF ROCKWOOD AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-145","desc":"SW CORNER OF EDNA CT AND SUNRISE HWY","dir":"EB"},{"id":"DS1-146","desc":"210 FEET FROM SE CORNER OF EDNA CT AND SUNRISE HWY","dir":"EB"},{"id":"DS1-147","desc":"425 FEET FROM DS1-146 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-148","desc":"335 FEET FROM DS1-147 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-149","desc":"SOUTH OF SE CORNER OF GRAND AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-150","desc":"EAST OF SE CORNER OF GRAND AVE AND SUNRISE HWY","dir":"EB"},{"id":"DS1-151","desc":"220 FEET FROM DS1-150 ON SUNRISE HWY","dir":"EB"},{"id":"DS1-152","desc":"NE CORNER OF GRAND AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-153","desc":"NW CORNER OF GRAND AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-154","desc":"175 FEET FROM DS1-153 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-155","desc":"210 FEET FROM DS1-154 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-156","desc":"250 FEET FROM DS1-155 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-157","desc":"200 FEET FROM DS1-156 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-158","desc":"50 FEET EAST OF THE NW RAMP ON CHARING CROSS RD AND SUNRISE HWY","dir":"WB"},{"id":"DS1-159","desc":"161 FEET WEST OF THE NW RAMP ON CHARING CROSS RD AND SUNRISE HWY","dir":"WB"},{"id":"DS1-160","desc":"400 FEET FROM DS1-159 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-161","desc":"360 FEET FROM NW RAMP ON YORKSHIRE ST AND SUNRISE HWY","dir":"WB"},{"id":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD AND SUNRISE HWY","dir":"WB"},{"id":"DS1-163","desc":"NE CORNER OF N LONG BEACH RD AND SUNRISE HWY","dir":"WB"},{"id":"DS1-164","desc":"WEST SIDE OF NW CORNER ON LONG BEACH RD AND SUNRISE HWY","dir":"WB"},{"id":"DS1-165","desc":"NORTH SIDE OF NW CORNER ON LONG BEACH RD AND SUNRISE HWY","dir":"WB"},{"id":"DS1-166","desc":"175 FEET FROM DS1-165 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-167","desc":"250 FEET FROM DS1-166 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-168","desc":"415 FEET FROM DS1-167 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-169","desc":"102 FEET FROM DS1-168 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-170","desc":"240 FEET FROM DS1-169 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-171","desc":"222 FEET FROM DS1-170 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-172","desc":"NE CORNER OF N FOREST AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-173","desc":"NW CORNER OF N FOREST AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-174","desc":"500 FEET FROM DS1-173 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-175","desc":"210 FEET FROM DS1-174 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-176","desc":"150 FEET FROM DS1-175 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-177","desc":"NE CORNER OF MORRIS AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-178","desc":"NW CORNER OF MORRIS AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-179","desc":"135 FEET FROM NW CORNER ON MORRIS AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-180","desc":"352 FEET FROM DS1-179 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-181","desc":"150 FEET FROM NW CORNER OF N PARK AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-182","desc":"170 FEET FROM DS1-181 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-183","desc":"NE CORNER OF N VILLAGE AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-184","desc":"200 FEET FROM NW CORNER OF N VILLAGE AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-185","desc":"NE CORNER OF N CENTRE AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-186","desc":"200 FEET FROM NW CORNER OF N CENTRE AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-187","desc":"185 FEET FROM NW CORNER OF BANKS AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-188","desc":"100 FEET FROM DS1-187 ON SUNRISE HWY JUST BEFORE MERRICK ROAD","dir":"WB"},{"id":"DS1-189","desc":"200 FEET FROM DS1-188 ON SUNRISE HWY UNDER MERRICK ROAD","dir":"WB"},{"id":"DS1-190","desc":"200 FEET FROM DS1-189 ON SUNRISE HWY UNDER MERRICK ROAD","dir":"WB"},{"id":"DS1-191","desc":"250 FEET FROM MERRICK ROAD BRIDGE ON WB SIDE OF MEDIAN","dir":"WB"},{"id":"DS1-192","desc":"475 FEET FROM DS1-190 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-193","desc":"450 FEET FROM NE CORNER OF OCEAN AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-194","desc":"350 FEET FROM NE CORNER OF OCEAN AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-195","desc":"200 FEET FROM NE CORNER OF OCEAN AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-196","desc":"370 FEET FROM THE NW CORNER OF OCEAN AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-197","desc":"175 FEET FROM DS1-196 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-198","desc":"250 FEET FROM DS1-197 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-199","desc":"NE CORNER OF ROCKLYN AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-200","desc":"NW CORNER OF ROCKLYN AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-201","desc":"175 FEET FROM DS1-200 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-202","desc":"220 FEET FROM DS1-201 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-203","desc":"120 FEET FROM DS1-202 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-204","desc":"135 FEET FROM DS1-203 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-205","desc":"EAST SIDE OF NE CORNER OF DENTON AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-206","desc":"NORTH SIDE OF NE CORNER OF DENTON AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-207","desc":"NE CORNER VINCENT AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-208","desc":"NW CORNER VINCENT AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-209","desc":"NE CORNER OF EARLE AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-210","desc":"NORTH SIDE OF NW CORNER OF EARLE AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-211","desc":"WEST SIDE OF NW CORNER OF EARLE AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-212","desc":"115 FEET FROM NE CORNER OF FOREST AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-213","desc":"NW CORNER OF FOREST AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-214","desc":"85 FEET FROM DS1-213 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-215","desc":"NE CORNER OF ATLANTIC AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-215A","desc":"ADD-ON STRUCTURE (not in original plan set) - located between DS1-215 and DS1-216 on Sunrise Hwy","dir":"WB"},{"id":"DS1-216","desc":"NE CORNER OF BROADWAY AND SUNRISE HWY","dir":"WB"},{"id":"DS1-217","desc":"NW CORNER OF BROADWAY AND SUNRISE HWY","dir":"WB"},{"id":"DS1-218","desc":"170 FEET FROM DS1-217 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-219","desc":"80 FEET FROM DS1-218 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-220","desc":"300 FEET FROM DS1-219 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-221","desc":"2 FEET FROM DS1-220 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-222","desc":"50 FEET FROM NE CORNER OF HORTON AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-223","desc":"25 FEET FROM NE CORNER OF HORTON AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-224","desc":"60 FEET FROM NW CORNER OF HORTON AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-225","desc":"60 FEET FROM DS1-224 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-226","desc":"150 FEET FROM DS1-225 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-227","desc":"300 FEET FROM DS1-226 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-228","desc":"300 FEET FROM DS1-227 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-229","desc":"NE CORNER OF SATTERIE AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-230","desc":"NW CORNER OF SATTERIE AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-231","desc":"2 FEET IN FRONT OF DS1-230 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-232","desc":"110 FEET FROM DS1-231 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-233","desc":"915 FEET FROM DS1-232 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-234","desc":"NE CORNER OF 4TH STREET AND SUNRISE HWY","dir":"WB"},{"id":"DS1-235","desc":"NW CORNER OF 4TH STREET AND SUNRISE HWY","dir":"WB"},{"id":"DS1-236","desc":"NE CORNER OF ROCKAWAY AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-237","desc":"NW CORNER OF ROCKAWAY AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-238","desc":"190 FEET FROM DS1-237 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-239","desc":"140 FEET FROM DS1-238 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-240","desc":"150 FEET FROM DS1-239 ON SUNRISE HWY","dir":"WB"},{"id":"DS1-241","desc":"NW CORNER OF S FRANKLIN AVE AND SUNRISE HWY","dir":"WB"},{"id":"DS1-242","desc":"1670 FEET FROM THE NW RAMP OF S TERRACE PLACE AND SUNRISE HWY","dir":"WB"}];
   /* ================= MAINLINE WIDTH TABLE (from corrected corridor survey) ================= */
   // Each entry: [startLF, endLF, width_ft] -- non-overlapping, gaps mean no confirmed width yet
-  const MAINLINE_WIDTHS = [[2430.0,2590.0,58],[2590.0,2662.0,60],[2662.0,3950.0,47],[3950.0,4650.0,46.5],[4650.0,4800.0,47],[4800.0,5148.0,60],[5148.0,5350.0,48],[5350.0,5768.0,60],[5768.0,6580.0,47.5],[6580.0,6750.0,48],[6750.0,7250.0,47.5],[7250.0,8320.0,74],[8320.0,8410.0,61],[8410.0,8600.0,47],[8600.0,8965.0,64],[8965.0,9538.0,47],[9600.0,10350.0,30],[10350.0,10420.0,46.3],[10420.0,10456.0,88.3],[10456.0,10700.0,42],[11900.0,12350.0,59],[13150.0,13562.0,88],[13562.0,13612.0,12],[14700.0,15016.0,52],[15800.0,15995.0,56.0],[16750.0,17057.0,57.0],[17135.0,17350.0,34],[17650.0,17965.0,55],[18400.0,18700.0,52],[19200.0,19335.0,43],[19550.0,19670.0,52],[19850.0,20094.0,52],[20200.0,20430.0,54],[20430.0,20975.0,43],[21350.0,21608.0,58],[22400.0,22779.0,63.0],[24923.0,25152.0,44],[25200.0,26500.0,44],[26950.0,27243.0,53],[28050.0,28252.0,51],[29450.0,29815.0,51],[29950.0,30025.0,54],[31000.0,31458.0,57],[32100.0,32563.0,57],[33300.0,33535.0,60],[33535.0,34050.0,47.0],[34315.0,34590.0,66],[34590.0,34913.0,47],[35135.0,35265.0,46],[35370.0,35590.0,46],[35650.0,36135.0,60],[36135.0,36410.0,47]];
+  const MAINLINE_WIDTHS = [[2430.0, 2590.0, 58], [2590.0, 2662.0, 58], [2662.0, 3950.0, 47], [3950.0, 4650.0, 46.5], [4650.0, 4800.0, 47], [4800.0, 5148.0, 60], [5148.0, 5350.0, 47], [5350.0, 5768.0, 60], [5768.0, 6580.0, 47.5], [6580.0, 6750.0, 47], [6750.0, 7250.0, 47.5], [7250.0, 8320.0, 74], [8320.0, 8410.0, 61], [8410.0, 8600.0, 47], [8600.0, 8965.0, 64], [8965.0, 9538.0, 47], [9538, 9600, 47], [9600.0, 9850.0, 30.0], [9850.0, 10350.0, 30.0], [10350.0, 10600.0, 30.0], [10600.0, 10990.0, 42.0], [10990.0, 11292.0, 44.0], [11292.0, 11750.0, 44.0], [11750.0, 11900.0, 47.0], [11900.0, 12325.0, 58.0], [12325.0, 13110.0, 47.0], [13110, 13593, 58], [13593, 14750, 47], [14750.0, 15050.0, 57.0], [15050.0, 15750.0, 47.0], [15750.0, 16000.0, 57.0], [16000.0, 16700.0, 47.0], [16700.0, 17080.0, 57.0], [17080.0, 17350.0, 35.0], [17350.0, 17600.0, 42.0], [17600.0, 17800.0, 48.0], [17800.0, 18035.0, 59.0], [18035.0, 18400.0, 48.0], [18400.0, 18675.0, 57.0], [18675.0, 18857.0, 40.0], [18857.0, 19024.0, 10.0], [19024.0, 19550.0, 43.0], [19550.0, 19735.0, 57.0], [19735.0, 19850.0, 47.0], [19850.0, 20090.0, 57.0], [20090.0, 20200.0, 47.0], [20200.0, 20425.0, 57.0], [20425.0, 21300.0, 47.0], [21300.0, 21630.0, 57.0], [21630.0, 22400.0, 47.0], [22400.0, 22770, 63.0], [22770.0, 23050.0, 47.0], [23050.0, 23200.0, 47.0], [23200.0, 23410.0, 70], [23410.0, 23862, 36.0], [23862.0, 24400.0, 36.0], [24400.0, 24550.0, 36.0], [24550.0, 24750.0, 36.0], [24750.0, 25000.0, 47.0], [25000.0, 25200.0, 36.0], [25200.0, 25450.0, 41.0], [25450.0, 27000.0, 47.0], [27000.0, 27250.0, 57.0], [27250.0, 28050.0, 47.0], [28050.0, 28285.0, 57.0], [28285.0, 29400.0, 47.0], [29400.0, 29850.0, 57.0], [29850.0, 29950.0, 47.0], [29950.0, 30150.0, 57.0], [30150.0, 31000.0, 47.0], [31000.0, 31455.0, 57.0], [31455.0, 32100.0, 47.0], [32100.0, 32575.0, 57.0], [32575.0, 33000.0, 47.0], [33000.0, 33340.0, 57.0], [33340.0, 34150.0, 47.0], [34150.0, 34450.0, 57.0], [34450.0, 35650.0, 47.0], [35650.0, 36135.0, 57.0], [36135.0, 36410.0, 47.0]];
 
   // Cross-street/driveway areas: [stationLF, name, area_sf]. Auto-added to nightly target when their station falls within Start/End.
-  const CROSS_STREET_AREAS = [[2490.0,"Theatre Rd",6516],[2956.5,"Green Acres Rd West",6012],[3630.0,"Market Rd",2221],[4800.0,"Target Entrance",4656],[5350.0,"S. Terrace",6780],[6580.0,"Green Acres Rd East",2997],[6775.0,"T-Mobile junction/lot",570],[7250.0,"Mill Rd (right-turn area)",5885],[9850.0,"1st St",935],[9950.0,"Legion St",1382.5],[10650.0,"Brooklyn Ave",3688.4],[10700.0,"Fourth St",1190],[10990.0,"Fifth St",1290],[11250.0,"6th St",1435],[11750.0,"Brookside Dr",1120],[12250.0,"Brooklyn Ave (Stewart/Satterie corner)",4952.3],[12560.0,"Astor Pl",840],[12810.0,"Adeline Pl",693.5],[13065.0,"Woodlawn Ave",555],[13327.0,"Bismarck Ave",4091],[13562.0,"Horton Ave (right)",826.5],[14515.0,"Rogers Ave",724.5],[15000.0,"Bixley Heath",1196],[15283.0,"Freer St",750],[15630.0,"Norman St",890],[15849.0,"Reyam Rd",1932.5],[16924.0,"Peninsula Blvd",16380],[17207.0,"Endview Ave",2012.5],[17875.0,"Broadway",7677.5],[18300.0,"Roosevelt St",1379.5],[18610.0,"Atlantic Ave",6420],[19024.0,"Forest Ave",2352],[19335.0,"Randall Ave",412.5],[19670.0,"Earle Ave",1102.5],[20025.0,"Vincent Ave",872],[20355.0,"Denton Ave",2136],[20975.0,"Huntington Ave",590],[21450.0,"Rocklyn Ave",4105.5],[21630.0,"Wyoming Ave",2520],[21988.0,"Exeter St",2544],[22242.0,"Lakewood Blvd",2268],[22690.0,"Ocean Ave",5335],[24923.0,"N Center Ave",3700],[25200.0,"N Village Ave",4028],[26050.0,"N Park",2350],[26500.0,"Parking No.1 / Burrito Blvd",1680],[27160.0,"Morris Ave",4708.5],[27522.0,"N Marion Pl",966],[27828.0,"N Lewis Pl",850],[28210.0,"N Forest Ave",955],[28670.0,"N Kensington Ave",720],[29150.0,"Montauk Ave",637.5],[29750.0,"N Long Beach",4887.5],[30082.0,"Oceanside Rd",405],[30450.0,"Enterprise Rent-a-Car",440],[30600.0,"McDonald's (main)",1131],[30750.0,"McDonald's (East)",585],[30850.0,"Mercedes Benz entrance",315],[31100.0,"Concord St",741],[32483.0,"Charring Cross Rd",3604],[32850.0,"Derby Rd",1350],[33464.0,"Croydon Dr",1471.5],[34050.0,"Lancaster Ave",1716],[35070.0,"Best Buy (back entrance)",594],[35265.0,"Baldwin Square entrance",836],[35590.0,"Wendy's entrance",522],[36038.0,"Grand Ave",6160]];
+  const CROSS_STREET_AREAS = [[2490.0, "Theatre Rd", 6516], [2956.5, "Green Acres Rd West", 6012], [3630.0, "Market Rd", 2221], [4800.0, "Target Entrance", 4656], [5350.0, "S. Terrace", 6780], [6580.0, "Green Acres Rd East", 2997], [6775.0, "T-Mobile junction/lot", 570], [7250.0, "Mill Rd (right-turn area)", 8736], [9850.0, "1st St", 935], [9950.0, "Legion St", 1382.5], [10650.0, "Brooklyn Ave", 6079], [10700.0, "Fourth St", 1190], [10990.0, "Fifth St", 1290], [11250.0, "6th St", 1435], [11750.0, "Brookside Dr", 1120], [12250.0, "Brooklyn Ave (Stewart/Satterie corner)", 4414], [12560.0, "Astor Pl", 840], [12810.0, "Adeline Pl", 693.5], [13065.0, "Woodlawn Ave", 555], [13110, "Scranton Ave", 4810], [13327.0, "Bismarck Ave", 851], [13562.0, "Horton Ave (right)", 660], [14515.0, "Rogers Ave", 724.5], [15000.0, "Bixley Heath", 1196], [15283.0, "Freer St", 750], [15630.0, "Norman St", 890], [15849.0, "Reyam Rd", 1035], [16924.0, "Peninsula Blvd", 16380], [17207.0, "Endview Ave", 2145], [17875.0, "Broadway", 7677.5], [18300.0, "Roosevelt St", 1379.5], [18610.0, "Atlantic Ave", 6420], [19024.0, "Forest Ave", 2352], [19335.0, "Randall Ave", 412.5], [19670.0, "Earle Ave", 1102.5], [20025.0, "Vincent Ave", 872], [20355.0, "Denton Ave", 2136], [20975.0, "Huntington Ave", 590], [21450.0, "Rocklyn Ave", 4105.5], [21630.0, "Wyoming Ave", 2520], [21988.0, "Exeter St", 2544], [22242.0, "Lakewood Blvd", 2268], [22690.0, "Ocean Ave", 5335], [23600, "Merrick Rd Bridge Merge Lane", 1692], [24923.0, "N Center Ave", 3700], [25200.0, "N Village Ave", 4028], [26050.0, "N Park", 2350], [26500.0, "Parking No.1 / Burrito Blvd", 1680], [27160.0, "Morris Ave", 4708.5], [27522.0, "N Marion Pl", 966], [27828.0, "N Lewis Pl", 850], [28210.0, "N Forest Ave", 955], [28670.0, "N Kensington Ave", 720], [29150.0, "Montauk Ave", 637.5], [29750.0, "N Long Beach", 4887.5], [30082.0, "Oceanside Rd", 405], [30450.0, "Enterprise Rent-a-Car", 440], [30600.0, "McDonald's (main)", 1131], [30750.0, "McDonald's (East)", 585], [30850.0, "Mercedes Benz entrance", 315], [31100.0, "Concord St", 741], [32483.0, "Charring Cross Rd", 3604], [32850.0, "Derby Rd", 1350], [33464.0, "Croydon Dr", 1471.5], [34050.0, "Lancaster Ave", 1716], [35070.0, "Best Buy (back entrance)", 594], [35265.0, "Baldwin Square entrance", 836], [35590.0, "Wendy's entrance", 522], [36038.0, "Grand Ave", 6160]];
 
   // Lane-count zones: [startLF, endLF, "4 lanes"|"3 lanes", status, basis]
   const LANE_ZONES = [[2430, 9600, "4 lanes", "Confirmed", "Stated explicitly across Day 1 (24+30-96+00): 'same 4 lanes continuing', 'Hicks to S. Franklin are 4 lanes'"], [9600, 10350, "3 lanes", "Confirmed - genuine exception", "S. Franklin to Rockaway: 30ft / 3 lanes, 10ft each, no shoulder"], [10420, 17135, "4 lanes", "Confirmed", "Rockaway to 4th St: explicit 4 lanes. 4th St to before Peninsula: '3 lanes+shoulder constant' = 4 lanes by shoulder-as-lane rule"], [17135, 17875, "3 lanes", "Confirmed - genuine exception", "Narrow stretch after Peninsula (34ft, no room for 4 lanes) continuing through 'Left turn+3 lanes' to Broadway, no shoulder"], [17875, 23250, "4 lanes", "Confirmed", "Broadway to exit ramp start: '3 lanes+shoulder constant' = 4 lanes by shoulder-as-lane rule"], [23250, 25200, "3 lanes", "Confirmed - genuine exception", "Merrick Rd bridge crossing: shoulder splits off into the exit ramp at 232+50, leaving 3 lanes only through the bridge and past N Center Ave, until N Village Ave"], [25200, 36410, "4 lanes", "Confirmed", "N Village Ave to End of Limits: '3 lanes+shoulder' = 4 lanes by shoulder-as-lane rule"]];
   // Turn lane table: [startLF, lengthLF, width_ft, name, laneCountAtThisSpot]
-  const TURN_LANES_TABLE = [[4800, 348, 12, "Target Entrance", 1], [5350, 418, 12, "S. Terrace", 1], [7250, 1070, 13, "Mill Rd Lane 5", 1], [7250, 1160, 13, "Mill Rd Lane 4", 1], [8600, 365, 17, "Hicks St", 1], [11900, 450, 12, "Satterie St", 1], [13150, 456, 88, "Horton Ave (avg incl. odd right lanes)", 1], [14700, 316, 52, "Bixley Heath", 1], [15800, 195, 9.5, "Reyam Rd", 1], [16750, 307, 5.25, "Peninsula Blvd (2 lanes)", 2], [17650, 315, 12, "Broadway", 1], [18400, 300, 12, "Atlantic Ave", 1], [19550, 120, 10, "Earle Ave", 1], [19850, 244, 10, "Vincent Ave", 1], [20200, 230, 12, "Denton Ave", 1], [21350, 258, 12, "Rocklyn Ave", 1], [22400, 379, 16.5, "Ocean Ave", 1], [24923, 229, 10, "N Center Ave", 1], [25200, 244, 10, "N Village Ave", 1], [26950, 293, 10, "Morris Ave", 1], [28050, 202, 9, "N Forest Ave", 1], [29450, 365, 8, "Long Beach Rd", 1], [29950, 75, 11, "Oceanside Rd", 1], [31000, 458, 14, "Yorktown", 1], [32100, 463, 14, "Charring Cross Rd", 1], [33300, 238, 13, "Croydon Dr", 1], [34315, 275, 19, "Chestnut St", 1], [35650, 485, 13, "Grand Ave", 1]];
+  const TURN_LANES_TABLE = [[4800, 348, 12, "Target Entrance", 1], [5350, 418, 12, "S. Terrace", 1], [7250, 1070, 13, "Mill Rd Lane 5", 1], [7250, 1160, 13, "Mill Rd Lane 4", 1], [8600, 365, 17, "Hicks St", 1], [11900, 450, 12, "Satterie St", 1], [13110, 483, 10, "Horton Ave", 1], [14700, 316, 52, "Bixley Heath", 1], [15800, 195, 9.5, "Reyam Rd", 1], [16750, 307, 5.25, "Peninsula Blvd (2 lanes)", 2], [17650, 315, 12, "Broadway", 1], [18400, 300, 12, "Atlantic Ave", 1], [19550, 120, 10, "Earle Ave", 1], [19850, 244, 10, "Vincent Ave", 1], [20200, 230, 12, "Denton Ave", 1], [21350, 258, 12, "Rocklyn Ave", 1], [22400, 379, 16.5, "Ocean Ave", 1], [24923, 229, 10, "N Center Ave", 1], [25200, 244, 10, "N Village Ave", 1], [26950, 293, 10, "Morris Ave", 1], [28050, 202, 9, "N Forest Ave", 1], [29450, 365, 8, "Long Beach Rd", 1], [29950, 75, 11, "Oceanside Rd", 1], [31000, 458, 14, "Yorktown", 1], [32100, 463, 14, "Charring Cross Rd", 1], [33300, 238, 13, "Croydon Dr", 1], [34315, 275, 19, "Chestnut St", 1], [35650, 485, 13, "Grand Ave", 1]];
   // Right turn lanes: [startLF, lengthLF, width_ft, name, count]. Width = total width minus 4x12ft standard through-lanes.
+  /*
+   * HORTON AVE / SCRANTON AVE CORRECTION (131+10 to 135+93) -- derivation note
+   * ------------------------------------------------------------------------------------
+   * Sunrise Hwy transitions into Scranton Ave at a shallow angle here (not a 90 deg
+   * cross street) -- the old "2 odd right lanes / taper" were actually the beginning
+   * of Scranton Ave itself, still inside the highway's mill/fill footprint until it
+   * fully splits away at 134+80. Reclassified as a genuine Lane 0 / cross-street
+   * (crew reaches it, completes it, returns to Lane 1) rather than a mainline pass.
+   * ------------------------------------------------------------------------------------
+   * Range              | LF  | Width  | Basis
+   * ------------------------------------------------------------------------------------
+   * ...to 131+10       | --  | 47 ft  | Standard baseline, unchanged
+   * 131+10 to 135+93   | 483 | 58 ft  | CORE width only: standard 4 lanes (48ft) +
+   *                    |     |        | Horton Ave left turn lane (~10ft), constant.
+   *                    |     |        | = 28,014 SF (MAINLINE_WIDTHS)
+   * 135+93 onward      | --  | 47 ft  | Reverts to standard baseline
+   * ------------------------------------------------------------------------------------
+   * Scranton Ave (Lane 0, in CROSS_STREET_AREAS): 4,810 SF, station 131+10, extent
+   * 131+10-134+80. This is the wedge area beyond the 58ft core width -- previously
+   * modeled as 2 tapering "right lanes" (13.0ft combined avg), now tracked as its own
+   * intersection since it's genuinely a separate road, not a mainline lane.
+   * Total area unchanged from the prior version (28,014 + 4,810 = 32,824 SF) --
+   * this is a reclassification, not a quantity change.
+   * Woodlawn Ave (130+65) and Bismarck Ave (133+27, crosses through the Scranton
+   * wedge visually) are both independently-measured, no overlap with Scranton's area.
+   */
   const RIGHT_TURN_LANES_TABLE = [[2430, 160, 10, "Theatre Rd", 1]];
 
   function getLaneZoneAt(lf){
@@ -1543,7 +1975,7 @@ const DRAIN_STRUCTURES = [{"id":"DS1-1","desc":"SW CORNER OF SUNRISE HWY AND THE
     };
   }
 
-const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-05"},{"structureId":"DS1-163","desc":"NE CORNER OF N LONG BEACH RD AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-05"},{"structureId":"DS1-166","desc":"175 FEET FROM DS1-165 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-05"},{"structureId":"DS1-167","desc":"250 FEET FROM DS1-166 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-05"},{"structureId":"DS1-168","desc":"415 FEET FROM DS1-167 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-05"},{"structureId":"DS1-169","desc":"102 FEET FROM DS1-168 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-05"},{"structureId":"DS1-170","desc":"240 FEET FROM DS1-169 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-05"},{"structureId":"DS1-171","desc":"222 FEET FROM DS1-170 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-05"},{"structureId":"DS1-172","desc":"NE CORNER OF N FOREST AVE AND SUNRISE HWY","dir":"WB","inspector":"Ajit Dharmashin","date":"2026-08-07"},{"structureId":"DS1-173","desc":"NW CORNER OF N FOREST AVE AND SUNRISE HWY","dir":"WB","inspector":"Ajit Dharmashin","date":"2026-08-07"},{"structureId":"DS1-174","desc":"500 FEET FROM DS1-173 ON SUNRISE HWY","dir":"WB","inspector":"Ajit Dharmashin","date":"2026-08-07"},{"structureId":"DS1-175","desc":"210 FEET FROM DS1-174 ON SUNRISE HWY","dir":"WB","inspector":"Ajit Dharmashin","date":"2026-08-07"},{"structureId":"DS1-176","desc":"150 FEET FROM DS1-175 ON SUNRISE HWY","dir":"WB","inspector":"Ajit Dharmashin","date":"2026-08-07"},{"structureId":"DS1-179","desc":"135 FEET FROM NW CORNER ON MORRIS AVE AND SUNRISE HWY","dir":"WB","inspector":"Ajit Dharmashin","date":"2026-08-07"},{"structureId":"DS1-180","desc":"352 FEET FROM DS1-179 ON SUNRISE HWY","dir":"WB","inspector":"Ajit Dharmashin","date":"2026-08-07"},{"structureId":"DS1-181","desc":"150 FEET FROM NW CORNER OF N PARK AVE AND SUNRISE HWY","dir":"WB","inspector":"Ajit Dharmashin","date":"2026-08-07"},{"structureId":"DS1-182","desc":"170 FEET FROM DS1-181 ON SUNRISE HWY","dir":"WB","inspector":"Ajit Dharmashin","date":"2026-08-07"},{"structureId":"DS1-183","desc":"NE CORNER OF N VILLAGE AVE AND SUNRISE HWY","dir":"WB","inspector":"Ajit Dharmashin","date":"2026-08-07"},{"structureId":"DS1-184","desc":"200 FEET FROM NW CORNER OF N VILLAGE AVE AND SUNRISE HWY","dir":"WB","inspector":"Ajit Dharmashin","date":"2026-08-07"},{"structureId":"DS1-185","desc":"NE CORNER OF N CENTRE AVE AND SUNRISE HWY","dir":"WB","inspector":"Ajit Dharmashin","date":"2026-08-07"},{"structureId":"DS1-215A","desc":"ADD-ON STRUCTURE (not in original plan set) - located between DS1-215 and DS1-216 on Sunrise Hwy","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-14"},{"structureId":"DS1-216","desc":"NE CORNER OF BROADWAY AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-14"},{"structureId":"DS1-217","desc":"NW CORNER OF BROADWAY AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-14"},{"structureId":"DS1-218","desc":"170 FEET FROM DS1-217 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-14"},{"structureId":"DS1-219","desc":"80 FEET FROM DS1-218 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-14"},{"structureId":"DS1-220","desc":"300 FEET FROM DS1-219 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-14"},{"structureId":"DS1-221","desc":"2 FEET FROM DS1-220 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-14"},{"structureId":"DS1-222","desc":"50 FEET FROM NE CORNER OF HORTON AVE AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-14"},{"structureId":"DS1-223","desc":"25 FEET FROM NE CORNER OF HORTON AVE AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-14"},{"structureId":"DS1-224","desc":"60 FEET FROM NW CORNER OF HORTON AVE AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-17"},{"structureId":"DS1-225","desc":"60 FEET FROM DS1-224 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-17"},{"structureId":"DS1-226","desc":"150 FEET FROM DS1-225 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-17"},{"structureId":"DS1-227","desc":"300 FEET FROM DS1-226 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-17"},{"structureId":"DS1-228","desc":"300 FEET FROM DS1-227 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-17"},{"structureId":"DS1-229","desc":"NE CORNER OF SATTERIE AVE AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-17"},{"structureId":"DS1-230","desc":"NW CORNER OF SATTERIE AVE AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-18"},{"structureId":"DS1-231","desc":"2 FEET IN FRONT OF DS1-230 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-18"},{"structureId":"DS1-232","desc":"110 FEET FROM DS1-231 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-18"},{"structureId":"DS1-233","desc":"915 FEET FROM DS1-232 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-18"},{"structureId":"DS1-234","desc":"NE CORNER OF 4TH STREET AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-18"},{"structureId":"DS1-235","desc":"NW CORNER OF 4TH STREET AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-19"},{"structureId":"DS1-236","desc":"NE CORNER OF ROCKAWAY AVE AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-19"},{"structureId":"DS1-237","desc":"NW CORNER OF ROCKAWAY AVE AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-19"},{"structureId":"DS1-238","desc":"190 FEET FROM DS1-237 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-19"},{"structureId":"DS1-239","desc":"140 FEET FROM DS1-238 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-19"},{"structureId":"DS1-240","desc":"150 FEET FROM DS1-239 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-19"},{"structureId":"DS1-241","desc":"NW CORNER OF S FRANKLIN AVE AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-19"},{"structureId":"DS1-242","desc":"1670 FEET FROM THE NW RAMP OF S TERRACE PLACE AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-19"}];
+const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-05"},{"structureId":"DS1-163","desc":"NE CORNER OF N LONG BEACH RD AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-05"},{"structureId":"DS1-166","desc":"175 FEET FROM DS1-165 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-05"},{"structureId":"DS1-167","desc":"250 FEET FROM DS1-166 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-05"},{"structureId":"DS1-168","desc":"415 FEET FROM DS1-167 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-05"},{"structureId":"DS1-169","desc":"102 FEET FROM DS1-168 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-05"},{"structureId":"DS1-170","desc":"240 FEET FROM DS1-169 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-05"},{"structureId":"DS1-171","desc":"222 FEET FROM DS1-170 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-05"},{"structureId":"DS1-172","desc":"NE CORNER OF N FOREST AVE AND SUNRISE HWY","dir":"WB","inspector":"Ajit Dhanesan","date":"2026-08-07"},{"structureId":"DS1-173","desc":"NW CORNER OF N FOREST AVE AND SUNRISE HWY","dir":"WB","inspector":"Ajit Dhanesan","date":"2026-08-07"},{"structureId":"DS1-174","desc":"500 FEET FROM DS1-173 ON SUNRISE HWY","dir":"WB","inspector":"Ajit Dhanesan","date":"2026-08-07"},{"structureId":"DS1-175","desc":"210 FEET FROM DS1-174 ON SUNRISE HWY","dir":"WB","inspector":"Ajit Dhanesan","date":"2026-08-07"},{"structureId":"DS1-176","desc":"150 FEET FROM DS1-175 ON SUNRISE HWY","dir":"WB","inspector":"Ajit Dhanesan","date":"2026-08-07"},{"structureId":"DS1-179","desc":"135 FEET FROM NW CORNER ON MORRIS AVE AND SUNRISE HWY","dir":"WB","inspector":"Ajit Dhanesan","date":"2026-08-07"},{"structureId":"DS1-180","desc":"352 FEET FROM DS1-179 ON SUNRISE HWY","dir":"WB","inspector":"Ajit Dhanesan","date":"2026-08-07"},{"structureId":"DS1-181","desc":"150 FEET FROM NW CORNER OF N PARK AVE AND SUNRISE HWY","dir":"WB","inspector":"Ajit Dhanesan","date":"2026-08-07"},{"structureId":"DS1-182","desc":"170 FEET FROM DS1-181 ON SUNRISE HWY","dir":"WB","inspector":"Ajit Dhanesan","date":"2026-08-07"},{"structureId":"DS1-183","desc":"NE CORNER OF N VILLAGE AVE AND SUNRISE HWY","dir":"WB","inspector":"Ajit Dhanesan","date":"2026-08-07"},{"structureId":"DS1-184","desc":"200 FEET FROM NW CORNER OF N VILLAGE AVE AND SUNRISE HWY","dir":"WB","inspector":"Ajit Dhanesan","date":"2026-08-07"},{"structureId":"DS1-185","desc":"NE CORNER OF N CENTRE AVE AND SUNRISE HWY","dir":"WB","inspector":"Ajit Dhanesan","date":"2026-08-07"},{"structureId":"DS1-215A","desc":"ADD-ON STRUCTURE (not in original plan set) - located between DS1-215 and DS1-216 on Sunrise Hwy","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-14"},{"structureId":"DS1-216","desc":"NE CORNER OF BROADWAY AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-14"},{"structureId":"DS1-217","desc":"NW CORNER OF BROADWAY AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-14"},{"structureId":"DS1-218","desc":"170 FEET FROM DS1-217 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-14"},{"structureId":"DS1-219","desc":"80 FEET FROM DS1-218 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-14"},{"structureId":"DS1-220","desc":"300 FEET FROM DS1-219 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-14"},{"structureId":"DS1-221","desc":"2 FEET FROM DS1-220 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-14"},{"structureId":"DS1-222","desc":"50 FEET FROM NE CORNER OF HORTON AVE AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-14"},{"structureId":"DS1-223","desc":"25 FEET FROM NE CORNER OF HORTON AVE AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-14"},{"structureId":"DS1-224","desc":"60 FEET FROM NW CORNER OF HORTON AVE AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-17"},{"structureId":"DS1-225","desc":"60 FEET FROM DS1-224 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-17"},{"structureId":"DS1-226","desc":"150 FEET FROM DS1-225 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-17"},{"structureId":"DS1-227","desc":"300 FEET FROM DS1-226 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-17"},{"structureId":"DS1-228","desc":"300 FEET FROM DS1-227 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-17"},{"structureId":"DS1-229","desc":"NE CORNER OF SATTERIE AVE AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-17"},{"structureId":"DS1-230","desc":"NW CORNER OF SATTERIE AVE AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-18"},{"structureId":"DS1-231","desc":"2 FEET IN FRONT OF DS1-230 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-18"},{"structureId":"DS1-232","desc":"110 FEET FROM DS1-231 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-18"},{"structureId":"DS1-233","desc":"915 FEET FROM DS1-232 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-18"},{"structureId":"DS1-234","desc":"NE CORNER OF 4TH STREET AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-18"},{"structureId":"DS1-235","desc":"NW CORNER OF 4TH STREET AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-19"},{"structureId":"DS1-236","desc":"NE CORNER OF ROCKAWAY AVE AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-19"},{"structureId":"DS1-237","desc":"NW CORNER OF ROCKAWAY AVE AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-19"},{"structureId":"DS1-238","desc":"190 FEET FROM DS1-237 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-19"},{"structureId":"DS1-239","desc":"140 FEET FROM DS1-238 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-19"},{"structureId":"DS1-240","desc":"150 FEET FROM DS1-239 ON SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-19"},{"structureId":"DS1-241","desc":"NW CORNER OF S FRANKLIN AVE AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-19"},{"structureId":"DS1-242","desc":"1670 FEET FROM THE NW RAMP OF S TERRACE PLACE AND SUNRISE HWY","dir":"WB","inspector":"Ulfat Shahzad","date":"2026-08-19"}];
 
   /* ================= HOME DASHBOARD TARGETS ================= */
   const HOME_OPS = ['mill','sawcut','asphaltpatch','utiladj','fill','joint','tac','drain'];
@@ -1757,17 +2189,17 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
       let currentLaneVal = laneVal;
       const night = getNightlyOp('fill');
       let iterations = 0, firstEntry = true;
+      let handoffToLane1Tons = 0;
+      const sessionLoggedTons = {};   // intersection -> tons added earlier in THIS transaction (not yet saved)
+      const sessionCompleted = new Set(); // intersections fully completed earlier in THIS transaction
 
       while(remainingTons > 0.005 && iterations < 20){
         iterations++;
-        if(!currentLaneVal.startsWith('0:')){
-          alert(`${fmt(remainingTons,1)} tons left on this truck after finishing the last intersection \u2014 switch to Lane ${currentLaneVal} manually to log the remainder on the mainline.`);
-          break;
-        }
+        if(!currentLaneVal.startsWith('0:')) break; // shouldn't happen, guarded below
         const intersection = currentLaneVal.slice(2);
         const target = getLane0TargetTons(intersection, 'fill');
-        const alreadyLogged = getLane0LoggedTons(intersection, 'fill');
-        const remainingNeed = Math.max(0, target - alreadyLogged);
+        const priorLogged = getLane0LoggedTons(intersection, 'fill') + (sessionLoggedTons[intersection]||0);
+        const remainingNeed = Math.max(0, target - priorLogged);
         const tonsUsed = Math.min(remainingTons, remainingNeed);
         if(tonsUsed > 0.005){
           entries.push({
@@ -1777,22 +2209,40 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
             measDepth: isFinite(measDepth)?measDepth:'', depthFlag
           });
           firstEntry = false;
+          sessionLoggedTons[intersection] = (sessionLoggedTons[intersection]||0) + tonsUsed;
         }
         remainingTons -= tonsUsed;
         const nowComplete = tonsUsed >= remainingNeed - 0.005;
-        if(nowComplete) showToast(`\u2713 ${intersection} reached its target`);
+        if(nowComplete){ sessionCompleted.add(intersection); showToast(`\u2713 ${intersection} reached its target`); }
         if(remainingTons > 0.005){
           if(!nowComplete) break; // this intersection isn't actually full yet, don't skip ahead
           const opts = getAvailableLanes(parseStation($('lg_start').value), 'fill', null, night, 'fwd');
-          const optVals = opts.map(o=>o.value);
-          const curIdx = optVals.indexOf(currentLaneVal);
-          if(curIdx >= 0 && curIdx < optVals.length-1){ currentLaneVal = optVals[curIdx+1]; }
-          else break; // nothing left to carry into
+          const nextLane0 = opts.find(o => o.value.startsWith('0:') && !sessionCompleted.has(o.value.slice(2)));
+          if(nextLane0){
+            currentLaneVal = nextLane0.value; // another intersection still pending -- keep going
+          } else {
+            handoffToLane1Tons = remainingTons; // no more intersections -- always hand off to Lane 1 specifically
+            remainingTons = 0;
+          }
         }
       }
       saveFillLog(entries);
       rememberInspector('lg');
       renderFillLog(); renderRoster();
+
+      if(handoffToLane1Tons > 0.005){
+        const opts = getAvailableLanes(parseStation($('lg_start').value), 'fill', null, night, 'fwd');
+        const lane1Available = opts.some(o => o.value === '1');
+        if(lane1Available){
+          $('lg_lane').value = '1';
+          onFillLaneChange();
+          $('lg_tons').value = handoffToLane1Tons.toFixed(2);
+          calcFillPass();
+          showToast(`\u2192 ${fmt(handoffToLane1Tons,1)} tons carried to Lane 1 \u2014 review and Add to confirm`);
+        } else {
+          alert(`${fmt(handoffToLane1Tons,1)} tons left on this truck, but Lane 1 isn't available at this station \u2014 switch lanes manually to log the remainder.`);
+        }
+      }
       $('lg_ticket').value='';
       refreshFillLaneOptions();
       updateNightlyProgress('fill');
@@ -1946,35 +2396,70 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
     const lo = Math.min(startLF, endLF), hi = Math.max(startLF, endLF);
     const totalLF = hi - lo;
 
+    // Break into sub-segments at every boundary that could change lane count, surveyed
+    // width, or an active turn lane -- ensures each sub-segment has ONE consistent width.
     const breakpoints = new Set([lo, hi]);
     LANE_ZONES.forEach(z => { if(z[0]>lo && z[0]<hi) breakpoints.add(z[0]); if(z[1]>lo && z[1]<hi) breakpoints.add(z[1]); });
+    MAINLINE_WIDTHS.forEach(w => { if(w[0]>lo && w[0]<hi) breakpoints.add(w[0]); if(w[1]>lo && w[1]<hi) breakpoints.add(w[1]); });
+    TURN_LANES_TABLE.forEach(t => { const s=t[0], e=t[0]+t[1]; if(s>lo && s<hi) breakpoints.add(s); if(e>lo && e<hi) breakpoints.add(e); });
+    RIGHT_TURN_LANES_TABLE.forEach(t => { const s=t[0], e=t[0]+t[1]; if(s>lo && s<hi) breakpoints.add(s); if(e>lo && e<hi) breakpoints.add(e); });
     const pts = Array.from(breakpoints).sort((a,b)=>a-b);
 
-    let lf4 = 0, lf3 = 0, lfUnknown = 0;
+    const laneRoleTotals = {}; // e.g. {L:sy, LM:sy, RM:sy, R:sy} or {L:sy, M:sy, R:sy}
+    const leftTurnTotals = {}; // name -> sy
+    const rightTurnTotals = {}; // name -> sy
+    let lfUnknown = 0;
+    let sawLaneCount = null, sawMixedLaneCounts = false;
+
     for(let i=0;i<pts.length-1;i++){
-      const segLF = pts[i+1]-pts[i];
-      const mid = (pts[i]+pts[i+1])/2;
+      const segStart = pts[i], segEnd = pts[i+1];
+      const segLF = segEnd - segStart;
+      const mid = (segStart+segEnd)/2;
+
       const zone = getLaneZoneAt(mid);
-      if(!zone){ lfUnknown += segLF; continue; }
-      if(zone[2].indexOf('4')===0) lf4 += segLF; else lf3 += segLF;
+      const widthEntry = MAINLINE_WIDTHS.find(w => w[0] <= mid && mid < w[1]);
+      if(!zone || !widthEntry){ lfUnknown += segLF; continue; }
+
+      const laneCount = zone[2].indexOf('4')===0 ? 4 : (zone[2].indexOf('3')===0 ? 3 : 0);
+      if(!laneCount){ lfUnknown += segLF; continue; }
+      if(sawLaneCount===null) sawLaneCount = laneCount;
+      else if(sawLaneCount !== laneCount) sawMixedLaneCounts = true;
+
+      const totalWidth = widthEntry[2];
+
+      // Any turn lane fully containing this sub-segment is "active" here
+      const activeLeft = TURN_LANES_TABLE.filter(t => segStart >= t[0]-0.5 && segEnd <= t[0]+t[1]+0.5);
+      const activeRight = RIGHT_TURN_LANES_TABLE.filter(t => segStart >= t[0]-0.5 && segEnd <= t[0]+t[1]+0.5);
+
+      let turnWidthUsed = 0;
+      activeLeft.forEach(t => {
+        leftTurnTotals[t[3]] = (leftTurnTotals[t[3]]||0) + segLF*t[2]/9;
+        turnWidthUsed += t[2];
+      });
+      activeRight.forEach(t => {
+        rightTurnTotals[t[3]] = (rightTurnTotals[t[3]]||0) + segLF*t[2]/9;
+        turnWidthUsed += t[2];
+      });
+
+      // Whatever's left after known turn lanes is the straight-lane width --
+      // this replaces the old flat "always 12ft" assumption with the real surveyed value.
+      const straightWidth = Math.max(0, totalWidth - turnWidthUsed);
+      const perLaneWidth = straightWidth / laneCount;
+      const labels = laneCount===4 ? ['L','LM','RM','R'] : ['L','M','R'];
+      labels.forEach(lab => {
+        laneRoleTotals[lab] = (laneRoleTotals[lab]||0) + segLF*perLaneWidth/9;
+      });
     }
 
-    const straightLanes = [];
-    straightLanes.push({ name:'L', sy:(lf4+lf3)*12/9 });
-    if(lf4>0) straightLanes.push({ name:'LM', sy: lf4*12/9 });
-    if(lf3>0) straightLanes.push({ name:'M', sy: lf3*12/9 });
-    if(lf4>0) straightLanes.push({ name:'RM', sy: lf4*12/9 });
-    straightLanes.push({ name:'R', sy:(lf4+lf3)*12/9 });
+    const laneOrder4 = ['L','LM','RM','R'], laneOrder3 = ['L','M','R'];
+    const order = sawMixedLaneCounts ? Array.from(new Set([...laneOrder4,...laneOrder3])) : (sawLaneCount===3?laneOrder3:laneOrder4);
+    const straightLanes = order.filter(l=>laneRoleTotals[l]!==undefined).map(l=>({ name:l, sy:laneRoleTotals[l] }));
 
-    const leftTurns = TURN_LANES_TABLE.map(t => {
-      const ov = overlapLF(lo,hi,t[0],t[0]+t[1]);
-      return ov>0.5 ? { name:t[3], lf:ov, width:t[2], sy: ov*t[2]/9 } : null;
-    }).filter(Boolean);
-
-    const rightTurns = RIGHT_TURN_LANES_TABLE.map(t => {
-      const ov = overlapLF(lo,hi,t[0],t[0]+t[1]);
-      return ov>0.5 ? { name:t[3], lf:ov, width:t[2], sy: ov*t[2]/9 } : null;
-    }).filter(Boolean);
+    const leftTurns = Object.entries(leftTurnTotals).map(([name,sy])=>{
+      const t = TURN_LANES_TABLE.find(tt=>tt[3]===name);
+      return { name, sy };
+    });
+    const rightTurns = Object.entries(rightTurnTotals).map(([name,sy])=>({ name, sy }));
 
     const crossStreets = CROSS_STREET_AREAS.filter(cs => cs[0]>=lo && cs[0]<=hi)
       .map(cs => ({ name:cs[1], areaSF:cs[2], sy:cs[2]/9 }));
@@ -2351,6 +2836,316 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
   }
   function clearUtilAdjLog(){
     if(confirm('Clear all Utility Adjustment report entries? This cannot be undone.')){ saveUtilAdjLog([]); renderUtilAdjLog(); }
+  }
+
+
+  /* ================= FULL DEPTH REPAIR / SINK HOLE ================= */
+
+  // --- Repair Log ---
+  const FD_RL_KEY = 'millfill_fd_repairlog_v1';
+  function loadFdRepairLog(){ try{ return JSON.parse(localStorage.getItem(FD_RL_KEY))||[]; }catch(e){ return []; } }
+  function saveFdRepairLog(v){ try{ localStorage.setItem(FD_RL_KEY, JSON.stringify(v)); }catch(e){} }
+
+  function calcFdRepairCrossChecks(){
+    const L = parseFloat($('fd_rl_exL').value), W = parseFloat($('fd_rl_exW').value);
+    const subD = parseFloat($('fd_rl_exD').value);
+    const concD = parseFloat($('fd_rl_concD').value);
+    const asphD = parseFloat($('fd_rl_asphD').value);
+    if(isFinite(L) && isFinite(W)){
+      if(isFinite(subD)){
+        const subCalc = (L*W*subD)/27;
+        $('fd_rl_subbaseCalc').value = fmt(subCalc,2)+' CY';
+      } else { $('fd_rl_subbaseCalc').value = ''; }
+      if(isFinite(concD)){
+        const concCalc = (L*W*concD)/27;
+        $('fd_rl_concCalc').textContent = fmt(concCalc,2)+' CY';
+      } else { $('fd_rl_concCalc').textContent = '—'; }
+      if(isFinite(asphD)){
+        // asphalt volume -> tons using 145 lb/ft3 standard density
+        const asphSF = L*W;
+        const asphTons = (asphSF*asphD*12*145)/24000; // depth in ft -> convert consistent w/ app's in-based formula: ft*12=inches
+        $('fd_rl_asphCalc').textContent = fmt(asphTons,2)+' tons';
+      } else { $('fd_rl_asphCalc').textContent = '—'; }
+    } else {
+      $('fd_rl_subbaseCalc').value = ''; $('fd_rl_concCalc').textContent = '—'; $('fd_rl_asphCalc').textContent = '—';
+    }
+  }
+
+  function addFdRepairLogEntry(){
+    const inspector = getInspectorValue('fd_rl');
+    const repairId = $('fd_rl_repairid').value.trim();
+    if(!inspector){ alert('Please select or type in the inspector name.'); return; }
+    if(!repairId){ alert('Enter a Repair ID.'); return; }
+    const entries = loadFdRepairLog();
+    entries.push({
+      id: genId(), locked:false, date: $('fd_rl_date').value || todayStr(), inspector, repairId,
+      location: $('fd_rl_location').value.trim(),
+      exL: $('fd_rl_exL').value, exW: $('fd_rl_exW').value, exD: $('fd_rl_exD').value,
+      concD: $('fd_rl_concD').value, asphD: $('fd_rl_asphD').value,
+      subbase: $('fd_rl_subbase').value, binder: $('fd_rl_binder').value, tack: $('fd_rl_tack').value,
+      pccrepair: $('fd_rl_pccrepair').value, pccliftout: $('fd_rl_pccliftout').value,
+      dowels: $('fd_rl_dowels').value, transjoints: $('fd_rl_transjoints').value, sawcut: $('fd_rl_sawcut').value,
+      trafficcontrol: $('fd_rl_trafficcontrol').value,
+      subbaseLifts: $('fd_rl_subbaseLifts').value, subbaseTicket: $('fd_rl_subbaseTicket').value,
+      subbaseDelivered: $('fd_rl_subbaseDelivered').value, subbaseCalc: $('fd_rl_subbaseCalc').value,
+      concCalc: $('fd_rl_concCalc').textContent, asphCalc: $('fd_rl_asphCalc').textContent
+    });
+    saveFdRepairLog(entries);
+    rememberInspector('fd_rl');
+    renderFdRepairLog();
+    showToast('\u2713 Repair logged to report');
+  }
+
+  function renderFdRepairLog(){
+    const entries = loadFdRepairLog();
+    const tbody=$('fd_rl_tbody'), table=$('fd_rl_table'), empty=$('fd_rl_empty');
+    $('fd_rl_count').textContent = entries.length + (entries.length===1?' entry logged':' entries logged');
+    if(entries.length===0){ table.style.display='none'; empty.style.display='block'; return; }
+    table.style.display='table'; empty.style.display='none';
+    tbody.innerHTML = entries.map((e,i)=>{
+      const lockTag = e.locked ? ' &#128274;' : '';
+      return `<tr>
+        <td>${e.date||''}</td><td>${e.inspector||''}</td><td>${e.repairId||''}</td><td>${e.location||''}</td>
+        <td>${e.exL||'—'}x${e.exW||'—'}x${e.exD||'—'}</td>
+        <td>${e.subbase||'—'}</td><td>${e.binder||'—'}</td><td>${e.tack||'—'}</td>
+        <td>${e.pccrepair||'—'}</td><td>${e.pccliftout||'—'}</td><td>${e.dowels||'—'}</td>
+        <td>${e.transjoints||'—'}</td><td>${e.sawcut||'—'}${lockTag}</td>
+        <td><button class="del-btn" data-idx="${i}" title="Delete">&#10005;</button></td>
+      </tr>`;
+    }).join('');
+  }
+
+  function exportFdRepairLogCSV(){
+    const entries = loadFdRepairLog();
+    if(entries.length===0){ alert('No entries to export yet.'); return; }
+    const headers=['Date','Inspector','Repair ID','Location','Exc L','Exc W','Exc D','Concrete Depth','Asphalt Depth',
+      'Subbase CY','Binder TON','Tack GAL','PCC Repair CY','PCC Liftout SY','Dowels EACH','Trans Joints LF','Saw Cut LF',
+      'Traffic Control','Subbase Lifts','Subbase Ticket','Subbase Delivered','Subbase Calc','Concrete Calc','Asphalt Calc'];
+    const rows=entries.map(e=>[e.date,e.inspector,e.repairId,e.location,e.exL,e.exW,e.exD,e.concD,e.asphD,
+      e.subbase,e.binder,e.tack,e.pccrepair,e.pccliftout,e.dowels,e.transjoints,e.sawcut,
+      e.trafficcontrol,e.subbaseLifts,e.subbaseTicket,e.subbaseDelivered,e.subbaseCalc,e.concCalc,e.asphCalc]);
+    downloadCSV(headers, rows, 'fulldepth-repairlog');
+  }
+  function clearFdRepairLog(){
+    if(confirm('Clear all Repair Log entries? This cannot be undone.')){ saveFdRepairLog([]); renderFdRepairLog(); }
+  }
+
+  /** Generic factory for a simple Full Depth Repair sub-log: load/save/render/export/clear.
+   * fields: array of {key, fromDOM: ()=>value} pairs collected when adding an entry.
+   * renderRow: (entry, idx) => html string for one table row.
+   */
+  function makeFdLog(prefix, storageKey){
+    const KEY = storageKey;
+    function load(){ try{ return JSON.parse(localStorage.getItem(KEY))||[]; }catch(e){ return []; } }
+    function save(v){ try{ localStorage.setItem(KEY, JSON.stringify(v)); }catch(e){} }
+    function render(renderRowFn){
+      const entries = load();
+      const tbody=$(prefix+'_tbody'), table=$(prefix+'_table'), empty=$(prefix+'_empty');
+      $(prefix+'_count').textContent = entries.length + (entries.length===1?' entry logged':' entries logged');
+      if(entries.length===0){ table.style.display='none'; empty.style.display='block'; return; }
+      table.style.display='table'; empty.style.display='none';
+      tbody.innerHTML = entries.map((e,i)=>renderRowFn(e,i)).join('');
+    }
+    function exportCSV(headers, rowFn, filename){
+      const entries = load();
+      if(entries.length===0){ alert('No entries to export yet.'); return; }
+      downloadCSV(headers, entries.map(rowFn), filename);
+    }
+    function clear(renderFn){
+      if(confirm('Clear all entries? This cannot be undone.')){ save([]); renderFn(); }
+    }
+    return { load, save, render, exportCSV, clear };
+  }
+
+  // --- Labor ---
+  const fdLabor = makeFdLog('fd_lb', 'millfill_fd_labor_v1');
+  function addFdLaborEntry(){
+    const inspector = getInspectorValue('fd_lb');
+    const repairId = $('fd_lb_repairid').value.trim();
+    const role = $('fd_lb_role').value;
+    const name = $('fd_lb_name').value.trim();
+    if(!inspector){ alert('Please select or type in the inspector name.'); return; }
+    if(!repairId){ alert('Enter a Repair ID.'); return; }
+    if(!role){ alert('Select a role.'); return; }
+    if(!name){ alert('Enter a name.'); return; }
+    const entries = fdLabor.load();
+    entries.push({ id: genId(), locked:false, date: $('fd_lb_date').value||todayStr(), inspector, repairId, role, name });
+    fdLabor.save(entries);
+    rememberInspector('fd_lb');
+    renderFdLabor();
+    $('fd_lb_name').value='';
+    showToast('\u2713 Labor logged');
+  }
+  function renderFdLabor(){
+    fdLabor.render((e,i) => `<tr><td>${e.date||''}</td><td>${e.inspector||''}</td><td>${e.repairId||''}</td><td>${e.role||''}</td><td>${e.name||''}${e.locked?' &#128274;':''}</td><td><button class="del-btn" data-idx="${i}" title="Delete">&#10005;</button></td></tr>`);
+  }
+
+  // --- Equipment ---
+  const fdEquip = makeFdLog('fd_eq', 'millfill_fd_equipment_v1');
+  function addFdEquipmentEntry(){
+    const inspector = getInspectorValue('fd_eq');
+    const repairId = $('fd_eq_repairid').value.trim();
+    const type = $('fd_eq_type').value;
+    const qty = parseFloat($('fd_eq_qty').value);
+    if(!inspector){ alert('Please select or type in the inspector name.'); return; }
+    if(!repairId){ alert('Enter a Repair ID.'); return; }
+    if(!type){ alert('Select equipment type.'); return; }
+    if(!isFinite(qty)||qty<=0){ alert('Enter a valid quantity.'); return; }
+    const entries = fdEquip.load();
+    entries.push({ id: genId(), locked:false, date: $('fd_eq_date').value||todayStr(), inspector, repairId, type, qty,
+      equipNum: $('fd_eq_num').value.trim(), ticket: type==='Asphalt Truck' ? $('fd_eq_ticket').value.trim() : '' });
+    fdEquip.save(entries);
+    rememberInspector('fd_eq');
+    renderFdEquipment();
+    $('fd_eq_num').value=''; $('fd_eq_ticket').value=''; $('fd_eq_qty').value='1';
+    showToast('\u2713 Equipment logged');
+  }
+  function renderFdEquipment(){
+    fdEquip.render((e,i) => `<tr><td>${e.date||''}</td><td>${e.inspector||''}</td><td>${e.repairId||''}</td><td>${e.type||''}</td><td>${e.qty||''}</td><td>${e.equipNum||'—'}</td><td>${e.ticket||'—'}${e.locked?' &#128274;':''}</td><td><button class="del-btn" data-idx="${i}" title="Delete">&#10005;</button></td></tr>`);
+  }
+
+  // --- Concrete Delivery ---
+  const fdConcDeliv = makeFdLog('fd_cd', 'millfill_fd_concdelivery_v1');
+  function calcFdDeadline(){
+    const arrived = $('fd_cd_timeArrived').value;
+    if(!arrived){ $('fd_cd_deadline').textContent='\u2014'; return null; }
+    const [h,m] = arrived.split(':').map(Number);
+    let total = h*60+m+90;
+    const dh = Math.floor(total/60)%24, dm = total%60;
+    const label = `${String(dh).padStart(2,'0')}:${String(dm).padStart(2,'0')}`;
+    $('fd_cd_deadline').textContent = label;
+    return label;
+  }
+  function addFdConcDeliveryEntry(){
+    const inspector = getInspectorValue('fd_cd');
+    const repairId = $('fd_cd_repairid').value.trim();
+    if(!inspector){ alert('Please select or type in the inspector name.'); return; }
+    if(!repairId){ alert('Enter a Repair ID.'); return; }
+    const deadline = calcFdDeadline();
+    const entries = fdConcDeliv.load();
+    entries.push({ id: genId(), locked:false, date: $('fd_cd_date').value||todayStr(), inspector, repairId,
+      ticket: $('fd_cd_ticket').value.trim(), mixCorrect: $('fd_cd_mixcorrect').value,
+      timeLeft: $('fd_cd_timeLeft').value, timeArrived: $('fd_cd_timeArrived').value, deadline: deadline||'' });
+    fdConcDeliv.save(entries);
+    rememberInspector('fd_cd');
+    renderFdConcDelivery();
+    showToast('\u2713 Concrete delivery logged');
+  }
+  function renderFdConcDelivery(){
+    fdConcDeliv.render((e,i) => `<tr><td>${e.date||''}</td><td>${e.inspector||''}</td><td>${e.repairId||''}</td><td>${e.ticket||''}</td><td>${e.mixCorrect==='Y'?'Yes':e.mixCorrect==='N'?'No':'—'}</td><td>${e.timeLeft||'—'}</td><td>${e.timeArrived||'—'}</td><td>${e.deadline||'—'}${e.locked?' &#128274;':''}</td><td><button class="del-btn" data-idx="${i}" title="Delete">&#10005;</button></td></tr>`);
+  }
+
+  // --- Concrete Testing ---
+  const fdConcTest = makeFdLog('fd_ct', 'millfill_fd_conctest_v1');
+  function addFdConcTestEntry(){
+    const inspector = getInspectorValue('fd_ct');
+    const repairId = $('fd_ct_repairid').value.trim();
+    if(!inspector){ alert('Please select or type in the inspector name.'); return; }
+    if(!repairId){ alert('Enter a Repair ID.'); return; }
+    const entries = fdConcTest.load();
+    entries.push({ id: genId(), locked:false, date: $('fd_ct_date').value||todayStr(), inspector, repairId,
+      hours: $('fd_ct_hours').value, psi: $('fd_ct_psi').value, slump: $('fd_ct_slump').value, temp: $('fd_ct_temp').value });
+    fdConcTest.save(entries);
+    rememberInspector('fd_ct');
+    renderFdConcTest();
+    showToast('\u2713 Concrete test logged');
+  }
+  function renderFdConcTest(){
+    fdConcTest.render((e,i) => `<tr><td>${e.date||''}</td><td>${e.inspector||''}</td><td>${e.repairId||''}</td><td>${e.hours||''}</td><td>${e.psi||'—'}</td><td>${e.slump||'—'}</td><td>${e.temp||'—'}${e.locked?' &#128274;':''}</td><td><button class="del-btn" data-idx="${i}" title="Delete">&#10005;</button></td></tr>`);
+  }
+
+  // --- Asphalt Verification ---
+  const fdAsphVerify = makeFdLog('fd_av', 'millfill_fd_asphaltverify_v1');
+  function addFdAsphVerifyEntry(){
+    const inspector = getInspectorValue('fd_av');
+    const repairId = $('fd_av_repairid').value.trim();
+    if(!inspector){ alert('Please select or type in the inspector name.'); return; }
+    if(!repairId){ alert('Enter a Repair ID.'); return; }
+    const entries = fdAsphVerify.load();
+    entries.push({ id: genId(), locked:false, date: $('fd_av_date').value||todayStr(), inspector, repairId,
+      ticket: $('fd_av_ticket').value.trim(), temp: $('fd_av_temp').value });
+    fdAsphVerify.save(entries);
+    rememberInspector('fd_av');
+    renderFdAsphVerify();
+    showToast('\u2713 Asphalt verification logged');
+  }
+  function renderFdAsphVerify(){
+    fdAsphVerify.render((e,i) => `<tr><td>${e.date||''}</td><td>${e.inspector||''}</td><td>${e.repairId||''}</td><td>${e.ticket||''}</td><td>${e.temp||'—'}${e.locked?' &#128274;':''}</td><td><button class="del-btn" data-idx="${i}" title="Delete">&#10005;</button></td></tr>`);
+  }
+
+  // --- Saw Cutting QA ---
+  const fdSawCutQA = makeFdLog('fd_sc', 'millfill_fd_sawcutqa_v1');
+  function addFdSawCutQAEntry(){
+    const inspector = getInspectorValue('fd_sc');
+    const repairId = $('fd_sc_repairid').value.trim();
+    const laborerSel = $('fd_sc_laborer').value;
+    const laborer = laborerSel==='__other__' ? $('fd_sc_laborer_other').value.trim() : laborerSel;
+    if(!inspector){ alert('Please select or type in the inspector name.'); return; }
+    if(!repairId){ alert('Enter a Repair ID.'); return; }
+    if(!laborer){ alert('Enter the laborer name.'); return; }
+    const entries = fdSawCutQA.load();
+    entries.push({ id: genId(), locked:false, date: $('fd_sc_date').value||todayStr(), inspector, repairId,
+      subcontractor: 'Island Pavement Cutting Corp Inc', laborer });
+    fdSawCutQA.save(entries);
+    rememberInspector('fd_sc');
+    renderFdSawCutQA();
+    showToast('\u2713 Saw cutting QA logged');
+  }
+  function renderFdSawCutQA(){
+    fdSawCutQA.render((e,i) => `<tr><td>${e.date||''}</td><td>${e.inspector||''}</td><td>${e.repairId||''}</td><td>${e.subcontractor||''}</td><td>${e.laborer||''}${e.locked?' &#128274;':''}</td><td><button class="del-btn" data-idx="${i}" title="Delete">&#10005;</button></td></tr>`);
+  }
+
+  // --- Subbase Compaction ---
+  const fdSubbaseComp = makeFdLog('fd_sb', 'millfill_fd_subbasecomp_v1');
+  function addFdSubbaseCompEntry(){
+    const inspector = getInspectorValue('fd_sb');
+    const repairId = $('fd_sb_repairid').value.trim();
+    const result = $('fd_sb_result').value;
+    if(!inspector){ alert('Please select or type in the inspector name.'); return; }
+    if(!repairId){ alert('Enter a Repair ID.'); return; }
+    if(!result){ alert('Select Pass or Fail.'); return; }
+    const entries = fdSubbaseComp.load();
+    entries.push({ id: genId(), locked:false, date: $('fd_sb_date').value||todayStr(), inspector, repairId, result });
+    fdSubbaseComp.save(entries);
+    rememberInspector('fd_sb');
+    renderFdSubbaseComp();
+    showToast('\u2713 Subbase compaction logged');
+  }
+  function renderFdSubbaseComp(){
+    fdSubbaseComp.render((e,i) => `<tr><td>${e.date||''}</td><td>${e.inspector||''}</td><td>${e.repairId||''}</td><td style="color:${e.result==='Pass'?'var(--ok-green)':'var(--warn-red)'};font-weight:600;">${e.result||''}${e.locked?' &#128274;':''}</td><td><button class="del-btn" data-idx="${i}" title="Delete">&#10005;</button></td></tr>`);
+  }
+
+  // --- Dowel Installation QA ---
+  const fdDowelQA = makeFdLog('fd_dq', 'millfill_fd_dowelqa_v1');
+  const FD_DOWEL_CHECKS = ['holeDiameter','holeDepth','holeSpacing','dustBlown','materialMixed','epoxyPlaced','protrusion','alignment','groutDisk'];
+  function addFdDowelQAEntry(){
+    const inspector = getInspectorValue('fd_dq');
+    const repairId = $('fd_dq_repairid').value.trim();
+    if(!inspector){ alert('Please select or type in the inspector name.'); return; }
+    if(!repairId){ alert('Enter a Repair ID.'); return; }
+    const checks = {};
+    let anyFail = false, allAnswered = true;
+    FD_DOWEL_CHECKS.forEach(k => {
+      const v = $('fd_dq_'+k).value;
+      checks[k] = v;
+      if(v==='Fail') anyFail = true;
+      if(!v) allAnswered = false;
+    });
+    const cageUsed = $('fd_dq_cageUsed').value;
+    const cageCount = cageUsed==='Y' ? $('fd_dq_cageCount').value : '';
+    const entries = fdDowelQA.load();
+    entries.push({ id: genId(), locked:false, date: $('fd_dq_date').value||todayStr(), inspector, repairId,
+      checks, cageUsed, cageCount, overall: anyFail?'FAIL':(allAnswered?'PASS':'INCOMPLETE') });
+    fdDowelQA.save(entries);
+    rememberInspector('fd_dq');
+    renderFdDowelQA();
+    showToast('\u2713 Dowel installation QA logged');
+  }
+  function renderFdDowelQA(){
+    fdDowelQA.render((e,i) => {
+      const color = e.overall==='FAIL' ? 'var(--warn-red)' : e.overall==='PASS' ? 'var(--ok-green)' : 'var(--muted)';
+      return `<tr><td>${e.date||''}</td><td>${e.inspector||''}</td><td>${e.repairId||''}</td><td style="color:${color};font-weight:600;">${e.overall||''}${e.locked?' &#128274;':''}</td><td>${e.cageUsed==='Y'?('Yes, '+(e.cageCount||'?')+'/cage'):(e.cageUsed==='N'?'No':'—')}</td><td><button class="del-btn" data-idx="${i}" title="Delete">&#10005;</button></td></tr>`;
+    });
   }
 
   /* ================= JOINT ADHESIVE QA ================= */
@@ -2754,6 +3549,134 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
     if(entries[idx] && entries[idx].locked){ alert('This entry is locked and cannot be deleted. Unlock it from Data Management first.'); return; }
     entries.splice(idx,1);
     saveUtilAdjLog(entries); renderUtilAdjLog();
+  });
+
+
+  // --- Full Depth Repair: event wiring ---
+  $('fd_rl_exL').addEventListener('input', calcFdRepairCrossChecks);
+  $('fd_rl_exW').addEventListener('input', calcFdRepairCrossChecks);
+  $('fd_rl_exD').addEventListener('input', calcFdRepairCrossChecks);
+  $('fd_rl_concD').addEventListener('input', calcFdRepairCrossChecks);
+  $('fd_rl_asphD').addEventListener('input', calcFdRepairCrossChecks);
+  $('fd_rl_add').addEventListener('click', addFdRepairLogEntry);
+  $('fd_rl_export').addEventListener('click', exportFdRepairLogCSV);
+  $('fd_rl_sync').addEventListener('click', () => syncOperation('fd_repairlog', loadFdRepairLog));
+  $('fd_rl_clear').addEventListener('click', clearFdRepairLog);
+  $('fd_rl_tbody').addEventListener('click', (e) => {
+    const btn = e.target.closest('.del-btn'); if(!btn) return;
+    const entries = loadFdRepairLog();
+    const idx = parseInt(btn.dataset.idx,10);
+    if(entries[idx] && entries[idx].locked){ alert('This entry is locked and cannot be deleted.'); return; }
+    entries.splice(idx,1); saveFdRepairLog(entries); renderFdRepairLog();
+  });
+
+  $('fd_lb_add').addEventListener('click', addFdLaborEntry);
+  $('fd_lb_export').addEventListener('click', () => fdLabor.exportCSV(['Date','Inspector','Repair ID','Role','Name'], e=>[e.date,e.inspector,e.repairId,e.role,e.name], 'fulldepth-labor'));
+  $('fd_lb_sync').addEventListener('click', () => syncOperation('fd_labor', fdLabor.load));
+  $('fd_lb_clear').addEventListener('click', () => fdLabor.clear(renderFdLabor));
+  $('fd_lb_tbody').addEventListener('click', (e) => {
+    const btn = e.target.closest('.del-btn'); if(!btn) return;
+    const entries = fdLabor.load();
+    const idx = parseInt(btn.dataset.idx,10);
+    if(entries[idx] && entries[idx].locked){ alert('This entry is locked and cannot be deleted.'); return; }
+    entries.splice(idx,1); fdLabor.save(entries); renderFdLabor();
+  });
+
+  $('fd_eq_type').addEventListener('change', () => {
+    $('fd_eq_ticket_wrap').style.display = $('fd_eq_type').value==='Asphalt Truck' ? 'block' : 'none';
+  });
+  $('fd_eq_add').addEventListener('click', addFdEquipmentEntry);
+  $('fd_eq_export').addEventListener('click', () => fdEquip.exportCSV(['Date','Inspector','Repair ID','Type','Qty','Equip #','Ticket'], e=>[e.date,e.inspector,e.repairId,e.type,e.qty,e.equipNum,e.ticket], 'fulldepth-equipment'));
+  $('fd_eq_sync').addEventListener('click', () => syncOperation('fd_equipment', fdEquip.load));
+  $('fd_eq_clear').addEventListener('click', () => fdEquip.clear(renderFdEquipment));
+  $('fd_eq_tbody').addEventListener('click', (e) => {
+    const btn = e.target.closest('.del-btn'); if(!btn) return;
+    const entries = fdEquip.load();
+    const idx = parseInt(btn.dataset.idx,10);
+    if(entries[idx] && entries[idx].locked){ alert('This entry is locked and cannot be deleted.'); return; }
+    entries.splice(idx,1); fdEquip.save(entries); renderFdEquipment();
+  });
+
+  $('fd_cd_timeArrived').addEventListener('input', calcFdDeadline);
+  $('fd_cd_add').addEventListener('click', addFdConcDeliveryEntry);
+  $('fd_cd_export').addEventListener('click', () => fdConcDeliv.exportCSV(['Date','Inspector','Repair ID','Ticket','Mix Correct','Time Left Plant','Time Arrived','Deadline'], e=>[e.date,e.inspector,e.repairId,e.ticket,e.mixCorrect,e.timeLeft,e.timeArrived,e.deadline], 'fulldepth-concretedelivery'));
+  $('fd_cd_sync').addEventListener('click', () => syncOperation('fd_concdelivery', fdConcDeliv.load));
+  $('fd_cd_clear').addEventListener('click', () => fdConcDeliv.clear(renderFdConcDelivery));
+  $('fd_cd_tbody').addEventListener('click', (e) => {
+    const btn = e.target.closest('.del-btn'); if(!btn) return;
+    const entries = fdConcDeliv.load();
+    const idx = parseInt(btn.dataset.idx,10);
+    if(entries[idx] && entries[idx].locked){ alert('This entry is locked and cannot be deleted.'); return; }
+    entries.splice(idx,1); fdConcDeliv.save(entries); renderFdConcDelivery();
+  });
+
+  $('fd_ct_add').addEventListener('click', addFdConcTestEntry);
+  $('fd_ct_export').addEventListener('click', () => fdConcTest.exportCSV(['Date','Inspector','Repair ID','Hours','PSI','Slump','Temp'], e=>[e.date,e.inspector,e.repairId,e.hours,e.psi,e.slump,e.temp], 'fulldepth-concretetesting'));
+  $('fd_ct_sync').addEventListener('click', () => syncOperation('fd_conctest', fdConcTest.load));
+  $('fd_ct_clear').addEventListener('click', () => fdConcTest.clear(renderFdConcTest));
+  $('fd_ct_tbody').addEventListener('click', (e) => {
+    const btn = e.target.closest('.del-btn'); if(!btn) return;
+    const entries = fdConcTest.load();
+    const idx = parseInt(btn.dataset.idx,10);
+    if(entries[idx] && entries[idx].locked){ alert('This entry is locked and cannot be deleted.'); return; }
+    entries.splice(idx,1); fdConcTest.save(entries); renderFdConcTest();
+  });
+
+  $('fd_av_add').addEventListener('click', addFdAsphVerifyEntry);
+  $('fd_av_export').addEventListener('click', () => fdAsphVerify.exportCSV(['Date','Inspector','Repair ID','Ticket','Temp'], e=>[e.date,e.inspector,e.repairId,e.ticket,e.temp], 'fulldepth-asphaltverify'));
+  $('fd_av_sync').addEventListener('click', () => syncOperation('fd_asphaltverify', fdAsphVerify.load));
+  $('fd_av_clear').addEventListener('click', () => fdAsphVerify.clear(renderFdAsphVerify));
+  $('fd_av_tbody').addEventListener('click', (e) => {
+    const btn = e.target.closest('.del-btn'); if(!btn) return;
+    const entries = fdAsphVerify.load();
+    const idx = parseInt(btn.dataset.idx,10);
+    if(entries[idx] && entries[idx].locked){ alert('This entry is locked and cannot be deleted.'); return; }
+    entries.splice(idx,1); fdAsphVerify.save(entries); renderFdAsphVerify();
+  });
+
+  $('fd_sc_laborer').addEventListener('change', () => {
+    $('fd_sc_laborer_other_wrap').style.display = $('fd_sc_laborer').value==='__other__' ? 'block' : 'none';
+  });
+  $('fd_sc_add').addEventListener('click', addFdSawCutQAEntry);
+  $('fd_sc_export').addEventListener('click', () => fdSawCutQA.exportCSV(['Date','Inspector','Repair ID','Subcontractor','Laborer'], e=>[e.date,e.inspector,e.repairId,e.subcontractor,e.laborer], 'fulldepth-sawcutqa'));
+  $('fd_sc_sync').addEventListener('click', () => syncOperation('fd_sawcutqa', fdSawCutQA.load));
+  $('fd_sc_clear').addEventListener('click', () => fdSawCutQA.clear(renderFdSawCutQA));
+  $('fd_sc_tbody').addEventListener('click', (e) => {
+    const btn = e.target.closest('.del-btn'); if(!btn) return;
+    const entries = fdSawCutQA.load();
+    const idx = parseInt(btn.dataset.idx,10);
+    if(entries[idx] && entries[idx].locked){ alert('This entry is locked and cannot be deleted.'); return; }
+    entries.splice(idx,1); fdSawCutQA.save(entries); renderFdSawCutQA();
+  });
+
+  $('fd_sb_add').addEventListener('click', addFdSubbaseCompEntry);
+  $('fd_sb_export').addEventListener('click', () => fdSubbaseComp.exportCSV(['Date','Inspector','Repair ID','Result'], e=>[e.date,e.inspector,e.repairId,e.result], 'fulldepth-subbasecompaction'));
+  $('fd_sb_sync').addEventListener('click', () => syncOperation('fd_subbasecomp', fdSubbaseComp.load));
+  $('fd_sb_clear').addEventListener('click', () => fdSubbaseComp.clear(renderFdSubbaseComp));
+  $('fd_sb_tbody').addEventListener('click', (e) => {
+    const btn = e.target.closest('.del-btn'); if(!btn) return;
+    const entries = fdSubbaseComp.load();
+    const idx = parseInt(btn.dataset.idx,10);
+    if(entries[idx] && entries[idx].locked){ alert('This entry is locked and cannot be deleted.'); return; }
+    entries.splice(idx,1); fdSubbaseComp.save(entries); renderFdSubbaseComp();
+  });
+
+  $('fd_dq_cageUsed').addEventListener('change', () => {
+    $('fd_dq_cageCount_wrap').style.display = $('fd_dq_cageUsed').value==='Y' ? 'block' : 'none';
+  });
+  $('fd_dq_add').addEventListener('click', addFdDowelQAEntry);
+  $('fd_dq_export').addEventListener('click', () => fdDowelQA.exportCSV(
+    ['Date','Inspector','Repair ID','Overall',...FD_DOWEL_CHECKS,'Cage Used','Dowels/Cage'],
+    e=>[e.date,e.inspector,e.repairId,e.overall,...FD_DOWEL_CHECKS.map(k=>e.checks?e.checks[k]:''),e.cageUsed,e.cageCount],
+    'fulldepth-dowelqa'));
+  $('fd_dq_sync').addEventListener('click', () => syncOperation('fd_dowelqa', fdDowelQA.load));
+  $('fd_dq_clear').addEventListener('click', () => fdDowelQA.clear(renderFdDowelQA));
+  $('fd_dq_tbody').addEventListener('click', (e) => {
+    const btn = e.target.closest('.del-btn'); if(!btn) return;
+    const entries = fdDowelQA.load();
+    const idx = parseInt(btn.dataset.idx,10);
+    if(entries[idx] && entries[idx].locked){ alert('This entry is locked and cannot be deleted.'); return; }
+    entries.splice(idx,1); fdDowelQA.save(entries); renderFdDowelQA();
   });
 
   $('ja_add').addEventListener('click', addJointLogEntry);
@@ -3567,10 +4490,29 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
   wireInspectorField('sc');
   wireInspectorField('ap');
   wireInspectorField('ua');
+  wireInspectorField('fd_rl');
+  wireInspectorField('fd_lb');
+  wireInspectorField('fd_eq');
+  wireInspectorField('fd_cd');
+  wireInspectorField('fd_ct');
+  wireInspectorField('fd_av');
+  wireInspectorField('fd_sc');
+  wireInspectorField('fd_sb');
+  wireInspectorField('fd_dq');
   populateSawCutLocations();
   $('sc_date').value = todayStr();
   $('ap_date').value = todayStr();
   $('ua_date').value = todayStr();
+  ['fd_rl','fd_lb','fd_eq','fd_cd','fd_ct','fd_av','fd_sc','fd_sb','fd_dq'].forEach(p => { $(p+'_date').value = todayStr(); });
+  renderFdRepairLog();
+  renderFdLabor();
+  renderFdEquipment();
+  renderFdConcDelivery();
+  renderFdConcTest();
+  renderFdAsphVerify();
+  renderFdSawCutQA();
+  renderFdSubbaseComp();
+  renderFdDowelQA();
   renderRoster();
   renderFillLog();
   renderMillLog();
