@@ -1038,26 +1038,19 @@
 
         <div style="font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em; margin:16px 0 8px;">Pay Items</div>
         <div class="grid2">
-          <div class="field"><label>304.10119917 &mdash; Subbase Course Type 1011-2 (CY)</label><input type="number" id="fd_rl_subbase" inputmode="decimal"></div>
+          <div class="field"><label>304.10119917 &mdash; Subbase Course Type 1011-2 (CY)</label><input type="text" id="fd_rl_subbase" readonly placeholder="Auto-filled from Subbase Compaction tab"></div>
           <div class="field"><label>404.1969 &mdash; 19F9 Binder Course Asphalt (TON)</label><input type="text" id="fd_rl_binder" readonly placeholder="Auto-filled from Asphalt tab"></div>
           <div class="field"><label>407.0102 &mdash; Diluted Tack Coat (GAL)</label><input type="text" id="fd_rl_tack" readonly placeholder="Auto-filled from TAC Coat tab"></div>
           <div class="field"><label>510.02210018 &mdash; PCC Full-Depth Repair (CY)</label><input type="text" id="fd_rl_pccrepair" readonly placeholder="Auto-filled from Concrete tab"></div>
           <div class="field"><label>510.20000018 &mdash; PCC Pavement Lift Out (SY)</label><input type="number" id="fd_rl_pccliftout" inputmode="decimal"></div>
           <div class="field"><label>510.81000018 &mdash; Drill &amp; Anchor Dowels (EACH)</label><input type="text" id="fd_rl_dowels" readonly placeholder="Auto-filled from Dowel Cages total"></div>
           <div class="field"><label>510.91000018 &mdash; Transverse Joints (LF)</label><input type="number" id="fd_rl_transjoints" inputmode="decimal"></div>
-          <div class="field"><label>520.09000010 &mdash; Saw Cutting Asphalt Concrete (LF)</label><input type="number" id="fd_rl_sawcut" inputmode="decimal"></div>
+          <div class="field"><label>520.09000010 &mdash; Saw Cutting Asphalt Concrete (LF)</label><input type="text" id="fd_rl_sawcut" readonly placeholder="Auto-filled from Saw Cutting QA (manual measurement)"></div>
           <div class="field"><label>619.01 &mdash; Work Zone Traffic Control (LS)</label>
             <select id="fd_rl_trafficcontrol"><option value="">&mdash; Select &mdash;</option><option value="Included">Included</option></select>
           </div>
         </div>
 
-        <div style="font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em; margin:16px 0 8px;">Subbase</div>
-        <div class="grid2">
-          <div class="field"><label># of Lifts</label><input type="number" id="fd_rl_subbaseLifts" inputmode="numeric"></div>
-          <div class="field"><label>Ticket #</label><input type="text" id="fd_rl_subbaseTicket"></div>
-          <div class="field"><label>Quantity Delivered (CY)</label><input type="number" id="fd_rl_subbaseDelivered" inputmode="decimal"></div>
-          <div class="field"><label>Calculated Quantity (CY)</label><input type="text" id="fd_rl_subbaseCalc" readonly placeholder="Auto: L x W x Depth / 27"></div>
-        </div>
 
         <div class="result" style="margin-top:14px;">
           <div class="label">Calculated Cross-Checks</div>
@@ -1085,24 +1078,22 @@
     <div class="fd-maintab-panel" id="fdmain-labor" style="display:none;">
       <div class="panel">
         <h2>Labor</h2>
-        <div class="desc">One row per person, per repair.</div>
+        <div class="desc">Enter a quantity for any mix of roles below, name each person, then add the whole crew at once. Each person still logs as their own row.</div>
         <div class="grid2">
           <div class="field"><label>Inspector</label><select id="fd_lb_inspector"></select></div>
           <div class="field" id="fd_lb_inspector_other_wrap" style="display:none;"><label>Inspector Name</label><input type="text" id="fd_lb_inspector_other" placeholder="Type name"></div>
           <div class="field"><label>Repair ID</label><input type="text" id="fd_lb_repairid" placeholder="SH-001"></div>
-          <div class="field"><label>Role</label>
-            <select id="fd_lb_role">
-              <option value="">&mdash; Select role &mdash;</option>
-              <option value="Laborer Foreman">Laborer Foreman</option>
-              <option value="Laborer Apprentice">Laborer Apprentice</option>
-              <option value="Laborer Operator">Laborer Operator</option>
-              <option value="Laborer Journeyman">Laborer Journeyman</option>
-            </select>
-          </div>
-          <div class="field"><label>Name</label><input type="text" id="fd_lb_name" placeholder="Type name"></div>
           <div class="field"><label>Date</label><input type="date" id="fd_lb_date"></div>
         </div>
-        <div class="log-toolbar" style="margin-top:14px;"><button class="btn primary" id="fd_lb_add">+ Add to Report</button></div>
+        <div style="font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em; margin:16px 0 8px;">Crew Quantities</div>
+        <div class="grid2">
+          <div class="field"><label>Laborer Foreman</label><input type="number" id="fd_lb_qty_foreman" value="0" min="0" inputmode="numeric" data-role="Laborer Foreman"></div>
+          <div class="field"><label>Laborer Apprentice</label><input type="number" id="fd_lb_qty_apprentice" value="0" min="0" inputmode="numeric" data-role="Laborer Apprentice"></div>
+          <div class="field"><label>Laborer Operator</label><input type="number" id="fd_lb_qty_operator" value="0" min="0" inputmode="numeric" data-role="Laborer Operator"></div>
+          <div class="field"><label>Laborer Journeyman</label><input type="number" id="fd_lb_qty_journeyman" value="0" min="0" inputmode="numeric" data-role="Laborer Journeyman"></div>
+        </div>
+        <div id="fd_lb_names_container" style="margin-top:10px;"></div>
+        <div class="log-toolbar" style="margin-top:14px;"><button class="btn primary" id="fd_lb_add">+ Add Crew to Report</button></div>
         <div class="log-count" id="fd_lb_count">0 entries logged</div>
         <div class="log-toolbar">
           <button class="btn" id="fd_lb_export">Export CSV</button>
@@ -1122,32 +1113,36 @@
     <div class="fd-maintab-panel" id="fdmain-equipment" style="display:none;">
       <div class="panel">
         <h2>Equipment</h2>
-        <div class="desc">One row per piece of equipment, per repair.</div>
+        <div class="desc">Enter a quantity for any mix of equipment types, then give each unit its own Model and ID (e.g. "Ford F250" / "625"), then add them all at once. Each unit still logs as its own row.</div>
         <div class="grid2">
           <div class="field"><label>Inspector</label><select id="fd_eq_inspector"></select></div>
           <div class="field" id="fd_eq_inspector_other_wrap" style="display:none;"><label>Inspector Name</label><input type="text" id="fd_eq_inspector_other" placeholder="Type name"></div>
           <div class="field"><label>Repair ID</label><input type="text" id="fd_eq_repairid" placeholder="SH-001"></div>
-          <div class="field"><label>Equipment Type</label>
-            <select id="fd_eq_type">
-              <option value="">&mdash; Select type &mdash;</option>
-              <option value="Attenuator Truck (IMP C)">Attenuator Truck (IMP C)</option>
-              <option value="Heavy Duty Pickup Truck">Heavy Duty Pickup Truck</option>
-              <option value="Light Duty Pickup Truck">Light Duty Pickup Truck</option>
-              <option value="Light Tower">Light Tower</option>
-              <option value="Backhoe">Backhoe</option>
-              <option value="Excavator">Excavator</option>
-              <option value="Generator">Generator</option>
-              <option value="Dowel EZ Drill">Dowel EZ Drill</option>
-              <option value="Dump Truck">Dump Truck</option>
-              <option value="Asphalt Truck">Asphalt Truck</option>
-            </select>
-          </div>
-          <div class="field"><label>Quantity</label><input type="number" id="fd_eq_qty" value="1" inputmode="numeric"></div>
-          <div class="field"><label>Equipment # (optional)</label><input type="text" id="fd_eq_num"></div>
-          <div class="field" id="fd_eq_ticket_wrap" style="display:none;"><label>Ticket #</label><input type="text" id="fd_eq_ticket"></div>
           <div class="field"><label>Date</label><input type="date" id="fd_eq_date"></div>
         </div>
-        <div class="log-toolbar" style="margin-top:14px;"><button class="btn primary" id="fd_eq_add">+ Add to Report</button></div>
+        <div style="font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em; margin:16px 0 8px;">Equipment Quantities</div>
+        <div class="grid2">
+          <div class="field"><label>Attenuator Truck (IMP C)</label><input type="number" id="fd_eq_qty_attenuator" value="0" min="0" inputmode="numeric" data-type="Attenuator Truck (IMP C)"></div>
+          <div class="field"><label>Heavy Duty Pickup Truck</label><input type="number" id="fd_eq_qty_hdpickup" value="0" min="0" inputmode="numeric" data-type="Heavy Duty Pickup Truck"></div>
+          <div class="field"><label>Light Duty Pickup Truck</label><input type="number" id="fd_eq_qty_ldpickup" value="0" min="0" inputmode="numeric" data-type="Light Duty Pickup Truck"></div>
+          <div class="field"><label>Light Tower</label><input type="number" id="fd_eq_qty_lighttower" value="0" min="0" inputmode="numeric" data-type="Light Tower"></div>
+          <div class="field"><label>Backhoe</label><input type="number" id="fd_eq_qty_backhoe" value="0" min="0" inputmode="numeric" data-type="Backhoe"></div>
+          <div class="field"><label>Excavator</label><input type="number" id="fd_eq_qty_excavator" value="0" min="0" inputmode="numeric" data-type="Excavator"></div>
+          <div class="field"><label>Generator</label><input type="number" id="fd_eq_qty_generator" value="0" min="0" inputmode="numeric" data-type="Generator"></div>
+          <div class="field"><label>Dowel EZ Drill</label><input type="number" id="fd_eq_qty_dowelezdrill" value="0" min="0" inputmode="numeric" data-type="Dowel EZ Drill"></div>
+          <div class="field"><label>Dump Truck</label><input type="number" id="fd_eq_qty_dumptruck" value="0" min="0" inputmode="numeric" data-type="Dump Truck"></div>
+          <div class="field"><label>Asphalt Truck</label><input type="number" id="fd_eq_qty_asphalttruck" value="0" min="0" inputmode="numeric" data-type="Asphalt Truck"></div>
+        </div>
+        <div id="fd_eq_units_container" style="margin-top:10px;"></div>
+
+        <div style="font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em; margin:16px 0 8px;">Other Equipment (not in the list above)</div>
+        <div class="grid2">
+          <div class="field"><label>Model</label><input type="text" id="fd_eq_other_model" placeholder="e.g. Compressor"></div>
+          <div class="field"><label>ID</label><input type="text" id="fd_eq_other_id" placeholder="e.g. 118"></div>
+          <div class="field full"><label>Explanation</label><input type="text" id="fd_eq_other_explanation" placeholder="What it is / why it's here"></div>
+        </div>
+        <div class="log-toolbar" style="margin-top:10px;"><button class="btn primary" id="fd_eq_other_add">+ Add Other Equipment</button></div>
+        <div class="log-toolbar" style="margin-top:14px;"><button class="btn primary" id="fd_eq_add">+ Add Equipment to Report</button></div>
         <div class="log-count" id="fd_eq_count">0 entries logged</div>
         <div class="log-toolbar">
           <button class="btn" id="fd_eq_export">Export CSV</button>
@@ -1156,7 +1151,7 @@
         </div>
         <div class="log-table-wrap">
           <table class="log" id="fd_eq_table">
-            <thead><tr><th>Date</th><th>Inspector</th><th>Repair ID</th><th>Type</th><th>Qty</th><th>Equip #</th><th>Ticket</th><th></th></tr></thead>
+            <thead><tr><th>Date</th><th>Inspector</th><th>Repair ID</th><th>Type</th><th>Model</th><th>Equipment ID</th><th>Ticket</th><th>Explanation</th><th></th></tr></thead>
             <tbody id="fd_eq_tbody"></tbody>
           </table>
           <div class="log-empty" id="fd_eq_empty">No entries yet.</div>
@@ -1179,12 +1174,13 @@
         <div class="grid2">
           <div class="field"><label>Length (ft)</label><input type="number" id="fd_co_L" inputmode="decimal"></div>
           <div class="field"><label>Width (ft)</label><input type="number" id="fd_co_W" inputmode="decimal"></div>
-          <div class="field"><label>Depth (ft)</label><input type="number" id="fd_co_D" inputmode="decimal"></div>
+          <div class="field"><label>Depth (in)</label><input type="number" id="fd_co_D" inputmode="decimal"></div>
         </div>
+        <div class="log-toolbar" style="margin-top:10px;"><button class="btn primary" id="fd_co_calcBtn">Calculate Quantity</button></div>
         <div class="result" style="margin-top:10px;">
           <div class="label">Calculated Quantity</div>
           <div class="value" id="fd_co_calcCY">&mdash;</div>
-          <div class="station">L &times; W &times; Depth &divide; 27</div>
+          <div class="station">L &times; W &times; (Depth(in) &divide; 12) &divide; 27</div>
         </div>
 
         <div style="font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em; margin:16px 0 8px;">Delivery &mdash; ELM Transit Mix Transportation</div>
@@ -1255,6 +1251,7 @@
           <div class="field"><label>Width (ft)</label><input type="number" id="fd_as_W" inputmode="decimal"></div>
           <div class="field"><label>Depth (in)</label><input type="number" id="fd_as_D" inputmode="decimal"></div>
         </div>
+        <div class="log-toolbar" style="margin-top:10px;"><button class="btn primary" id="fd_as_calcBtn">Calculate Tonnage</button></div>
         <div class="result" style="margin-top:10px;">
           <div class="label">Calculated Tonnage</div>
           <div class="value" id="fd_as_calcTons">&mdash;</div>
@@ -1287,17 +1284,20 @@
           <div class="field"><label>Inspector</label><select id="fd_sc_inspector"></select></div>
           <div class="field" id="fd_sc_inspector_other_wrap" style="display:none;"><label>Inspector Name</label><input type="text" id="fd_sc_inspector_other" placeholder="Type name"></div>
           <div class="field"><label>Repair ID</label><input type="text" id="fd_sc_repairid" placeholder="SH-001"></div>
-          <div class="field"><label>Laborer</label>
-            <select id="fd_sc_laborer"><option value="Bill Grandorf">Bill Grandorf</option><option value="__other__">Other (type in)</option></select>
-          </div>
-          <div class="field" id="fd_sc_laborer_other_wrap" style="display:none;"><label>Laborer Name</label><input type="text" id="fd_sc_laborer_other"></div>
           <div class="field"><label>Date</label><input type="date" id="fd_sc_date"></div>
         </div>
+        <div style="font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em; margin:16px 0 8px;">Crew (Bill Grandorf might be one, or enter anyone manually)</div>
+        <div class="grid2">
+          <div class="field"><label>Laborer</label><input type="number" id="fd_sc_qty_laborer" value="0" min="0" inputmode="numeric" data-role="Laborer"></div>
+          <div class="field"><label>Operator</label><input type="number" id="fd_sc_qty_operator" value="0" min="0" inputmode="numeric" data-role="Operator"></div>
+        </div>
+        <div id="fd_sc_names_container" style="margin-top:10px;"></div>
         <div style="font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em; margin:16px 0 8px;">Linear Footage &mdash; Ticket and Manual Cross-Check</div>
+        <div class="desc" style="color:var(--warn-red);">Both LF values are recorded and shown in the report. Unless authorized otherwise, the manually measured LF (not the ticket LF) is what governs payment and is what flows into the Repair Log.</div>
         <div class="grid2">
           <div class="field"><label>Ticket #</label><input type="text" id="fd_sc_ticket"></div>
           <div class="field"><label>LF per Ticket</label><input type="number" id="fd_sc_lfTicket" inputmode="decimal"></div>
-          <div class="field"><label>LF Measured Manually (wheel)</label><input type="number" id="fd_sc_lfManual" inputmode="decimal"></div>
+          <div class="field"><label>LF Measured Manually (wheel) &mdash; governs payment</label><input type="number" id="fd_sc_lfManual" inputmode="decimal"></div>
         </div>
         <div id="fd_sc_lfflag"></div>
         <div class="log-toolbar" style="margin-top:14px;"><button class="btn primary" id="fd_sc_add">+ Add to Report</button></div>
@@ -1309,7 +1309,7 @@
         </div>
         <div class="log-table-wrap">
           <table class="log" id="fd_sc_table">
-            <thead><tr><th>Date</th><th>Inspector</th><th>Repair ID</th><th>Subcontractor</th><th>Laborer</th><th>Ticket</th><th>LF (Ticket)</th><th>LF (Manual)</th><th></th></tr></thead>
+            <thead><tr><th>Date</th><th>Inspector</th><th>Repair ID</th><th>Subcontractor</th><th>Role</th><th>Name</th><th>Ticket</th><th>LF (Ticket)</th><th>LF (Manual)</th><th>Pay Basis</th><th></th></tr></thead>
             <tbody id="fd_sc_tbody"></tbody>
           </table>
           <div class="log-empty" id="fd_sc_empty">No entries yet.</div>
@@ -1324,11 +1324,40 @@
           <div class="field"><label>Inspector</label><select id="fd_sb_inspector"></select></div>
           <div class="field" id="fd_sb_inspector_other_wrap" style="display:none;"><label>Inspector Name</label><input type="text" id="fd_sb_inspector_other" placeholder="Type name"></div>
           <div class="field"><label>Repair ID</label><input type="text" id="fd_sb_repairid" placeholder="SH-001"></div>
+          <div class="field"><label>Date</label><input type="date" id="fd_sb_date"></div>
+        </div>
+
+        <div style="font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em; margin:16px 0 8px;">Delivery</div>
+        <div class="grid2">
+          <div class="field"><label>Ticket #</label><input type="text" id="fd_sb_ticket"></div>
+          <div class="field"><label>Quantity Delivered (CY)</label><input type="number" id="fd_sb_delivered" inputmode="decimal"></div>
+        </div>
+
+        <div style="font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em; margin:16px 0 8px;"># of Lifts</div>
+        <div class="grid2">
+          <div class="field"><label># of Lifts Used</label><input type="number" id="fd_sb_lifts" inputmode="numeric"></div>
+        </div>
+
+        <div style="font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em; margin:16px 0 8px;">Compaction</div>
+        <div class="grid2">
           <div class="field"><label>Compaction</label>
             <select id="fd_sb_result"><option value="">&mdash; Select &mdash;</option><option value="Pass">Pass</option><option value="Fail">Fail</option></select>
           </div>
-          <div class="field"><label>Date</label><input type="date" id="fd_sb_date"></div>
         </div>
+
+        <div style="font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em; margin:16px 0 8px;">Placement &amp; Volume Calculation</div>
+        <div class="grid2">
+          <div class="field"><label>Length (ft)</label><input type="number" id="fd_sb_L" inputmode="decimal"></div>
+          <div class="field"><label>Width (ft)</label><input type="number" id="fd_sb_W" inputmode="decimal"></div>
+          <div class="field"><label>Depth (ft)</label><input type="number" id="fd_sb_D" inputmode="decimal"></div>
+        </div>
+        <div class="log-toolbar" style="margin-top:10px;"><button class="btn primary" id="fd_sb_calcBtn">Calculate Quantity</button></div>
+        <div class="result" style="margin-top:10px;">
+          <div class="label">Calculated Quantity</div>
+          <div class="value" id="fd_sb_calcCY">&mdash;</div>
+          <div class="station">L &times; W &times; Depth &divide; 27</div>
+        </div>
+
         <div class="log-toolbar" style="margin-top:14px;"><button class="btn primary" id="fd_sb_add">+ Add to Report</button></div>
         <div class="log-count" id="fd_sb_count">0 entries logged</div>
         <div class="log-toolbar">
@@ -1338,7 +1367,7 @@
         </div>
         <div class="log-table-wrap">
           <table class="log" id="fd_sb_table">
-            <thead><tr><th>Date</th><th>Inspector</th><th>Repair ID</th><th>Result</th><th></th></tr></thead>
+            <thead><tr><th>Date</th><th>Inspector</th><th>Repair ID</th><th>Ticket</th><th>Delivered</th><th>Lifts</th><th>Result</th><th>L</th><th>W</th><th>D</th><th>Calc CY</th><th></th></tr></thead>
             <tbody id="fd_sb_tbody"></tbody>
           </table>
           <div class="log-empty" id="fd_sb_empty">No entries yet.</div>
@@ -1348,126 +1377,86 @@
 
     <div class="fd-maintab-panel" id="fdmain-dowelqa" style="display:none;">
       <div class="panel">
-        <h2>Dowel Installation QA</h2>
-        <div class="desc">Reference: hole depth 7" (+3/8"/-0"), dowel protrusion 6.5"-7" from saw cut face, alignment within &plusmn;1/8" of centerline/surface/each other. All checks Pass/Fail.</div>
+        <h2>Dowels</h2>
+        <div class="desc">Reference: hole depth 7" (+3/8"/-0"), dowel protrusion 6.5"-7" from saw cut face, alignment within &plusmn;1/8" of centerline/surface/each other.</div>
         <div class="grid2">
-          <div class="field"><label>Inspector</label><select id="fd_dq_inspector"></select></div>
-          <div class="field" id="fd_dq_inspector_other_wrap" style="display:none;"><label>Inspector Name</label><input type="text" id="fd_dq_inspector_other" placeholder="Type name"></div>
-          <div class="field"><label>Repair ID</label><input type="text" id="fd_dq_repairid" placeholder="SH-001"></div>
-          <div class="field"><label>Date</label><input type="date" id="fd_dq_date"></div>
+          <div class="field"><label>Inspector</label><select id="fd_dw_inspector"></select></div>
+          <div class="field" id="fd_dw_inspector_other_wrap" style="display:none;"><label>Inspector Name</label><input type="text" id="fd_dw_inspector_other" placeholder="Type name"></div>
+          <div class="field"><label>Repair ID</label><input type="text" id="fd_dw_repairid" placeholder="SH-001"></div>
+          <div class="field"><label>Date</label><input type="date" id="fd_dw_date"></div>
         </div>
-        <div id="fd_dq_checks" style="margin-top:10px;">
+
+        <div style="font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em; margin:16px 0 8px;">Individual Dowels</div>
+        <div class="grid2">
+          <div class="field"><label>Individual Dowels Count</label><input type="number" id="fd_dw_individualCount" inputmode="numeric" value="0" min="0"></div>
+        </div>
+
+        <div style="font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em; margin:16px 0 8px;">Dowel Cages / Baskets</div>
+        <div class="grid2">
+          <div class="field"><label>Cage #</label><input type="text" id="fd_dw_cageNum" placeholder="1"></div>
+          <div class="field"><label># of Dowels in this Cage</label><input type="number" id="fd_dw_cageDowels" inputmode="numeric"></div>
+        </div>
+        <div class="log-toolbar" style="margin-top:8px;"><button class="btn" id="fd_dw_addCage">+ Add Cage</button></div>
+        <div id="fd_dw_cageList" style="margin-top:8px;"></div>
+
+        <div class="result" style="margin-top:14px;">
+          <div class="label">Combined Total (Individual + All Cages)</div>
+          <div class="value" id="fd_dw_combinedTotal">0</div>
+        </div>
+
+        <div style="font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em; margin:16px 0 8px;">Dowel Installation QA</div>
+        <div id="fd_dw_checks" style="margin-top:10px;">
           <div class="field full" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding:10px 0;">
             <label style="margin:0;">Hole diameter correct (per anchoring manufacturer spec)</label>
-            <select id="fd_dq_holeDiameter" style="width:120px;"><option value="">&mdash;</option><option value="Pass">Pass</option><option value="Fail">Fail</option></select>
+            <select id="fd_dw_holeDiameter" style="width:120px;"><option value="">&mdash;</option><option value="Pass">Pass</option><option value="Fail">Fail</option></select>
           </div>
           <div class="field full" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding:10px 0;">
             <label style="margin:0;">Hole depth correct (ref: 7" +3/8"/-0")</label>
-            <select id="fd_dq_holeDepth" style="width:120px;"><option value="">&mdash;</option><option value="Pass">Pass</option><option value="Fail">Fail</option></select>
+            <select id="fd_dw_holeDepth" style="width:120px;"><option value="">&mdash;</option><option value="Pass">Pass</option><option value="Fail">Fail</option></select>
           </div>
           <div class="field full" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding:10px 0;">
             <label style="margin:0;">Hole spacing/count correct (ref: 4/wheelpath, 8/lane, 12" o.c.)</label>
-            <select id="fd_dq_holeSpacing" style="width:120px;"><option value="">&mdash;</option><option value="Pass">Pass</option><option value="Fail">Fail</option></select>
+            <select id="fd_dw_holeSpacing" style="width:120px;"><option value="">&mdash;</option><option value="Pass">Pass</option><option value="Fail">Fail</option></select>
           </div>
           <div class="field full" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding:10px 0;">
             <label style="margin:0;">Dust blown out of hole (compressed air)</label>
-            <select id="fd_dq_dustBlown" style="width:120px;"><option value="">&mdash;</option><option value="Pass">Pass</option><option value="Fail">Fail</option></select>
+            <select id="fd_dw_dustBlown" style="width:120px;"><option value="">&mdash;</option><option value="Pass">Pass</option><option value="Fail">Fail</option></select>
           </div>
           <div class="field full" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding:10px 0;">
             <label style="margin:0;">Anchoring material uniformly mixed before use</label>
-            <select id="fd_dq_materialMixed" style="width:120px;"><option value="">&mdash;</option><option value="Pass">Pass</option><option value="Fail">Fail</option></select>
+            <select id="fd_dw_materialMixed" style="width:120px;"><option value="">&mdash;</option><option value="Pass">Pass</option><option value="Fail">Fail</option></select>
           </div>
           <div class="field full" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding:10px 0;">
             <label style="margin:0;">Epoxy/anchoring material placed correctly</label>
-            <select id="fd_dq_epoxyPlaced" style="width:120px;"><option value="">&mdash;</option><option value="Pass">Pass</option><option value="Fail">Fail</option></select>
+            <select id="fd_dw_epoxyPlaced" style="width:120px;"><option value="">&mdash;</option><option value="Pass">Pass</option><option value="Fail">Fail</option></select>
           </div>
           <div class="field full" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding:10px 0;">
             <label style="margin:0;">Dowel protrusion correct (ref: 6.5"-7" from saw cut face)</label>
-            <select id="fd_dq_protrusion" style="width:120px;"><option value="">&mdash;</option><option value="Pass">Pass</option><option value="Fail">Fail</option></select>
+            <select id="fd_dw_protrusion" style="width:120px;"><option value="">&mdash;</option><option value="Pass">Pass</option><option value="Fail">Fail</option></select>
           </div>
           <div class="field full" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding:10px 0;">
             <label style="margin:0;">Alignment correct (ref: parallel, &plusmn;1/8")</label>
-            <select id="fd_dq_alignment" style="width:120px;"><option value="">&mdash;</option><option value="Pass">Pass</option><option value="Fail">Fail</option></select>
+            <select id="fd_dw_alignment" style="width:120px;"><option value="">&mdash;</option><option value="Pass">Pass</option><option value="Fail">Fail</option></select>
           </div>
           <div class="field full" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding:10px 0;">
-            <label style="margin:0;">Grout retention disk placed (tight against face)</label>
-            <select id="fd_dq_groutDisk" style="width:120px;"><option value="">&mdash;</option><option value="Pass">Pass</option><option value="Fail">Fail</option></select>
+            <label style="margin:0;">Dowel caps added to the dowels</label>
+            <select id="fd_dw_dowelCaps" style="width:120px;"><option value="">&mdash;</option><option value="Pass">Pass</option><option value="Fail">Fail</option></select>
           </div>
         </div>
-        <div class="log-toolbar" style="margin-top:14px;"><button class="btn primary" id="fd_dq_add">+ Add to Report</button></div>
-        <div class="log-count" id="fd_dq_count">0 entries logged</div>
-        <div class="log-toolbar">
-          <button class="btn" id="fd_dq_export">Export CSV</button>
-          <button class="btn primary" id="fd_dq_sync">&#9729; Sync to Cloud</button>
-          <button class="btn danger" id="fd_dq_clear">Clear Report</button>
-        </div>
-        <div class="log-table-wrap">
-          <table class="log" id="fd_dq_table">
-            <thead><tr><th>Date</th><th>Inspector</th><th>Repair ID</th><th>Overall</th><th></th></tr></thead>
-            <tbody id="fd_dq_tbody"></tbody>
-          </table>
-          <div class="log-empty" id="fd_dq_empty">No entries yet.</div>
-        </div>
-      </div>
 
-      <div class="panel">
-        <h2>Dowel Cages</h2>
-        <div class="desc">Tracked independently &mdash; a repair may use multiple cages. One row per cage.</div>
-        <div class="grid2">
-          <div class="field"><label>Inspector</label><select id="fd_cg_inspector"></select></div>
-          <div class="field" id="fd_cg_inspector_other_wrap" style="display:none;"><label>Inspector Name</label><input type="text" id="fd_cg_inspector_other" placeholder="Type name"></div>
-          <div class="field"><label>Repair ID</label><input type="text" id="fd_cg_repairid" placeholder="SH-001"></div>
-          <div class="field"><label>Cage #</label><input type="text" id="fd_cg_cagenum" placeholder="1"></div>
-          <div class="field"><label>Dowels in this Cage</label><input type="number" id="fd_cg_dowels" inputmode="numeric"></div>
-          <div class="field"><label>Date</label><input type="date" id="fd_cg_date"></div>
-        </div>
-        <div class="result" style="margin-top:10px;">
-          <div class="label">Combined Total (Cages + Individual) for this Repair ID</div>
-          <div class="value" id="fd_cg_total">0</div>
-        </div>
-        <div class="log-toolbar" style="margin-top:14px;"><button class="btn primary" id="fd_cg_add">+ Add Cage</button></div>
-        <div class="log-count" id="fd_cg_count">0 entries logged</div>
+        <div class="log-toolbar" style="margin-top:14px;"><button class="btn primary" id="fd_dw_add">+ Add to Report</button></div>
+        <div class="log-count" id="fd_dw_count">0 entries logged</div>
         <div class="log-toolbar">
-          <button class="btn" id="fd_cg_export">Export CSV</button>
-          <button class="btn primary" id="fd_cg_sync">&#9729; Sync to Cloud</button>
-          <button class="btn danger" id="fd_cg_clear">Clear Report</button>
+          <button class="btn" id="fd_dw_export">Export CSV</button>
+          <button class="btn primary" id="fd_dw_sync">&#9729; Sync to Cloud</button>
+          <button class="btn danger" id="fd_dw_clear">Clear Report</button>
         </div>
         <div class="log-table-wrap">
-          <table class="log" id="fd_cg_table">
-            <thead><tr><th>Date</th><th>Inspector</th><th>Repair ID</th><th>Cage #</th><th>Dowels</th><th></th></tr></thead>
-            <tbody id="fd_cg_tbody"></tbody>
+          <table class="log" id="fd_dw_table">
+            <thead><tr><th>Date</th><th>Inspector</th><th>Repair ID</th><th>Individual</th><th># Cages</th><th>Cage Breakdown</th><th>Combined Total</th><th>QA Overall</th><th></th></tr></thead>
+            <tbody id="fd_dw_tbody"></tbody>
           </table>
-          <div class="log-empty" id="fd_cg_empty">No cages logged yet.</div>
-        </div>
-      </div>
-
-      <div class="panel">
-        <h2>Individual Dowels (No Cage)</h2>
-        <div class="desc">Dowels installed one at a time, not part of a cage assembly. Combines with the cage total below.</div>
-        <div class="grid2">
-          <div class="field"><label>Inspector</label><select id="fd_id_inspector"></select></div>
-          <div class="field" id="fd_id_inspector_other_wrap" style="display:none;"><label>Inspector Name</label><input type="text" id="fd_id_inspector_other" placeholder="Type name"></div>
-          <div class="field"><label>Repair ID</label><input type="text" id="fd_id_repairid" placeholder="SH-001"></div>
-          <div class="field"><label>Individual Dowel Count</label><input type="number" id="fd_id_dowels" inputmode="numeric"></div>
-          <div class="field"><label>Date</label><input type="date" id="fd_id_date"></div>
-        </div>
-        <div class="result" style="margin-top:10px;">
-          <div class="label">Combined Total (Cages + Individual) for this Repair ID</div>
-          <div class="value" id="fd_id_combinedTotal">0</div>
-        </div>
-        <div class="log-toolbar" style="margin-top:14px;"><button class="btn primary" id="fd_id_add">+ Add</button></div>
-        <div class="log-count" id="fd_id_count">0 entries logged</div>
-        <div class="log-toolbar">
-          <button class="btn" id="fd_id_export">Export CSV</button>
-          <button class="btn primary" id="fd_id_sync">&#9729; Sync to Cloud</button>
-          <button class="btn danger" id="fd_id_clear">Clear Report</button>
-        </div>
-        <div class="log-table-wrap">
-          <table class="log" id="fd_id_table">
-            <thead><tr><th>Date</th><th>Inspector</th><th>Repair ID</th><th>Count</th><th></th></tr></thead>
-            <tbody id="fd_id_tbody"></tbody>
-          </table>
-          <div class="log-empty" id="fd_id_empty">No entries yet.</div>
+          <div class="log-empty" id="fd_dw_empty">No entries yet.</div>
         </div>
       </div>
     </div>
@@ -2977,13 +2966,17 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
    * read-only depth-placed display, converting to inches for consistency in this view. */
   function syncFdRepairDepthsFromMaterialTabs(){
     const repairId = $('fd_rl_repairid').value.trim();
-    if(!repairId){ $('fd_rl_concD').value=''; $('fd_rl_asphD').value=''; calcFdRepairCrossChecks(); return; }
+    if(!repairId){ $('fd_rl_concD').value=''; $('fd_rl_asphD').value=''; $('fd_rl_subbase').value=''; calcFdRepairCrossChecks(); return; }
+
+    const subMatches = fdSubbaseComp.load().filter(e => e.repairId === repairId && e.calcCY);
+    if(subMatches.length){
+      $('fd_rl_subbase').value = subMatches[subMatches.length-1].calcCY;
+    } else { $('fd_rl_subbase').value = ''; }
 
     const concMatches = fdConcrete.load().filter(e => e.repairId === repairId && e.D);
     if(concMatches.length){
       const latest = concMatches[concMatches.length-1];
-      const inches = parseFloat(latest.D) * 12; // Concrete tab's own D is in ft
-      $('fd_rl_concD').value = isFinite(inches) ? inches.toFixed(2) : '';
+      $('fd_rl_concD').value = latest.D; // Concrete tab's own D is already in inches
       $('fd_rl_pccrepair').value = latest.calcCY || '';
     } else { $('fd_rl_concD').value = ''; $('fd_rl_pccrepair').value = ''; }
 
@@ -3000,22 +2993,24 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
       $('fd_rl_tack').value = latest.finalPay;
     } else { $('fd_rl_tack').value = ''; }
 
-    const dowelTotal = getFdDowelGrandTotal(repairId);
-    $('fd_rl_dowels').value = dowelTotal > 0 ? dowelTotal : '';
+    const dowelMatches = fdDowels.load().filter(e => e.repairId === repairId && e.combinedTotal);
+    if(dowelMatches.length){
+      $('fd_rl_dowels').value = dowelMatches[dowelMatches.length-1].combinedTotal;
+    } else { $('fd_rl_dowels').value = ''; }
+
+    const sawCutMatches = fdSawCutQA.load().filter(e => e.repairId === repairId && e.lfManual);
+    if(sawCutMatches.length){
+      $('fd_rl_sawcut').value = sawCutMatches[sawCutMatches.length-1].lfManual;
+    } else { $('fd_rl_sawcut').value = ''; }
 
     calcFdRepairCrossChecks();
   }
 
   function calcFdRepairCrossChecks(){
     const L = parseFloat($('fd_rl_exL').value), W = parseFloat($('fd_rl_exW').value);
-    const subD = parseFloat($('fd_rl_exD').value);
     const concD_in = parseFloat($('fd_rl_concD').value);   // inches
     const asphD_in = parseFloat($('fd_rl_asphD').value);   // inches
     if(isFinite(L) && isFinite(W)){
-      if(isFinite(subD)){
-        const subCalc = (L*W*subD)/27; // excavation depth already in ft
-        $('fd_rl_subbaseCalc').value = fmt(subCalc,2)+' CY';
-      } else { $('fd_rl_subbaseCalc').value = ''; }
       if(isFinite(concD_in)){
         const concCalc = (L*W*(concD_in/12))/27; // convert inches -> ft for CY
         $('fd_rl_concCalc').textContent = fmt(concCalc,2)+' CY';
@@ -3025,7 +3020,7 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
         $('fd_rl_asphCalc').textContent = fmt(asphTons,2)+' tons';
       } else { $('fd_rl_asphCalc').textContent = '—'; }
     } else {
-      $('fd_rl_subbaseCalc').value = ''; $('fd_rl_concCalc').textContent = '—'; $('fd_rl_asphCalc').textContent = '—';
+      $('fd_rl_concCalc').textContent = '—'; $('fd_rl_asphCalc').textContent = '—';
     }
   }
 
@@ -3044,8 +3039,6 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
       pccrepair: $('fd_rl_pccrepair').value, pccliftout: $('fd_rl_pccliftout').value,
       dowels: $('fd_rl_dowels').value, transjoints: $('fd_rl_transjoints').value, sawcut: $('fd_rl_sawcut').value,
       trafficcontrol: $('fd_rl_trafficcontrol').value,
-      subbaseLifts: $('fd_rl_subbaseLifts').value, subbaseTicket: $('fd_rl_subbaseTicket').value,
-      subbaseDelivered: $('fd_rl_subbaseDelivered').value, subbaseCalc: $('fd_rl_subbaseCalc').value,
       concCalc: $('fd_rl_concCalc').textContent, asphCalc: $('fd_rl_asphCalc').textContent
     });
     saveFdRepairLog(entries);
@@ -3078,10 +3071,10 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
     if(entries.length===0){ alert('No entries to export yet.'); return; }
     const headers=['Date','Inspector','Repair ID','Location','Exc L','Exc W','Exc D','Concrete Depth','Asphalt Depth',
       'Subbase CY','Binder TON','Tack GAL','PCC Repair CY','PCC Liftout SY','Dowels EACH','Trans Joints LF','Saw Cut LF',
-      'Traffic Control','Subbase Lifts','Subbase Ticket','Subbase Delivered','Subbase Calc','Concrete Calc','Asphalt Calc'];
+      'Traffic Control','Concrete Calc','Asphalt Calc'];
     const rows=entries.map(e=>[e.date,e.inspector,e.repairId,e.location,e.exL,e.exW,e.exD,e.concD,e.asphD,
       e.subbase,e.binder,e.tack,e.pccrepair,e.pccliftout,e.dowels,e.transjoints,e.sawcut,
-      e.trafficcontrol,e.subbaseLifts,e.subbaseTicket,e.subbaseDelivered,e.subbaseCalc,e.concCalc,e.asphCalc]);
+      e.trafficcontrol,e.concCalc,e.asphCalc]);
     downloadCSV(headers, rows, 'fulldepth-repairlog');
   }
   function clearFdRepairLog(){
@@ -3117,22 +3110,50 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
 
   // --- Labor ---
   const fdLabor = makeFdLog('fd_lb', 'millfill_fd_labor_v1');
+  const FD_LABOR_ROLE_FIELDS = ['fd_lb_qty_foreman','fd_lb_qty_apprentice','fd_lb_qty_operator','fd_lb_qty_journeyman'];
+  function renderFdLaborNameInputs(){
+    const container = $('fd_lb_names_container');
+    // Preserve already-typed names per role before regenerating
+    const existingByRole = {};
+    container.querySelectorAll('input[data-lb-name]').forEach(inp => {
+      const role = inp.dataset.lbRole;
+      (existingByRole[role] = existingByRole[role]||[]).push(inp.value);
+    });
+    let html = '';
+    FD_LABOR_ROLE_FIELDS.forEach(fieldId => {
+      const field = $(fieldId);
+      const role = field.dataset.role;
+      const qty = Math.max(0, parseInt(field.value,10) || 0);
+      if(qty===0) return;
+      html += `<div style="font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em; margin:12px 0 6px;">${role} (${qty})</div><div class="grid2">`;
+      const existing = existingByRole[role] || [];
+      for(let i=0; i<qty; i++){
+        const val = existing[i] ? ` value="${existing[i].replace(/"/g,'&quot;')}"` : '';
+        html += `<div class="field"><label>${role} #${i+1} Name</label><input type="text" data-lb-name data-lb-role="${role}" placeholder="Type name"${val}></div>`;
+      }
+      html += '</div>';
+    });
+    container.innerHTML = html;
+  }
   function addFdLaborEntry(){
     const inspector = getInspectorValue('fd_lb');
     const repairId = $('fd_lb_repairid').value.trim();
-    const role = $('fd_lb_role').value;
-    const name = $('fd_lb_name').value.trim();
     if(!inspector){ alert('Please select or type in the inspector name.'); return; }
     if(!repairId){ alert('Enter a Repair ID.'); return; }
-    if(!role){ alert('Select a role.'); return; }
-    if(!name){ alert('Enter a name.'); return; }
+    const nameInputs = Array.from($('fd_lb_names_container').querySelectorAll('input[data-lb-name]'));
+    const people = nameInputs.map(inp => ({ role: inp.dataset.lbRole, name: inp.value.trim() })).filter(p => p.name.length>0);
+    if(people.length===0){ alert('Enter at least one quantity and name.'); return; }
     const entries = fdLabor.load();
-    entries.push({ id: genId(), locked:false, date: $('fd_lb_date').value||todayStr(), inspector, repairId, role, name });
+    const date = $('fd_lb_date').value||todayStr();
+    people.forEach(({role,name}) => {
+      entries.push({ id: genId(), locked:false, date, inspector, repairId, role, name });
+    });
     fdLabor.save(entries);
     rememberInspector('fd_lb');
     renderFdLabor();
-    $('fd_lb_name').value='';
-    showToast('\u2713 Labor logged');
+    FD_LABOR_ROLE_FIELDS.forEach(fieldId => { $(fieldId).value = '0'; });
+    renderFdLaborNameInputs();
+    showToast(`\u2713 ${people.length} ${people.length===1?'person':'people'} logged`);
   }
   function renderFdLabor(){
     fdLabor.render((e,i) => `<tr><td>${e.date||''}</td><td>${e.inspector||''}</td><td>${e.repairId||''}</td><td>${e.role||''}</td><td>${e.name||''}${e.locked?' &#128274;':''}</td><td><button class="del-btn" data-idx="${i}" title="Delete">&#10005;</button></td></tr>`);
@@ -3140,39 +3161,113 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
 
   // --- Equipment ---
   const fdEquip = makeFdLog('fd_eq', 'millfill_fd_equipment_v1');
+  const FD_EQUIP_TYPE_FIELDS = ['fd_eq_qty_attenuator','fd_eq_qty_hdpickup','fd_eq_qty_ldpickup','fd_eq_qty_lighttower',
+    'fd_eq_qty_backhoe','fd_eq_qty_excavator','fd_eq_qty_generator','fd_eq_qty_dowelezdrill','fd_eq_qty_dumptruck','fd_eq_qty_asphalttruck'];
+  function renderFdEquipmentUnitInputs(){
+    const container = $('fd_eq_units_container');
+    // Preserve already-typed values per type before regenerating
+    const existingByType = {};
+    container.querySelectorAll('[data-eq-unit]').forEach(row => {
+      const type = row.dataset.eqType;
+      const model = row.querySelector('input[data-eq-model]').value;
+      const eid = row.querySelector('input[data-eq-id]').value;
+      const ticketInp = row.querySelector('input[data-eq-ticket]');
+      const ticket = ticketInp ? ticketInp.value : '';
+      (existingByType[type] = existingByType[type]||[]).push({model, eid, ticket});
+    });
+    let html = '';
+    FD_EQUIP_TYPE_FIELDS.forEach(fieldId => {
+      const field = $(fieldId);
+      const type = field.dataset.type;
+      const qty = Math.max(0, parseInt(field.value,10) || 0);
+      if(qty===0) return;
+      html += `<div style="font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em; margin:12px 0 6px;">${type} (${qty})</div>`;
+      const existing = existingByType[type] || [];
+      for(let i=0; i<qty; i++){
+        const prev = existing[i] || {model:'',eid:'',ticket:''};
+        const modelVal = prev.model ? ` value="${prev.model.replace(/"/g,'&quot;')}"` : '';
+        const idVal = prev.eid ? ` value="${prev.eid.replace(/"/g,'&quot;')}"` : '';
+        html += `<div class="grid2" data-eq-unit data-eq-type="${type}" style="border-bottom:1px solid var(--border); padding-bottom:10px; margin-bottom:8px;">
+          <div class="field"><label>${type} #${i+1} Model</label><input type="text" data-eq-model placeholder="e.g. Ford F250"${modelVal}></div>
+          <div class="field"><label>${type} #${i+1} ID</label><input type="text" data-eq-id placeholder="e.g. 625"${idVal}></div>`;
+        if(type==='Asphalt Truck'){
+          const ticketVal = prev.ticket ? ` value="${prev.ticket.replace(/"/g,'&quot;')}"` : '';
+          html += `<div class="field"><label>${type} #${i+1} Ticket #</label><input type="text" data-eq-ticket${ticketVal}></div>`;
+        }
+        html += '</div>';
+      }
+    });
+    container.innerHTML = html;
+  }
   function addFdEquipmentEntry(){
     const inspector = getInspectorValue('fd_eq');
     const repairId = $('fd_eq_repairid').value.trim();
-    const type = $('fd_eq_type').value;
-    const qty = parseFloat($('fd_eq_qty').value);
     if(!inspector){ alert('Please select or type in the inspector name.'); return; }
     if(!repairId){ alert('Enter a Repair ID.'); return; }
-    if(!type){ alert('Select equipment type.'); return; }
-    if(!isFinite(qty)||qty<=0){ alert('Enter a valid quantity.'); return; }
+    const rows = Array.from($('fd_eq_units_container').querySelectorAll('[data-eq-unit]'));
+    const units = rows.map(row => {
+      const type = row.dataset.eqType;
+      const model = row.querySelector('input[data-eq-model]').value.trim();
+      const eid = row.querySelector('input[data-eq-id]').value.trim();
+      const ticketInp = row.querySelector('input[data-eq-ticket]');
+      const ticket = ticketInp ? ticketInp.value.trim() : '';
+      return { type, model, eid, ticket };
+    }).filter(u => u.model.length>0 || u.eid.length>0);
+    if(units.length===0){ alert('Enter at least one quantity, with a model or ID.'); return; }
     const entries = fdEquip.load();
-    entries.push({ id: genId(), locked:false, date: $('fd_eq_date').value||todayStr(), inspector, repairId, type, qty,
-      equipNum: $('fd_eq_num').value.trim(), ticket: type==='Asphalt Truck' ? $('fd_eq_ticket').value.trim() : '' });
+    const date = $('fd_eq_date').value||todayStr();
+    units.forEach(u => {
+      entries.push({ id: genId(), locked:false, date, inspector, repairId, type:u.type, model:u.model, equipNum:u.eid, ticket:u.ticket });
+    });
     fdEquip.save(entries);
     rememberInspector('fd_eq');
     renderFdEquipment();
-    $('fd_eq_num').value=''; $('fd_eq_ticket').value=''; $('fd_eq_qty').value='1';
-    showToast('\u2713 Equipment logged');
+    FD_EQUIP_TYPE_FIELDS.forEach(fieldId => { $(fieldId).value = '0'; });
+    renderFdEquipmentUnitInputs();
+    showToast(`\u2713 ${units.length} ${units.length===1?'unit':'units'} logged`);
+  }
+  function addFdEquipmentOtherEntry(){
+    const inspector = getInspectorValue('fd_eq');
+    const repairId = $('fd_eq_repairid').value.trim();
+    const model = $('fd_eq_other_model').value.trim();
+    const eid = $('fd_eq_other_id').value.trim();
+    const explanation = $('fd_eq_other_explanation').value.trim();
+    if(!inspector){ alert('Please select or type in the inspector name.'); return; }
+    if(!repairId){ alert('Enter a Repair ID.'); return; }
+    if(!model && !eid){ alert('Enter a model or an ID for this equipment.'); return; }
+    if(!explanation){ alert('Enter an explanation for this equipment.'); return; }
+    const entries = fdEquip.load();
+    entries.push({ id: genId(), locked:false, date: $('fd_eq_date').value||todayStr(), inspector, repairId,
+      type: 'Other', model, equipNum: eid, ticket: '', explanation });
+    fdEquip.save(entries);
+    rememberInspector('fd_eq');
+    renderFdEquipment();
+    $('fd_eq_other_model').value=''; $('fd_eq_other_id').value=''; $('fd_eq_other_explanation').value='';
+    showToast('\u2713 Other equipment logged');
   }
   function renderFdEquipment(){
-    fdEquip.render((e,i) => `<tr><td>${e.date||''}</td><td>${e.inspector||''}</td><td>${e.repairId||''}</td><td>${e.type||''}</td><td>${e.qty||''}</td><td>${e.equipNum||'—'}</td><td>${e.ticket||'—'}${e.locked?' &#128274;':''}</td><td><button class="del-btn" data-idx="${i}" title="Delete">&#10005;</button></td></tr>`);
+    fdEquip.render((e,i) => `<tr><td>${e.date||''}</td><td>${e.inspector||''}</td><td>${e.repairId||''}</td><td>${e.type||''}</td><td>${e.model||'—'}</td><td>${e.equipNum||'—'}</td><td>${e.ticket||'—'}</td><td>${e.explanation||'—'}${e.locked?' &#128274;':''}</td><td><button class="del-btn" data-idx="${i}" title="Delete">&#10005;</button></td></tr>`);
   }
 
   // --- Concrete (Delivery + Testing + Volume Calc, merged) ---
   const fdConcrete = makeFdLog('fd_co', 'millfill_fd_concrete_v1');
   function calcFdConcreteCY(){
-    const L = parseFloat($('fd_co_L').value), W = parseFloat($('fd_co_W').value), D = parseFloat($('fd_co_D').value);
-    if(isFinite(L) && isFinite(W) && isFinite(D)){
-      const cy = (L*W*D)/27;
+    const L = parseFloat($('fd_co_L').value), W = parseFloat($('fd_co_W').value), D_in = parseFloat($('fd_co_D').value);
+    if(isFinite(L) && isFinite(W) && isFinite(D_in)){
+      const cy = (L*W*(D_in/12))/27;
       $('fd_co_calcCY').innerHTML = fmt(cy,2)+'<span class="unit">CY</span>';
       return cy;
     }
     $('fd_co_calcCY').innerHTML = '&mdash;';
     return null;
+  }
+  /** "Calculate Quantity" button: computes CY, shows it here, AND pushes it directly
+   * into the Repair Log's PCC Full-Depth Repair pay item right away. */
+  function calcAndPushConcreteQty(){
+    const cy = calcFdConcreteCY();
+    if(cy===null){ alert('Enter Length, Width, and Depth first.'); return; }
+    $('fd_rl_pccrepair').value = cy.toFixed(2);
+    showToast('\u2713 Quantity calculated and sent to Repair Log');
   }
   function calcFdConcreteDeadline(){
     const arrived = $('fd_co_timeArrived').value;
@@ -3217,6 +3312,14 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
     }
     $('fd_as_calcTons').innerHTML = '&mdash;';
     return null;
+  }
+  /** "Calculate Tonnage" button: computes tons, shows it here, AND pushes it directly
+   * into the Repair Log's 19F9 Binder Course pay item right away. */
+  function calcAndPushAsphaltTons(){
+    const tons = calcFdAsphaltTons();
+    if(tons===null){ alert('Enter Length, Width, and Depth first.'); return; }
+    $('fd_rl_binder').value = tons.toFixed(2);
+    showToast('\u2713 Tonnage calculated and sent to Repair Log');
   }
   function renderFdAsphaltTypeFlag(){
     const el = $('fd_as_typeflag');
@@ -3267,29 +3370,83 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
       }
     } else { el.innerHTML = ''; }
   }
+  const FD_SC_ROLE_FIELDS = ['fd_sc_qty_laborer','fd_sc_qty_operator'];
+  function renderFdSawCutNameInputs(){
+    const container = $('fd_sc_names_container');
+    const existingByRole = {};
+    container.querySelectorAll('input[data-sc-name]').forEach(inp => {
+      const role = inp.dataset.scRole;
+      (existingByRole[role] = existingByRole[role]||[]).push(inp.value);
+    });
+    let html = '';
+    FD_SC_ROLE_FIELDS.forEach(fieldId => {
+      const field = $(fieldId);
+      const role = field.dataset.role;
+      const qty = Math.max(0, parseInt(field.value,10) || 0);
+      if(qty===0) return;
+      html += `<div style="font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em; margin:12px 0 6px;">${role} (${qty})</div><div class="grid2">`;
+      const existing = existingByRole[role] || [];
+      for(let i=0; i<qty; i++){
+        const val = existing[i] ? ` value="${existing[i].replace(/"/g,'&quot;')}"` : '';
+        html += `<div class="field"><label>${role} #${i+1} Name</label><input type="text" data-sc-name data-sc-role="${role}" placeholder="Type name"${val}></div>`;
+      }
+      html += '</div>';
+    });
+    container.innerHTML = html;
+  }
   function addFdSawCutQAEntry(){
     const inspector = getInspectorValue('fd_sc');
     const repairId = $('fd_sc_repairid').value.trim();
-    const laborerSel = $('fd_sc_laborer').value;
-    const laborer = laborerSel==='__other__' ? $('fd_sc_laborer_other').value.trim() : laborerSel;
     if(!inspector){ alert('Please select or type in the inspector name.'); return; }
     if(!repairId){ alert('Enter a Repair ID.'); return; }
-    if(!laborer){ alert('Enter the laborer name.'); return; }
+    const nameInputs = Array.from($('fd_sc_names_container').querySelectorAll('input[data-sc-name]'));
+    const people = nameInputs.map(inp => ({ role: inp.dataset.scRole, name: inp.value.trim() })).filter(p => p.name.length>0);
+    if(people.length===0){ alert('Enter a quantity and at least one name for the crew.'); return; }
+    const lfManual = $('fd_sc_lfManual').value;
+    const date = $('fd_sc_date').value||todayStr();
+    const shared = {
+      subcontractor: 'Island Pavement Cutting Corp Inc',
+      ticket: $('fd_sc_ticket').value.trim(), lfTicket: $('fd_sc_lfTicket').value, lfManual,
+      payBasis: 'Manual (unless authorized otherwise)'
+    };
     const entries = fdSawCutQA.load();
-    entries.push({ id: genId(), locked:false, date: $('fd_sc_date').value||todayStr(), inspector, repairId,
-      subcontractor: 'Island Pavement Cutting Corp Inc', laborer,
-      ticket: $('fd_sc_ticket').value.trim(), lfTicket: $('fd_sc_lfTicket').value, lfManual: $('fd_sc_lfManual').value });
+    people.forEach(({role,name}) => {
+      entries.push({ id: genId(), locked:false, date, inspector, repairId, role, name, ...shared });
+    });
     fdSawCutQA.save(entries);
     rememberInspector('fd_sc');
     renderFdSawCutQA();
-    showToast('\u2713 Saw cutting QA logged');
+    FD_SC_ROLE_FIELDS.forEach(fieldId => { $(fieldId).value = '0'; });
+    renderFdSawCutNameInputs();
+    // Manual measurement overrides ticket LF and flows directly to the Repair Log pay item.
+    if(lfManual){ $('fd_rl_sawcut').value = lfManual; }
+    showToast(`\u2713 ${people.length} ${people.length===1?'person':'people'} logged \u2014 manual LF sent to Repair Log`);
   }
   function renderFdSawCutQA(){
-    fdSawCutQA.render((e,i) => `<tr><td>${e.date||''}</td><td>${e.inspector||''}</td><td>${e.repairId||''}</td><td>${e.subcontractor||''}</td><td>${e.laborer||''}</td><td>${e.ticket||'—'}</td><td>${e.lfTicket||'—'}</td><td>${e.lfManual||'—'}${e.locked?' &#128274;':''}</td><td><button class="del-btn" data-idx="${i}" title="Delete">&#10005;</button></td></tr>`);
+    fdSawCutQA.render((e,i) => `<tr><td>${e.date||''}</td><td>${e.inspector||''}</td><td>${e.repairId||''}</td><td>${e.subcontractor||''}</td><td>${e.role||''}</td><td>${e.name||''}</td><td>${e.ticket||'—'}</td><td>${e.lfTicket||'—'}</td><td>${e.lfManual||'—'}</td><td>${e.payBasis||'Manual (unless authorized otherwise)'}${e.locked?' &#128274;':''}</td><td><button class="del-btn" data-idx="${i}" title="Delete">&#10005;</button></td></tr>`);
   }
+
 
   // --- Subbase Compaction ---
   const fdSubbaseComp = makeFdLog('fd_sb', 'millfill_fd_subbasecomp_v1');
+  function calcFdSubbaseCY(){
+    const L = parseFloat($('fd_sb_L').value), W = parseFloat($('fd_sb_W').value), D = parseFloat($('fd_sb_D').value);
+    if(isFinite(L) && isFinite(W) && isFinite(D)){
+      const cy = (L*W*D)/27;
+      $('fd_sb_calcCY').innerHTML = fmt(cy,2)+'<span class="unit">CY</span>';
+      return cy;
+    }
+    $('fd_sb_calcCY').innerHTML = '&mdash;';
+    return null;
+  }
+  /** "Calculate Quantity" button: computes CY, shows it here, AND pushes it directly
+   * into the Repair Log's Subbase Course pay item right away. */
+  function calcAndPushSubbaseQty(){
+    const cy = calcFdSubbaseCY();
+    if(cy===null){ alert('Enter Length, Width, and Depth first.'); return; }
+    $('fd_rl_subbase').value = cy.toFixed(2);
+    showToast('\u2713 Quantity calculated and sent to Repair Log');
+  }
   function addFdSubbaseCompEntry(){
     const inspector = getInspectorValue('fd_sb');
     const repairId = $('fd_sb_repairid').value.trim();
@@ -3297,112 +3454,97 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
     if(!inspector){ alert('Please select or type in the inspector name.'); return; }
     if(!repairId){ alert('Enter a Repair ID.'); return; }
     if(!result){ alert('Select Pass or Fail.'); return; }
+    const calcCY = calcFdSubbaseCY();
     const entries = fdSubbaseComp.load();
-    entries.push({ id: genId(), locked:false, date: $('fd_sb_date').value||todayStr(), inspector, repairId, result });
+    entries.push({ id: genId(), locked:false, date: $('fd_sb_date').value||todayStr(), inspector, repairId, result,
+      L: $('fd_sb_L').value, W: $('fd_sb_W').value, D: $('fd_sb_D').value, calcCY: calcCY!==null?calcCY.toFixed(2):'',
+      lifts: $('fd_sb_lifts').value, ticket: $('fd_sb_ticket').value.trim(), delivered: $('fd_sb_delivered').value });
     fdSubbaseComp.save(entries);
     rememberInspector('fd_sb');
     renderFdSubbaseComp();
     showToast('\u2713 Subbase compaction logged');
   }
   function renderFdSubbaseComp(){
-    fdSubbaseComp.render((e,i) => `<tr><td>${e.date||''}</td><td>${e.inspector||''}</td><td>${e.repairId||''}</td><td style="color:${e.result==='Pass'?'var(--ok-green)':'var(--warn-red)'};font-weight:600;">${e.result||''}${e.locked?' &#128274;':''}</td><td><button class="del-btn" data-idx="${i}" title="Delete">&#10005;</button></td></tr>`);
+    fdSubbaseComp.render((e,i) => `<tr><td>${e.date||''}</td><td>${e.inspector||''}</td><td>${e.repairId||''}</td><td>${e.ticket||'—'}</td><td>${e.delivered||'—'}</td><td>${e.lifts||'—'}</td><td style="color:${e.result==='Pass'?'var(--ok-green)':'var(--warn-red)'};font-weight:600;">${e.result||''}</td><td>${e.L||'—'}</td><td>${e.W||'—'}</td><td>${e.D||'—'}</td><td>${e.calcCY||'—'}${e.locked?' &#128274;':''}</td><td><button class="del-btn" data-idx="${i}" title="Delete">&#10005;</button></td></tr>`);
   }
 
-  // --- Dowel Installation QA ---
-  const fdDowelQA = makeFdLog('fd_dq', 'millfill_fd_dowelqa_v1');
-  const FD_DOWEL_CHECKS = ['holeDiameter','holeDepth','holeSpacing','dustBlown','materialMixed','epoxyPlaced','protrusion','alignment','groutDisk'];
-  function addFdDowelQAEntry(){
-    const inspector = getInspectorValue('fd_dq');
-    const repairId = $('fd_dq_repairid').value.trim();
+  // --- Dowels (unified: individual count + cages + QA, one combined report entry) ---
+  const fdDowels = makeFdLog('fd_dw', 'millfill_fd_dowels_v1');
+  const FD_DOWEL_CHECKS = ['holeDiameter','holeDepth','holeSpacing','dustBlown','materialMixed','epoxyPlaced','protrusion','alignment','dowelCaps'];
+  let fdDwStagedCages = []; // cages added to the CURRENT entry, not yet submitted
+
+  function renderFdDwCageList(){
+    const el = $('fd_dw_cageList');
+    if(fdDwStagedCages.length===0){ el.innerHTML = '<div style="color:var(--muted); font-size:13px;">No cages added yet.</div>'; return; }
+    el.innerHTML = fdDwStagedCages.map((c,i) =>
+      `<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding:8px 0;">
+        <span>Cage ${c.cageNum}: ${c.dowels} dowels</span>
+        <button class="del-btn" data-cage-idx="${i}" title="Remove">&#10005;</button>
+      </div>`
+    ).join('');
+  }
+  function updateFdDwCombinedTotal(){
+    const individual = parseInt($('fd_dw_individualCount').value,10) || 0;
+    const cageTotal = fdDwStagedCages.reduce((s,c) => s + (parseInt(c.dowels,10)||0), 0);
+    const combined = individual + cageTotal;
+    $('fd_dw_combinedTotal').textContent = combined;
+    return combined;
+  }
+  function addFdDwCage(){
+    const cageNum = $('fd_dw_cageNum').value.trim();
+    const dowels = $('fd_dw_cageDowels').value;
+    if(!cageNum){ alert('Enter a cage number.'); return; }
+    if(!dowels){ alert('Enter the number of dowels in this cage.'); return; }
+    fdDwStagedCages.push({ cageNum, dowels });
+    renderFdDwCageList();
+    updateFdDwCombinedTotal();
+    $('fd_dw_cageNum').value=''; $('fd_dw_cageDowels').value='';
+  }
+  function removeFdDwCage(idx){
+    fdDwStagedCages.splice(idx,1);
+    renderFdDwCageList();
+    updateFdDwCombinedTotal();
+  }
+  function addFdDowelsEntry(){
+    const inspector = getInspectorValue('fd_dw');
+    const repairId = $('fd_dw_repairid').value.trim();
     if(!inspector){ alert('Please select or type in the inspector name.'); return; }
     if(!repairId){ alert('Enter a Repair ID.'); return; }
+    const individualCount = parseInt($('fd_dw_individualCount').value,10) || 0;
+    const combinedTotal = updateFdDwCombinedTotal();
+    if(combinedTotal===0){ alert('Enter an individual dowel count and/or at least one cage.'); return; }
     const checks = {};
     let anyFail = false, allAnswered = true;
     FD_DOWEL_CHECKS.forEach(k => {
-      const v = $('fd_dq_'+k).value;
+      const v = $('fd_dw_'+k).value;
       checks[k] = v;
       if(v==='Fail') anyFail = true;
       if(!v) allAnswered = false;
     });
-    const entries = fdDowelQA.load();
-    entries.push({ id: genId(), locked:false, date: $('fd_dq_date').value||todayStr(), inspector, repairId,
-      checks, overall: anyFail?'FAIL':(allAnswered?'PASS':'INCOMPLETE') });
-    fdDowelQA.save(entries);
-    rememberInspector('fd_dq');
-    renderFdDowelQA();
-    showToast('\u2713 Dowel installation QA logged');
+    const overall = anyFail?'FAIL':(allAnswered?'PASS':'INCOMPLETE');
+    const entries = fdDowels.load();
+    entries.push({ id: genId(), locked:false, date: $('fd_dw_date').value||todayStr(), inspector, repairId,
+      individualCount, cages: [...fdDwStagedCages], cageCount: fdDwStagedCages.length,
+      combinedTotal, checks, overall });
+    fdDowels.save(entries);
+    rememberInspector('fd_dw');
+    renderFdDowels();
+    // Combined total (individual + all cages) flows directly to the Repair Log pay item.
+    $('fd_rl_dowels').value = combinedTotal;
+    // Reset the form for the next repair
+    $('fd_dw_individualCount').value = '0';
+    fdDwStagedCages = [];
+    renderFdDwCageList();
+    updateFdDwCombinedTotal();
+    FD_DOWEL_CHECKS.forEach(k => { $('fd_dw_'+k).value = ''; });
+    showToast(`\u2713 ${combinedTotal} dowels logged \u2014 sent to Repair Log`);
   }
-  function renderFdDowelQA(){
-    fdDowelQA.render((e,i) => {
+  function renderFdDowels(){
+    fdDowels.render((e,i) => {
       const color = e.overall==='FAIL' ? 'var(--warn-red)' : e.overall==='PASS' ? 'var(--ok-green)' : 'var(--muted)';
-      return `<tr><td>${e.date||''}</td><td>${e.inspector||''}</td><td>${e.repairId||''}</td><td style="color:${color};font-weight:600;">${e.overall||''}${e.locked?' &#128274;':''}</td><td><button class="del-btn" data-idx="${i}" title="Delete">&#10005;</button></td></tr>`;
+      const breakdown = (e.cages||[]).map(c=>`#${c.cageNum}:${c.dowels}`).join(', ') || '—';
+      return `<tr><td>${e.date||''}</td><td>${e.inspector||''}</td><td>${e.repairId||''}</td><td>${e.individualCount||0}</td><td>${e.cageCount||0}</td><td>${breakdown}</td><td>${e.combinedTotal||0}</td><td style="color:${color};font-weight:600;">${e.overall||''}${e.locked?' &#128274;':''}</td><td><button class="del-btn" data-idx="${i}" title="Delete">&#10005;</button></td></tr>`;
     });
-  }
-
-  // --- Dowel Cages (independent repeatable log) ---
-  const fdCages = makeFdLog('fd_cg', 'millfill_fd_cages_v1');
-  function getFdCageTotal(repairId){
-    return fdCages.load().filter(e => e.repairId === repairId).reduce((s,e) => s + (parseFloat(e.dowels)||0), 0);
-  }
-  function updateFdCageTotalDisplay(){
-    const repairId = $('fd_cg_repairid').value.trim();
-    $('fd_cg_total').textContent = repairId ? getFdDowelGrandTotal(repairId) : '0';
-  }
-  function addFdCageEntry(){
-    const inspector = getInspectorValue('fd_cg');
-    const repairId = $('fd_cg_repairid').value.trim();
-    const cagenum = $('fd_cg_cagenum').value.trim();
-    const dowels = $('fd_cg_dowels').value;
-    if(!inspector){ alert('Please select or type in the inspector name.'); return; }
-    if(!repairId){ alert('Enter a Repair ID.'); return; }
-    if(!cagenum){ alert('Enter a cage number.'); return; }
-    if(!dowels){ alert('Enter the number of dowels in this cage.'); return; }
-    const entries = fdCages.load();
-    entries.push({ id: genId(), locked:false, date: $('fd_cg_date').value||todayStr(), inspector, repairId, cagenum, dowels });
-    fdCages.save(entries);
-    rememberInspector('fd_cg');
-    renderFdCages();
-    updateFdCageTotalDisplay();
-    updateFdIndivDowelTotalDisplay();
-    $('fd_cg_cagenum').value=''; $('fd_cg_dowels').value='';
-    showToast('\u2713 Cage logged');
-  }
-  function renderFdCages(){
-    fdCages.render((e,i) => `<tr><td>${e.date||''}</td><td>${e.inspector||''}</td><td>${e.repairId||''}</td><td>${e.cagenum||''}</td><td>${e.dowels||''}${e.locked?' &#128274;':''}</td><td><button class="del-btn" data-idx="${i}" title="Delete">&#10005;</button></td></tr>`);
-  }
-
-  // --- Individual Dowels (no cage) ---
-  const fdIndivDowels = makeFdLog('fd_id', 'millfill_fd_indivdowels_v1');
-  function getFdIndivDowelTotal(repairId){
-    return fdIndivDowels.load().filter(e => e.repairId === repairId).reduce((s,e) => s + (parseFloat(e.dowels)||0), 0);
-  }
-  /** Total dowels for a Repair ID = cages + individual (no cage), combined. This is what feeds Repair Log. */
-  function getFdDowelGrandTotal(repairId){
-    return getFdCageTotal(repairId) + getFdIndivDowelTotal(repairId);
-  }
-  function updateFdIndivDowelTotalDisplay(){
-    const repairId = $('fd_id_repairid').value.trim();
-    $('fd_id_combinedTotal').textContent = repairId ? getFdDowelGrandTotal(repairId) : '0';
-  }
-  function addFdIndivDowelEntry(){
-    const inspector = getInspectorValue('fd_id');
-    const repairId = $('fd_id_repairid').value.trim();
-    const dowels = $('fd_id_dowels').value;
-    if(!inspector){ alert('Please select or type in the inspector name.'); return; }
-    if(!repairId){ alert('Enter a Repair ID.'); return; }
-    if(!dowels){ alert('Enter the individual dowel count.'); return; }
-    const entries = fdIndivDowels.load();
-    entries.push({ id: genId(), locked:false, date: $('fd_id_date').value||todayStr(), inspector, repairId, dowels });
-    fdIndivDowels.save(entries);
-    rememberInspector('fd_id');
-    renderFdIndivDowels();
-    updateFdIndivDowelTotalDisplay();
-    updateFdCageTotalDisplay();
-    $('fd_id_dowels').value='';
-    showToast('\u2713 Individual dowel count logged');
-  }
-  function renderFdIndivDowels(){
-    fdIndivDowels.render((e,i) => `<tr><td>${e.date||''}</td><td>${e.inspector||''}</td><td>${e.repairId||''}</td><td>${e.dowels||''}${e.locked?' &#128274;':''}</td><td><button class="del-btn" data-idx="${i}" title="Delete">&#10005;</button></td></tr>`);
   }
 
   // --- TAC Coat (Full Depth Repair) -- same temperature-correction formula as Filling's TAC Coat ---
@@ -3874,6 +4016,7 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
     entries.splice(idx,1); saveFdRepairLog(entries); renderFdRepairLog();
   });
 
+  FD_LABOR_ROLE_FIELDS.forEach(fieldId => { $(fieldId).addEventListener('input', renderFdLaborNameInputs); });
   $('fd_lb_add').addEventListener('click', addFdLaborEntry);
   $('fd_lb_export').addEventListener('click', () => fdLabor.exportCSV(['Date','Inspector','Repair ID','Role','Name'], e=>[e.date,e.inspector,e.repairId,e.role,e.name], 'fulldepth-labor'));
   $('fd_lb_sync').addEventListener('click', () => syncOperation('fd_labor', fdLabor.load));
@@ -3886,11 +4029,10 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
     entries.splice(idx,1); fdLabor.save(entries); renderFdLabor();
   });
 
-  $('fd_eq_type').addEventListener('change', () => {
-    $('fd_eq_ticket_wrap').style.display = $('fd_eq_type').value==='Asphalt Truck' ? 'block' : 'none';
-  });
+  FD_EQUIP_TYPE_FIELDS.forEach(fieldId => { $(fieldId).addEventListener('input', renderFdEquipmentUnitInputs); });
   $('fd_eq_add').addEventListener('click', addFdEquipmentEntry);
-  $('fd_eq_export').addEventListener('click', () => fdEquip.exportCSV(['Date','Inspector','Repair ID','Type','Qty','Equip #','Ticket'], e=>[e.date,e.inspector,e.repairId,e.type,e.qty,e.equipNum,e.ticket], 'fulldepth-equipment'));
+  $('fd_eq_other_add').addEventListener('click', addFdEquipmentOtherEntry);
+  $('fd_eq_export').addEventListener('click', () => fdEquip.exportCSV(['Date','Inspector','Repair ID','Type','Model','Equipment ID','Ticket','Explanation'], e=>[e.date,e.inspector,e.repairId,e.type,e.model,e.equipNum,e.ticket,e.explanation], 'fulldepth-equipment'));
   $('fd_eq_sync').addEventListener('click', () => syncOperation('fd_equipment', fdEquip.load));
   $('fd_eq_clear').addEventListener('click', () => fdEquip.clear(renderFdEquipment));
   $('fd_eq_tbody').addEventListener('click', (e) => {
@@ -3901,9 +4043,7 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
     entries.splice(idx,1); fdEquip.save(entries); renderFdEquipment();
   });
 
-  $('fd_co_L').addEventListener('input', calcFdConcreteCY);
-  $('fd_co_W').addEventListener('input', calcFdConcreteCY);
-  $('fd_co_D').addEventListener('input', calcFdConcreteCY);
+  $('fd_co_calcBtn').addEventListener('click', calcAndPushConcreteQty);
   $('fd_co_timeArrived').addEventListener('input', calcFdConcreteDeadline);
   $('fd_co_add').addEventListener('click', addFdConcreteEntry);
   $('fd_co_export').addEventListener('click', () => fdConcrete.exportCSV(
@@ -3920,9 +4060,7 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
     entries.splice(idx,1); fdConcrete.save(entries); renderFdConcrete();
   });
 
-  $('fd_as_L').addEventListener('input', calcFdAsphaltTons);
-  $('fd_as_W').addEventListener('input', calcFdAsphaltTons);
-  $('fd_as_D').addEventListener('input', calcFdAsphaltTons);
+  $('fd_as_calcBtn').addEventListener('click', calcAndPushAsphaltTons);
   $('fd_as_typecorrect').addEventListener('change', renderFdAsphaltTypeFlag);
   $('fd_as_add').addEventListener('click', addFdAsphaltEntry);
   $('fd_as_export').addEventListener('click', () => fdAsphalt.exportCSV(
@@ -3939,15 +4077,13 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
     entries.splice(idx,1); fdAsphalt.save(entries); renderFdAsphalt();
   });
 
-  $('fd_sc_laborer').addEventListener('change', () => {
-    $('fd_sc_laborer_other_wrap').style.display = $('fd_sc_laborer').value==='__other__' ? 'block' : 'none';
-  });
+  FD_SC_ROLE_FIELDS.forEach(fieldId => { $(fieldId).addEventListener('input', renderFdSawCutNameInputs); });
   $('fd_sc_lfTicket').addEventListener('input', renderFdSawCutLFFlag);
   $('fd_sc_lfManual').addEventListener('input', renderFdSawCutLFFlag);
   $('fd_sc_add').addEventListener('click', addFdSawCutQAEntry);
   $('fd_sc_export').addEventListener('click', () => fdSawCutQA.exportCSV(
-    ['Date','Inspector','Repair ID','Subcontractor','Laborer','Ticket','LF Ticket','LF Manual'],
-    e=>[e.date,e.inspector,e.repairId,e.subcontractor,e.laborer,e.ticket,e.lfTicket,e.lfManual],
+    ['Date','Inspector','Repair ID','Subcontractor','Role','Name','Ticket','LF Ticket','LF Manual','Pay Basis'],
+    e=>[e.date,e.inspector,e.repairId,e.subcontractor,e.role,e.name,e.ticket,e.lfTicket,e.lfManual,e.payBasis],
     'fulldepth-sawcutqa'));
   $('fd_sc_sync').addEventListener('click', () => syncOperation('fd_sawcutqa', fdSawCutQA.load));
   $('fd_sc_clear').addEventListener('click', () => fdSawCutQA.clear(renderFdSawCutQA));
@@ -3959,8 +4095,12 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
     entries.splice(idx,1); fdSawCutQA.save(entries); renderFdSawCutQA();
   });
 
+  $('fd_sb_calcBtn').addEventListener('click', calcAndPushSubbaseQty);
   $('fd_sb_add').addEventListener('click', addFdSubbaseCompEntry);
-  $('fd_sb_export').addEventListener('click', () => fdSubbaseComp.exportCSV(['Date','Inspector','Repair ID','Result'], e=>[e.date,e.inspector,e.repairId,e.result], 'fulldepth-subbasecompaction'));
+  $('fd_sb_export').addEventListener('click', () => fdSubbaseComp.exportCSV(
+    ['Date','Inspector','Repair ID','Ticket','Delivered','Lifts','Result','L','W','D','Calc CY'],
+    e=>[e.date,e.inspector,e.repairId,e.ticket,e.delivered,e.lifts,e.result,e.L,e.W,e.D,e.calcCY],
+    'fulldepth-subbasecompaction'));
   $('fd_sb_sync').addEventListener('click', () => syncOperation('fd_subbasecomp', fdSubbaseComp.load));
   $('fd_sb_clear').addEventListener('click', () => fdSubbaseComp.clear(renderFdSubbaseComp));
   $('fd_sb_tbody').addEventListener('click', (e) => {
@@ -3971,45 +4111,25 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
     entries.splice(idx,1); fdSubbaseComp.save(entries); renderFdSubbaseComp();
   });
 
-  $('fd_dq_add').addEventListener('click', addFdDowelQAEntry);
-  $('fd_dq_export').addEventListener('click', () => fdDowelQA.exportCSV(
-    ['Date','Inspector','Repair ID','Overall',...FD_DOWEL_CHECKS],
-    e=>[e.date,e.inspector,e.repairId,e.overall,...FD_DOWEL_CHECKS.map(k=>e.checks?e.checks[k]:'')],
-    'fulldepth-dowelqa'));
-  $('fd_dq_sync').addEventListener('click', () => syncOperation('fd_dowelqa', fdDowelQA.load));
-  $('fd_dq_clear').addEventListener('click', () => fdDowelQA.clear(renderFdDowelQA));
-  $('fd_dq_tbody').addEventListener('click', (e) => {
+  $('fd_dw_individualCount').addEventListener('input', updateFdDwCombinedTotal);
+  $('fd_dw_addCage').addEventListener('click', addFdDwCage);
+  $('fd_dw_cageList').addEventListener('click', (e) => {
     const btn = e.target.closest('.del-btn'); if(!btn) return;
-    const entries = fdDowelQA.load();
-    const idx = parseInt(btn.dataset.idx,10);
-    if(entries[idx] && entries[idx].locked){ alert('This entry is locked and cannot be deleted.'); return; }
-    entries.splice(idx,1); fdDowelQA.save(entries); renderFdDowelQA();
+    removeFdDwCage(parseInt(btn.dataset.cageIdx,10));
   });
-
-  $('fd_cg_repairid').addEventListener('input', updateFdCageTotalDisplay);
-  $('fd_cg_add').addEventListener('click', addFdCageEntry);
-  $('fd_cg_export').addEventListener('click', () => fdCages.exportCSV(['Date','Inspector','Repair ID','Cage #','Dowels'], e=>[e.date,e.inspector,e.repairId,e.cagenum,e.dowels], 'fulldepth-dowelcages'));
-  $('fd_cg_sync').addEventListener('click', () => syncOperation('fd_cages', fdCages.load));
-  $('fd_cg_clear').addEventListener('click', () => fdCages.clear(renderFdCages));
-  $('fd_cg_tbody').addEventListener('click', (e) => {
+  $('fd_dw_add').addEventListener('click', addFdDowelsEntry);
+  $('fd_dw_export').addEventListener('click', () => fdDowels.exportCSV(
+    ['Date','Inspector','Repair ID','Individual Count','# Cages','Cage Breakdown','Combined Total','QA Overall',...FD_DOWEL_CHECKS],
+    e=>[e.date,e.inspector,e.repairId,e.individualCount,e.cageCount,(e.cages||[]).map(c=>`#${c.cageNum}:${c.dowels}`).join('; '),e.combinedTotal,e.overall,...FD_DOWEL_CHECKS.map(k=>e.checks?e.checks[k]:'')],
+    'fulldepth-dowels'));
+  $('fd_dw_sync').addEventListener('click', () => syncOperation('fd_dowels', fdDowels.load));
+  $('fd_dw_clear').addEventListener('click', () => fdDowels.clear(renderFdDowels));
+  $('fd_dw_tbody').addEventListener('click', (e) => {
     const btn = e.target.closest('.del-btn'); if(!btn) return;
-    const entries = fdCages.load();
+    const entries = fdDowels.load();
     const idx = parseInt(btn.dataset.idx,10);
     if(entries[idx] && entries[idx].locked){ alert('This entry is locked and cannot be deleted.'); return; }
-    entries.splice(idx,1); fdCages.save(entries); renderFdCages();
-  });
-
-  $('fd_id_repairid').addEventListener('input', updateFdIndivDowelTotalDisplay);
-  $('fd_id_add').addEventListener('click', addFdIndivDowelEntry);
-  $('fd_id_export').addEventListener('click', () => fdIndivDowels.exportCSV(['Date','Inspector','Repair ID','Count'], e=>[e.date,e.inspector,e.repairId,e.dowels], 'fulldepth-individualdowels'));
-  $('fd_id_sync').addEventListener('click', () => syncOperation('fd_indivdowels', fdIndivDowels.load));
-  $('fd_id_clear').addEventListener('click', () => fdIndivDowels.clear(renderFdIndivDowels));
-  $('fd_id_tbody').addEventListener('click', (e) => {
-    const btn = e.target.closest('.del-btn'); if(!btn) return;
-    const entries = fdIndivDowels.load();
-    const idx = parseInt(btn.dataset.idx,10);
-    if(entries[idx] && entries[idx].locked){ alert('This entry is locked and cannot be deleted.'); return; }
-    entries.splice(idx,1); fdIndivDowels.save(entries); renderFdIndivDowels();
+    entries.splice(idx,1); fdDowels.save(entries); renderFdDowels();
   });
 
   $('fd_tc_truck').addEventListener('change', () => {
@@ -4850,25 +4970,26 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
   wireInspectorField('fd_as');
   wireInspectorField('fd_sc');
   wireInspectorField('fd_sb');
-  wireInspectorField('fd_dq');
-  wireInspectorField('fd_cg');
+  wireInspectorField('fd_dw');
   wireInspectorField('fd_tc');
-  wireInspectorField('fd_id');
   populateSawCutLocations();
   $('sc_date').value = todayStr();
   $('ap_date').value = todayStr();
   $('ua_date').value = todayStr();
-  ['fd_rl','fd_lb','fd_eq','fd_co','fd_as','fd_sc','fd_sb','fd_dq','fd_cg','fd_tc','fd_id'].forEach(p => { $(p+'_date').value = todayStr(); });
+  ['fd_rl','fd_lb','fd_eq','fd_co','fd_as','fd_sc','fd_sb','fd_dw','fd_tc'].forEach(p => { $(p+'_date').value = todayStr(); });
   renderFdRepairLog();
   renderFdLabor();
+  renderFdLaborNameInputs();
   renderFdEquipment();
+  renderFdEquipmentUnitInputs();
   renderFdConcrete();
   renderFdAsphalt();
   renderFdSawCutQA();
+  renderFdSawCutNameInputs();
   renderFdSubbaseComp();
-  renderFdDowelQA();
-  renderFdCages();
-  renderFdIndivDowels();
+  renderFdDowels();
+  renderFdDwCageList();
+  updateFdDwCombinedTotal();
   renderFdTacCoat();
   renderRoster();
   renderFillLog();
