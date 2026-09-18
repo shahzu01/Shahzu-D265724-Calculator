@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>ShahzU D265724</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1b1b1d">
@@ -1713,6 +1714,7 @@
   async function syncOperation(opKey, loadFn, silent){
     await waitForCloud();
     if(!window.__millfillCloud){
+      console.warn(`[sync:${opKey}] cloud-unreachable — window.__millfillCloud never became available (Firebase module may have failed to load).`);
       if(silent) return { ok:false, reason:'cloud-unreachable' };
       alert('Cloud not reachable right now — check your connection and try again.'); return;
     }
@@ -1721,13 +1723,15 @@
     try{
       const dayDoc = await window.__millfillCloud.getDayDoc(today);
       if(dayDoc.locked){
+        console.warn(`[sync:${opKey}] blocked — ${today} is locked in Data Management.`);
         if(silent) return { ok:false, reason:'day-locked' };
         alert('Today has been locked by the admin. No further syncing is allowed for ' + today + '.');
         return;
       }
     } catch(err){
-      if(silent) return { ok:false, reason:'cloud-error' };
-      alert('Could not reach the cloud database. Check your internet connection and try again.');
+      console.error(`[sync:${opKey}] getDayDoc failed:`, err);
+      if(silent) return { ok:false, reason:'cloud-error', errorMessage: err && err.message };
+      alert('Could not reach the cloud database. Check your internet connection and try again.\n\n' + (err && err.message ? err.message : ''));
       return;
     }
 
@@ -1744,13 +1748,13 @@
       byInspector[name].push(e);
     });
 
-    let syncedCount = 0, inspectorCount = 0, failures = [];
+    let syncedCount = 0, inspectorCount = 0, failures = [], lastErrorMessage = '';
     for(const [inspectorName, localEntries] of Object.entries(byInspector)){
       const inspectorId = sanitizeId(inspectorName);
       let cloudDoc;
       try{
         cloudDoc = await window.__millfillCloud.getInspectorDoc(today, inspectorId) || {};
-      } catch(err){ cloudDoc = {}; }
+      } catch(err){ console.error(`[sync:${opKey}] getInspectorDoc(${inspectorId}) failed:`, err); cloudDoc = {}; }
 
       const cloudOpEntries = cloudDoc[opKey] || [];
       const lockedCloud = cloudOpEntries.filter(e => e.locked);
@@ -1764,11 +1768,13 @@
         syncedCount += freshLocal.length;
         inspectorCount++;
       } catch(err){
+        console.error(`[sync:${opKey}] setInspectorDoc(${inspectorId}) failed:`, err);
         failures.push(inspectorName);
+        lastErrorMessage = (err && err.message) || String(err);
         if(!silent) alert('Sync failed for ' + inspectorName + ': ' + err.message);
       }
     }
-    if(silent) return { ok: failures.length===0, syncedCount, inspectorCount, failures };
+    if(silent) return { ok: failures.length===0, syncedCount, inspectorCount, failures, errorMessage: lastErrorMessage };
     alert(`Synced ${syncedCount} ${opKey} entr${syncedCount===1?'y':'ies'} for ${inspectorCount} inspector(s) — ${today}.`);
   }
 
@@ -4165,29 +4171,56 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
     updateFdInspectorReportButton();
   }
 
-  /** Builds a genuine multi-sheet Excel workbook (.xls, HTML-based — opens natively
-   * in Microsoft Excel with one tab per section) with no external library needed. */
+  /** Builds a genuine multi-sheet .xlsx workbook (real OOXML, via the SheetJS/
+   * xlsx-js-style library loaded in <head>) — opens correctly with real tabs,
+   * typed cells and styled headers in Excel, Google Sheets, Numbers and
+   * LibreOffice alike, unlike the old HTML-pretending-to-be-.xls trick. */
   function downloadFdExcelWorkbook(sections, filenamePrefix){
-    const sheetDefs = sections.map(s =>
-      `<x:ExcelWorksheet><x:Name>${escapeHtml(s.name.slice(0,31))}</x:Name><x:WorksheetOptions><x:Panes></x:Panes><x:Selected/></x:WorksheetOptions></x:ExcelWorksheet>`
-    ).join('');
-    const tables = sections.map(s => {
-      const headerRow = `<tr>${s.headers.map(h=>`<th style="background:#dde3ea;font-weight:bold;border:1px solid #999;padding:4px;">${escapeHtml(h)}</th>`).join('')}</tr>`;
-      const bodyRows = s.rows.length ? s.rows.map(r=>`<tr>${r.map(v=>`<td style="border:1px solid #ccc;padding:4px;">${escapeHtml(v)}</td>`).join('')}</tr>`).join('') :
-        `<tr><td style="padding:4px;color:#888;" colspan="${s.headers.length}">No entries</td></tr>`;
-      return `<table border="1" style="border-collapse:collapse;">${headerRow}${bodyRows}</table>`;
-    }).join('<br>');
-    const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
-<head><meta charset="UTF-8">
-<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets>${sheetDefs}</x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->
-</head>
-<body>${tables}</body></html>`;
-    const blob = new Blob(['﻿'+html], {type:'application/vnd.ms-excel'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = `${filenamePrefix}-${todayStr()}.xls`;
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    if(typeof XLSX === 'undefined'){
+      alert('The Excel export library did not load (no internet connection?). Please check your connection and try again.');
+      return;
+    }
+    const HEADER_STYLE = {
+      font: { bold:true, color:{ rgb:'FFFFFF' } },
+      fill: { fgColor:{ rgb:'2F5496' } },
+      alignment: { vertical:'center', horizontal:'left', wrapText:true },
+      border: { top:{style:'thin',color:{rgb:'999999'}}, bottom:{style:'thin',color:{rgb:'999999'}}, left:{style:'thin',color:{rgb:'999999'}}, right:{style:'thin',color:{rgb:'999999'}} }
+    };
+    const BODY_STYLE = {
+      border: { top:{style:'thin',color:{rgb:'DDDDDD'}}, bottom:{style:'thin',color:{rgb:'DDDDDD'}}, left:{style:'thin',color:{rgb:'DDDDDD'}}, right:{style:'thin',color:{rgb:'DDDDDD'}} }
+    };
+    const wb = XLSX.utils.book_new();
+    const usedNames = new Set();
+    sections.forEach(s => {
+      // Excel sheet names: max 31 chars, no \ / ? * [ ] :, must be unique.
+      let name = String(s.name || 'Sheet').replace(/[\\\/\?\*\[\]:]/g, ' ').slice(0,31).trim() || 'Sheet';
+      let base = name, n = 2;
+      while(usedNames.has(name)){ const suffix = ` (${n++})`; name = base.slice(0, 31 - suffix.length) + suffix; }
+      usedNames.add(name);
+
+      const hasRows = s.rows && s.rows.length > 0;
+      const aoa = [s.headers, ...(hasRows ? s.rows : [s.headers.map(()=>'No entries')])];
+      const ws = XLSX.utils.aoa_to_sheet(aoa);
+      const range = XLSX.utils.decode_range(ws['!ref']);
+      for(let C = range.s.c; C <= range.e.c; C++){
+        const addr = XLSX.utils.encode_cell({ r:0, c:C });
+        if(ws[addr]) ws[addr].s = HEADER_STYLE;
+      }
+      for(let R = 1; R <= range.e.r; R++){
+        for(let C = range.s.c; C <= range.e.c; C++){
+          const addr = XLSX.utils.encode_cell({ r:R, c:C });
+          if(ws[addr]) ws[addr].s = BODY_STYLE;
+        }
+      }
+      ws['!cols'] = s.headers.map((h,i) => {
+        const colLens = hasRows ? s.rows.map(r => String(r[i] ?? '').length) : [0];
+        const maxLen = Math.max(String(h).length, ...colLens);
+        return { wch: Math.min(Math.max(maxLen + 2, 10), 40) };
+      });
+      ws['!autofilter'] = { ref: ws['!ref'] };
+      XLSX.utils.book_append_sheet(wb, ws, name);
+    });
+    XLSX.writeFile(wb, `${filenamePrefix}-${todayStr()}.xlsx`);
   }
 
   /** Opens a print-formatted window and triggers the browser's print dialog —
@@ -4255,16 +4288,24 @@ ${sectionsHtml}
     const today = todayStr();
     const results = await Promise.all(keys.map(key => syncOperation(key, logs[key].load, true)));
     let synced = 0, skipped = 0, failed = 0;
+    const reasonCounts = {};
     results.forEach(result => {
       if(!result) return;
       if(result.ok && result.syncedCount>0) synced++;
       else if(result.ok && result.syncedCount===0) skipped++;
-      else failed++;
+      else {
+        failed++;
+        const label = result.reason==='day-locked' ? `Today (${today}) is locked in Data Management`
+          : result.reason==='cloud-unreachable' ? 'Cloud unreachable (Firebase did not load)'
+          : result.reason==='cloud-error' ? ('Could not reach the database' + (result.errorMessage ? ': '+result.errorMessage : ''))
+          : (result.errorMessage ? 'Write failed: '+result.errorMessage : 'Write failed (see browser console for details)');
+        reasonCounts[label] = (reasonCounts[label]||0) + 1;
+      }
     });
 
     await waitForCloud();
     if(!window.__millfillCloud){
-      alert(`Push finished (${synced} synced, ${skipped} had nothing new, ${failed} failed), but the cloud is unreachable right now so the combined report could not be pulled. Check your connection and try again.`);
+      alert(`Push finished (${synced} synced, ${skipped} had nothing new, ${failed} failed) — the cloud is unreachable right now, so the combined report could not be pulled. Check your connection and try again.`);
       return;
     }
     try{
@@ -4273,7 +4314,8 @@ ${sectionsHtml}
       updateFdMasterStatus();
       const names = Object.values(inspectors).map(d => d.inspectorName).filter(Boolean);
       if(failed>0){
-        alert(`Synced with issues (${synced} ok, ${failed} failed). Combined report for ${today} now includes ${names.length} inspector(s): ${names.join(', ')||'none yet'}.`);
+        const reasonLines = Object.entries(reasonCounts).map(([label,count]) => `• ${label} (${count} section${count===1?'':'s'})`).join('\n');
+        alert(`Sync failed for all sections that had new data today.\n\n${reasonLines}\n\nCombined report for ${today} currently includes ${names.length} inspector(s): ${names.join(', ')||'none yet'}.\n\nIf this says "locked," check Data Management → unlock ${today}. Otherwise open the browser console (F12) for the exact Firestore error, or check the Firestore security rules in the Firebase console — test-mode rules expire after 30 days and start blocking all writes.`);
       } else {
         showToast(`✓ Synced & combined — ${names.length} inspector(s) for ${today}`);
       }
