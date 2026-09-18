@@ -1004,6 +1004,7 @@
       <button class="stop" data-maintab="labor">Labor</button>
       <button class="stop" data-maintab="equipment">Equipment</button>
       <button class="stop" data-maintab="concrete">Concrete</button>
+      <button class="stop" data-maintab="pccliftout">PCC Lift-Out</button>
       <button class="stop" data-maintab="asphalt">Asphalt</button>
       <button class="stop" data-maintab="sawcutqa">Saw Cutting QA</button>
       <button class="stop" data-maintab="subbasecomp">Subbase Compaction</button>
@@ -1042,7 +1043,7 @@
           <div class="field"><label>404.1969 &mdash; 19F9 Binder Course Asphalt (TON)</label><input type="text" id="fd_rl_binder" readonly placeholder="Auto-filled from Asphalt tab"></div>
           <div class="field"><label>407.0102 &mdash; Diluted Tack Coat (GAL)</label><input type="text" id="fd_rl_tack" readonly placeholder="Auto-filled from TAC Coat tab"></div>
           <div class="field"><label>510.02210018 &mdash; PCC Full-Depth Repair (CY)</label><input type="text" id="fd_rl_pccrepair" readonly placeholder="Auto-filled from Concrete tab"></div>
-          <div class="field"><label>510.20000018 &mdash; PCC Pavement Lift Out (SY)</label><input type="number" id="fd_rl_pccliftout" inputmode="decimal"></div>
+          <div class="field"><label>510.20000018 &mdash; PCC Pavement Lift Out (SY)</label><input type="text" id="fd_rl_pccliftout" readonly placeholder="Auto-filled from PCC Lift-Out tab"></div>
           <div class="field"><label>510.81000018 &mdash; Drill &amp; Anchor Dowels (EACH)</label><input type="text" id="fd_rl_dowels" readonly placeholder="Auto-filled from Dowel Cages total"></div>
           <div class="field"><label>510.91000018 &mdash; Transverse Joints (LF)</label><input type="number" id="fd_rl_transjoints" inputmode="decimal"></div>
           <div class="field"><label>520.09000010 &mdash; Saw Cutting Asphalt Concrete (LF)</label><input type="text" id="fd_rl_sawcut" readonly placeholder="Auto-filled from Saw Cutting QA (manual measurement)"></div>
@@ -1071,6 +1072,34 @@
             <tbody id="fd_rl_tbody"></tbody>
           </table>
           <div class="log-empty" id="fd_rl_empty">No entries yet.</div>
+        </div>
+
+        <div style="font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em; margin:24px 0 8px; border-top:1px solid var(--border); padding-top:16px;">Full Depth Repair &mdash; Daily Report</div>
+        <div class="desc">Each tab's own "Sync to Cloud" button lets every inspector push their own work independently. "Sync All to Cloud" here pushes this device's work, then pulls every inspector's synced data for today together into one combined report. Full Report includes every operation (Labor, Equipment, Concrete, PCC Lift-Out, Asphalt, Saw Cutting QA, Subbase Compaction, Dowels, TAC Coat, and the Repair Log). Summary Report includes only the Repair Log's final pay-item quantities.</div>
+        <div id="fd_master_status" style="font-size:12px; color:var(--muted); margin:8px 0; font-style:italic;"></div>
+        <div class="log-toolbar" style="margin-top:8px;">
+          <button class="btn primary" id="fd_master_exportFullXlsx">&#128190; Full Report (Excel)</button>
+          <button class="btn primary" id="fd_master_exportFullPdf">&#128196; Full Report (PDF)</button>
+        </div>
+        <div class="log-toolbar">
+          <button class="btn" id="fd_master_exportSummaryXlsx">&#128190; Summary Report (Excel)</button>
+          <button class="btn" id="fd_master_exportSummaryPdf">&#128196; Summary Report (PDF)</button>
+        </div>
+        <div class="log-toolbar">
+          <button class="btn primary" id="fd_master_sync">&#9729; Sync All to Cloud</button>
+          <button class="btn" id="fd_master_inspectorReport" disabled title='Click "Sync All to Cloud" first.'>&#128221; Inspector Report</button>
+          <button class="btn danger" id="fd_master_clear">Clear Entire Report</button>
+        </div>
+
+        <div style="font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em; margin:20px 0 8px;">Generated Inspector Reports</div>
+        <div class="desc">"Inspector Report" writes up a narrative report (like a written report of work performed) for the Repair ID entered above, using the combined cloud data. It only becomes available after "Sync All to Cloud" has been run for today.</div>
+        <div class="log-count" id="fd_ir_count">0 entries logged</div>
+        <div class="log-table-wrap">
+          <table class="log" id="fd_ir_table">
+            <thead><tr><th>Repair ID</th><th>Date</th><th>Inspector</th><th>Generated At</th><th></th></tr></thead>
+            <tbody id="fd_ir_tbody"></tbody>
+          </table>
+          <div class="log-empty" id="fd_ir_empty">No reports generated yet.</div>
         </div>
       </div>
     </div>
@@ -1218,6 +1247,46 @@
             <tbody id="fd_co_tbody"></tbody>
           </table>
           <div class="log-empty" id="fd_co_empty">No entries yet.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="fd-maintab-panel" id="fdmain-pccliftout" style="display:none;">
+      <div class="panel">
+        <h2>PCC Pavement Lift Out</h2>
+        <div class="desc">Removal of existing PCC pavement slab(s) prior to full-depth repair. Pay item 510.20000018, measured in Square Yards (SY).</div>
+        <div class="grid2">
+          <div class="field"><label>Inspector</label><select id="fd_plo_inspector"></select></div>
+          <div class="field" id="fd_plo_inspector_other_wrap" style="display:none;"><label>Inspector Name</label><input type="text" id="fd_plo_inspector_other" placeholder="Type name"></div>
+          <div class="field"><label>Repair ID</label><input type="text" id="fd_plo_repairid" placeholder="SH-001"></div>
+          <div class="field"><label>Date</label><input type="date" id="fd_plo_date"></div>
+        </div>
+
+        <div style="font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em; margin:16px 0 8px;">Lift-Out Area Calculation</div>
+        <div class="grid2">
+          <div class="field"><label>Length (ft)</label><input type="number" id="fd_plo_L" inputmode="decimal"></div>
+          <div class="field"><label>Width (ft)</label><input type="number" id="fd_plo_W" inputmode="decimal"></div>
+        </div>
+        <div class="log-toolbar" style="margin-top:10px;"><button class="btn primary" id="fd_plo_calcBtn">Calculate SY</button></div>
+        <div class="result" style="margin-top:10px;">
+          <div class="label">Calculated Quantity</div>
+          <div class="value" id="fd_plo_calcSY">&mdash;</div>
+          <div class="station">L &times; W &divide; 9 (SF &rarr; SY)</div>
+        </div>
+
+        <div class="log-toolbar" style="margin-top:14px;"><button class="btn primary" id="fd_plo_add">+ Add to Report</button></div>
+        <div class="log-count" id="fd_plo_count">0 entries logged</div>
+        <div class="log-toolbar">
+          <button class="btn" id="fd_plo_export">Export CSV</button>
+          <button class="btn primary" id="fd_plo_sync">&#9729; Sync to Cloud</button>
+          <button class="btn danger" id="fd_plo_clear">Clear Report</button>
+        </div>
+        <div class="log-table-wrap">
+          <table class="log" id="fd_plo_table">
+            <thead><tr><th>Date</th><th>Inspector</th><th>Repair ID</th><th>L</th><th>W</th><th>Calc SY</th><th></th></tr></thead>
+            <tbody id="fd_plo_tbody"></tbody>
+          </table>
+          <div class="log-empty" id="fd_plo_empty">No entries yet.</div>
         </div>
       </div>
     </div>
@@ -1403,6 +1472,7 @@
           <div class="label">Combined Total (Individual + All Cages)</div>
           <div class="value" id="fd_dw_combinedTotal">0</div>
         </div>
+        <div class="log-toolbar" style="margin-top:8px;"><button class="btn primary" id="fd_dw_pushCount">+ Add Dowels Count</button></div>
 
         <div style="font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em; margin:16px 0 8px;">Dowel Installation QA</div>
         <div id="fd_dw_checks" style="margin-top:10px;">
@@ -1415,10 +1485,6 @@
             <select id="fd_dw_holeDepth" style="width:120px;"><option value="">&mdash;</option><option value="Pass">Pass</option><option value="Fail">Fail</option></select>
           </div>
           <div class="field full" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding:10px 0;">
-            <label style="margin:0;">Hole spacing/count correct (ref: 4/wheelpath, 8/lane, 12" o.c.)</label>
-            <select id="fd_dw_holeSpacing" style="width:120px;"><option value="">&mdash;</option><option value="Pass">Pass</option><option value="Fail">Fail</option></select>
-          </div>
-          <div class="field full" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding:10px 0;">
             <label style="margin:0;">Dust blown out of hole (compressed air)</label>
             <select id="fd_dw_dustBlown" style="width:120px;"><option value="">&mdash;</option><option value="Pass">Pass</option><option value="Fail">Fail</option></select>
           </div>
@@ -1429,6 +1495,10 @@
           <div class="field full" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding:10px 0;">
             <label style="margin:0;">Epoxy/anchoring material placed correctly</label>
             <select id="fd_dw_epoxyPlaced" style="width:120px;"><option value="">&mdash;</option><option value="Pass">Pass</option><option value="Fail">Fail</option></select>
+          </div>
+          <div class="field full" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding:10px 0;">
+            <label style="margin:0;">Hole spacing/count correct (ref: 4/wheelpath, 8/lane, 12" o.c.)</label>
+            <select id="fd_dw_holeSpacing" style="width:120px;"><option value="">&mdash;</option><option value="Pass">Pass</option><option value="Fail">Fail</option></select>
           </div>
           <div class="field full" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding:10px 0;">
             <label style="margin:0;">Dowel protrusion correct (ref: 6.5"-7" from saw cut face)</label>
@@ -1488,6 +1558,7 @@
           <div class="label">Final Pay Quantity</div>
           <div class="value" id="fd_tc_final">&mdash;<span class="unit">gal</span></div>
         </div>
+        <div class="log-toolbar" style="margin-top:10px;"><button class="btn primary" id="fd_tc_pushBtn">Send to Repair Log</button></div>
         <div class="log-toolbar" style="margin-top:14px;"><button class="btn primary" id="fd_tc_add">+ Add to Report</button></div>
         <div class="log-count" id="fd_tc_count">0 entries logged</div>
         <div class="log-toolbar">
@@ -2962,6 +3033,24 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
   function loadFdRepairLog(){ try{ return JSON.parse(localStorage.getItem(FD_RL_KEY))||[]; }catch(e){ return []; } }
   function saveFdRepairLog(v){ try{ localStorage.setItem(FD_RL_KEY, JSON.stringify(v)); }catch(e){} }
 
+  /** Small cache so a "Calculate & Push" result (Concrete/Asphalt/Subbase/Dowels) survives
+   * navigating back into the Repair Log tab even before that entry has been formally
+   * submitted via that tab's own "Add to Report" button. Keyed by Repair ID. */
+  const FD_CALC_CACHE_KEY = 'millfill_fd_calccache_v1';
+  function loadFdCalcCache(){ try{ return JSON.parse(localStorage.getItem(FD_CALC_CACHE_KEY))||{}; }catch(e){ return {}; } }
+  function saveFdCalcCache(c){ try{ localStorage.setItem(FD_CALC_CACHE_KEY, JSON.stringify(c)); }catch(e){} }
+  function setFdCalcCache(repairId, field, value){
+    if(!repairId) return;
+    const c = loadFdCalcCache();
+    if(!c[repairId]) c[repairId] = {};
+    c[repairId][field] = value;
+    saveFdCalcCache(c);
+  }
+  function getFdCalcCache(repairId, field){
+    const c = loadFdCalcCache();
+    return (c[repairId] && c[repairId][field]) || '';
+  }
+
   /** Pulls the latest matching Concrete/Asphalt entry (by Repair ID) into the Repair Log's
    * read-only depth-placed display, converting to inches for consistency in this view. */
   function syncFdRepairDepthsFromMaterialTabs(){
@@ -2971,32 +3060,37 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
     const subMatches = fdSubbaseComp.load().filter(e => e.repairId === repairId && e.calcCY);
     if(subMatches.length){
       $('fd_rl_subbase').value = subMatches[subMatches.length-1].calcCY;
-    } else { $('fd_rl_subbase').value = ''; }
+    } else { $('fd_rl_subbase').value = getFdCalcCache(repairId, 'subbase'); }
+
+    const ploMatches = fdPccLiftout.load().filter(e => e.repairId === repairId && e.calcSY);
+    if(ploMatches.length){
+      $('fd_rl_pccliftout').value = ploMatches[ploMatches.length-1].calcSY;
+    } else { $('fd_rl_pccliftout').value = getFdCalcCache(repairId, 'pccliftout'); }
 
     const concMatches = fdConcrete.load().filter(e => e.repairId === repairId && e.D);
     if(concMatches.length){
       const latest = concMatches[concMatches.length-1];
       $('fd_rl_concD').value = latest.D; // Concrete tab's own D is already in inches
       $('fd_rl_pccrepair').value = latest.calcCY || '';
-    } else { $('fd_rl_concD').value = ''; $('fd_rl_pccrepair').value = ''; }
+    } else { $('fd_rl_concD').value = ''; $('fd_rl_pccrepair').value = getFdCalcCache(repairId, 'pccrepair'); }
 
     const asphMatches = fdAsphalt.load().filter(e => e.repairId === repairId && e.D);
     if(asphMatches.length){
       const latest = asphMatches[asphMatches.length-1];
       $('fd_rl_asphD').value = latest.D; // Asphalt tab's own D is already in inches
       $('fd_rl_binder').value = latest.calcTons || '';
-    } else { $('fd_rl_asphD').value = ''; $('fd_rl_binder').value = ''; }
+    } else { $('fd_rl_asphD').value = ''; $('fd_rl_binder').value = getFdCalcCache(repairId, 'binder'); }
 
     const tacMatches = fdTacCoat.load().filter(e => e.repairId === repairId && e.finalPay!==undefined);
     if(tacMatches.length){
       const latest = tacMatches[tacMatches.length-1];
       $('fd_rl_tack').value = latest.finalPay;
-    } else { $('fd_rl_tack').value = ''; }
+    } else { $('fd_rl_tack').value = getFdCalcCache(repairId, 'tack'); }
 
     const dowelMatches = fdDowels.load().filter(e => e.repairId === repairId && e.combinedTotal);
     if(dowelMatches.length){
       $('fd_rl_dowels').value = dowelMatches[dowelMatches.length-1].combinedTotal;
-    } else { $('fd_rl_dowels').value = ''; }
+    } else { $('fd_rl_dowels').value = getFdCalcCache(repairId, 'dowels'); }
 
     const sawCutMatches = fdSawCutQA.load().filter(e => e.repairId === repairId && e.lfManual);
     if(sawCutMatches.length){
@@ -3267,6 +3361,7 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
     const cy = calcFdConcreteCY();
     if(cy===null){ alert('Enter Length, Width, and Depth first.'); return; }
     $('fd_rl_pccrepair').value = cy.toFixed(2);
+    setFdCalcCache($('fd_co_repairid').value.trim(), 'pccrepair', cy.toFixed(2));
     showToast('\u2713 Quantity calculated and sent to Repair Log');
   }
   function calcFdConcreteDeadline(){
@@ -3301,6 +3396,48 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
     fdConcrete.render((e,i) => `<tr><td>${e.date||''}</td><td>${e.inspector||''}</td><td>${e.repairId||''}</td><td>${e.calcCY||'—'}</td><td>${e.ticket||'—'}</td><td>${e.mixCorrect==='Y'?'Yes':e.mixCorrect==='N'?'No':'—'}</td><td>${e.deadline||'—'}</td><td>${e.hours||'—'}</td><td>${e.psi||'—'}</td><td>${e.slump||'—'}</td><td>${e.temp||'—'}${e.locked?' &#128274;':''}</td><td><button class="del-btn" data-idx="${i}" title="Delete">&#10005;</button></td></tr>`);
   }
 
+  // --- PCC Pavement Lift Out ---
+  const fdPccLiftout = makeFdLog('fd_plo', 'millfill_fd_pccliftout_v1');
+  function calcFdPccLiftoutSY(){
+    const L = parseFloat($('fd_plo_L').value), W = parseFloat($('fd_plo_W').value);
+    if(isFinite(L) && isFinite(W)){
+      const sy = (L*W)/9;
+      $('fd_plo_calcSY').innerHTML = fmt(sy,2)+'<span class="unit">SY</span>';
+      return sy;
+    }
+    $('fd_plo_calcSY').innerHTML = '&mdash;';
+    return null;
+  }
+  /** "Calculate SY" button: computes SY, shows it here, AND pushes it directly
+   * into the Repair Log's PCC Pavement Lift Out pay item right away. */
+  function calcAndPushPccLiftoutSY(){
+    const sy = calcFdPccLiftoutSY();
+    if(sy===null){ alert('Enter Length and Width first.'); return; }
+    $('fd_rl_pccliftout').value = sy.toFixed(2);
+    setFdCalcCache($('fd_plo_repairid').value.trim(), 'pccliftout', sy.toFixed(2));
+    showToast('✓ Quantity calculated and sent to Repair Log');
+  }
+  function addFdPccLiftoutEntry(){
+    const inspector = getInspectorValue('fd_plo');
+    const repairId = $('fd_plo_repairid').value.trim();
+    if(!inspector){ alert('Please select or type in the inspector name.'); return; }
+    if(!repairId){ alert('Enter a Repair ID.'); return; }
+    const calcSY = calcFdPccLiftoutSY();
+    if(calcSY===null){ alert('Enter Length and Width first.'); return; }
+    const entries = fdPccLiftout.load();
+    entries.push({ id: genId(), locked:false, date: $('fd_plo_date').value||todayStr(), inspector, repairId,
+      L: $('fd_plo_L').value, W: $('fd_plo_W').value, calcSY: calcSY.toFixed(2) });
+    fdPccLiftout.save(entries);
+    rememberInspector('fd_plo');
+    renderFdPccLiftout();
+    $('fd_rl_pccliftout').value = calcSY.toFixed(2);
+    setFdCalcCache(repairId, 'pccliftout', calcSY.toFixed(2));
+    showToast('✓ PCC Lift-Out logged — sent to Repair Log');
+  }
+  function renderFdPccLiftout(){
+    fdPccLiftout.render((e,i) => `<tr><td>${e.date||''}</td><td>${e.inspector||''}</td><td>${e.repairId||''}</td><td>${e.L||'—'}</td><td>${e.W||'—'}</td><td>${e.calcSY||'—'}${e.locked?' &#128274;':''}</td><td><button class="del-btn" data-idx="${i}" title="Delete">&#10005;</button></td></tr>`);
+  }
+
   // --- Asphalt (Verification + Tonnage Calc, merged) ---
   const fdAsphalt = makeFdLog('fd_as', 'millfill_fd_asphalt_v1');
   function calcFdAsphaltTons(){
@@ -3319,6 +3456,7 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
     const tons = calcFdAsphaltTons();
     if(tons===null){ alert('Enter Length, Width, and Depth first.'); return; }
     $('fd_rl_binder').value = tons.toFixed(2);
+    setFdCalcCache($('fd_as_repairid').value.trim(), 'binder', tons.toFixed(2));
     showToast('\u2713 Tonnage calculated and sent to Repair Log');
   }
   function renderFdAsphaltTypeFlag(){
@@ -3445,6 +3583,7 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
     const cy = calcFdSubbaseCY();
     if(cy===null){ alert('Enter Length, Width, and Depth first.'); return; }
     $('fd_rl_subbase').value = cy.toFixed(2);
+    setFdCalcCache($('fd_sb_repairid').value.trim(), 'subbase', cy.toFixed(2));
     showToast('\u2713 Quantity calculated and sent to Repair Log');
   }
   function addFdSubbaseCompEntry(){
@@ -3470,7 +3609,7 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
 
   // --- Dowels (unified: individual count + cages + QA, one combined report entry) ---
   const fdDowels = makeFdLog('fd_dw', 'millfill_fd_dowels_v1');
-  const FD_DOWEL_CHECKS = ['holeDiameter','holeDepth','holeSpacing','dustBlown','materialMixed','epoxyPlaced','protrusion','alignment','dowelCaps'];
+  const FD_DOWEL_CHECKS = ['holeDiameter','holeDepth','dustBlown','materialMixed','epoxyPlaced','holeSpacing','protrusion','alignment','dowelCaps'];
   let fdDwStagedCages = []; // cages added to the CURRENT entry, not yet submitted
 
   function renderFdDwCageList(){
@@ -3504,6 +3643,13 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
     fdDwStagedCages.splice(idx,1);
     renderFdDwCageList();
     updateFdDwCombinedTotal();
+  }
+  function pushFdDwCombinedTotal(){
+    const combined = updateFdDwCombinedTotal();
+    if(combined===0){ alert('Enter an individual dowel count and/or at least one cage.'); return; }
+    $('fd_rl_dowels').value = combined;
+    setFdCalcCache($('fd_dw_repairid').value.trim(), 'dowels', combined);
+    showToast(`✓ ${combined} dowels sent to Repair Log`);
   }
   function addFdDowelsEntry(){
     const inspector = getInspectorValue('fd_dw');
@@ -3567,6 +3713,15 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
     $('fd_tc_final').innerHTML = finalPay.toLocaleString()+'<span class="unit">gal</span>';
     return finalPay;
   }
+  /** "Send to Repair Log" button: pushes the current Final Pay quantity directly
+   * into the Repair Log's Diluted Tack Coat pay item right away. */
+  function pushFdTacFinalPay(){
+    const finalPay = calcFdTac();
+    if(finalPay===null){ alert('Enter delivered gallons and gauge temp first.'); return; }
+    $('fd_rl_tack').value = finalPay;
+    setFdCalcCache($('fd_tc_repairid').value.trim(), 'tack', finalPay);
+    showToast('✓ Final pay quantity sent to Repair Log');
+  }
   function getFdTcTruckValue(){
     const sel = $('fd_tc_truck');
     if(sel.value === '__other__'){
@@ -3589,7 +3744,9 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
     fdTacCoat.save(entries);
     rememberInspector('fd_tc');
     renderFdTacCoat();
-    showToast('\u2713 TAC coat logged');
+    $('fd_rl_tack').value = finalPay;
+    setFdCalcCache(repairId, 'tack', finalPay);
+    showToast('\u2713 TAC coat logged \u2014 sent to Repair Log');
   }
   function renderFdTacCoat(){
     fdTacCoat.render((e,i) => `<tr><td>${e.date||''}</td><td>${e.inspector||''}</td><td>${e.repairId||''}</td><td>${e.ticket||'—'}</td><td>${e.truck||'—'}</td><td>${e.contractor||'—'}</td><td>${e.gallons||'—'}</td><td>${e.temp||'—'}</td><td>${e.finalPay||'—'}${e.locked?' &#128274;':''}</td><td><button class="del-btn" data-idx="${i}" title="Delete">&#10005;</button></td></tr>`);
@@ -3807,6 +3964,10 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
     if(/[",\n]/.test(v)){ v = '"' + v.replace(/"/g,'""') + '"'; }
     return v;
   }
+  function escapeHtml(v){
+    v = (v===undefined || v===null) ? '' : String(v);
+    return v.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
   function downloadCSV(headers, rows, filenamePrefix){
     const csv = [headers.map(csvField).join(','), ...rows.map(r=>r.map(csvField).join(','))].join('\n');
     const blob = new Blob([csv], {type:'text/csv'});
@@ -3887,6 +4048,449 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
     a.href = url; a.download = `daily-report-${todayStr()}.csv`;
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  }
+
+  /* ================= FULL DEPTH REPAIR — MASTER DAILY REPORT ================= */
+  const FD_PAY_ITEM_COLUMNS = [
+    {key:'subbase', label:'304.10119917 Subbase (CY)'},
+    {key:'binder', label:'404.1969 Binder Course Asphalt (TON)'},
+    {key:'tack', label:'407.0102 Diluted Tack Coat (GAL)'},
+    {key:'pccrepair', label:'510.02210018 PCC Full-Depth Repair (CY)'},
+    {key:'pccliftout', label:'510.20000018 PCC Pavement Lift Out (SY)'},
+    {key:'dowels', label:'510.81000018 Drill & Anchor Dowels (EACH)'},
+    {key:'transjoints', label:'510.91000018 Transverse Joints (LF)'},
+    {key:'sawcut', label:'520.09000010 Saw Cutting Asphalt Concrete (LF)'},
+    {key:'trafficcontrol', label:'619.01 Work Zone Traffic Control (LS)'}
+  ];
+  /** Every Full Depth Repair sub-log, keyed for the master export/sync/clear actions. */
+  function getFdAllLogs(){
+    return {
+      fd_repairlog: { label:'Repair Log', load: loadFdRepairLog, save: saveFdRepairLog, render: renderFdRepairLog },
+      fd_labor: { label:'Labor', load: fdLabor.load, save: fdLabor.save, render: renderFdLabor },
+      fd_equipment: { label:'Equipment', load: fdEquip.load, save: fdEquip.save, render: renderFdEquipment },
+      fd_concrete: { label:'Concrete', load: fdConcrete.load, save: fdConcrete.save, render: renderFdConcrete },
+      fd_pccliftout: { label:'PCC Lift-Out', load: fdPccLiftout.load, save: fdPccLiftout.save, render: renderFdPccLiftout },
+      fd_asphalt: { label:'Asphalt', load: fdAsphalt.load, save: fdAsphalt.save, render: renderFdAsphalt },
+      fd_sawcutqa: { label:'Saw Cutting QA', load: fdSawCutQA.load, save: fdSawCutQA.save, render: renderFdSawCutQA },
+      fd_subbasecomp: { label:'Subbase Compaction', load: fdSubbaseComp.load, save: fdSubbaseComp.save, render: renderFdSubbaseComp },
+      fd_dowels: { label:'Dowels', load: fdDowels.load, save: fdDowels.save, render: renderFdDowels },
+      fd_taccoat: { label:'TAC Coat', load: fdTacCoat.load, save: fdTacCoat.save, render: renderFdTacCoat }
+    };
+  }
+  function getFdMasterSections(){
+    return [
+      { name:'Repair Log', headers:['Date','Inspector','Repair ID','Location','Exc L','Exc W','Exc D','Concrete Depth','Asphalt Depth','Subbase CY','Binder TON','Tack GAL','PCC Repair CY','PCC Liftout SY','Dowels EACH','Trans Joints LF','Saw Cut LF','Traffic Control'],
+        rows: fdOpEntriesFor('fd_repairlog', loadFdRepairLog).map(e=>[e.date,e.inspector,e.repairId,e.location,e.exL,e.exW,e.exD,e.concD,e.asphD,e.subbase,e.binder,e.tack,e.pccrepair,e.pccliftout,e.dowels,e.transjoints,e.sawcut,e.trafficcontrol]) },
+      { name:'Labor', headers:['Date','Inspector','Repair ID','Role','Name'],
+        rows: fdOpEntriesFor('fd_labor', fdLabor.load).map(e=>[e.date,e.inspector,e.repairId,e.role,e.name]) },
+      { name:'Equipment', headers:['Date','Inspector','Repair ID','Type','Model','Equipment ID','Ticket','Explanation'],
+        rows: fdOpEntriesFor('fd_equipment', fdEquip.load).map(e=>[e.date,e.inspector,e.repairId,e.type,e.model,e.equipNum,e.ticket,e.explanation]) },
+      { name:'Concrete', headers:['Date','Inspector','Repair ID','L','W','D','Calc CY','Ticket','Mix Correct','Time Left Plant','Time Arrived','Deadline','Hours','PSI','Slump','Temp'],
+        rows: fdOpEntriesFor('fd_concrete', fdConcrete.load).map(e=>[e.date,e.inspector,e.repairId,e.L,e.W,e.D,e.calcCY,e.ticket,e.mixCorrect,e.timeLeft,e.timeArrived,e.deadline,e.hours,e.psi,e.slump,e.temp]) },
+      { name:'PCC Lift-Out', headers:['Date','Inspector','Repair ID','L','W','Calc SY'],
+        rows: fdOpEntriesFor('fd_pccliftout', fdPccLiftout.load).map(e=>[e.date,e.inspector,e.repairId,e.L,e.W,e.calcSY]) },
+      { name:'Asphalt', headers:['Date','Inspector','Repair ID','Ticket','Type','Type Correct','Temp','L','W','D','Calc Tons'],
+        rows: fdOpEntriesFor('fd_asphalt', fdAsphalt.load).map(e=>[e.date,e.inspector,e.repairId,e.ticket,e.type,e.typeCorrect,e.temp,e.L,e.W,e.D,e.calcTons]) },
+      { name:'Saw Cutting QA', headers:['Date','Inspector','Repair ID','Subcontractor','Role','Name','Ticket','LF Ticket','LF Manual','Pay Basis'],
+        rows: fdOpEntriesFor('fd_sawcutqa', fdSawCutQA.load).map(e=>[e.date,e.inspector,e.repairId,e.subcontractor,e.role,e.name,e.ticket,e.lfTicket,e.lfManual,e.payBasis]) },
+      { name:'Subbase Compaction', headers:['Date','Inspector','Repair ID','Ticket','Delivered','Lifts','Result','L','W','D','Calc CY'],
+        rows: fdOpEntriesFor('fd_subbasecomp', fdSubbaseComp.load).map(e=>[e.date,e.inspector,e.repairId,e.ticket,e.delivered,e.lifts,e.result,e.L,e.W,e.D,e.calcCY]) },
+      { name:'Dowels', headers:['Date','Inspector','Repair ID','Individual Count','# Cages','Cage Breakdown','Combined Total','QA Overall',...FD_DOWEL_CHECKS],
+        rows: fdOpEntriesFor('fd_dowels', fdDowels.load).map(e=>[e.date,e.inspector,e.repairId,e.individualCount,e.cageCount,(e.cages||[]).map(c=>`#${c.cageNum}:${c.dowels}`).join('; '),e.combinedTotal,e.overall,...FD_DOWEL_CHECKS.map(k=>e.checks?e.checks[k]:'')]) },
+      { name:'TAC Coat', headers:['Date','Inspector','Repair ID','Ticket','Truck','Contractor','Gallons','Temp','Final Pay'],
+        rows: fdOpEntriesFor('fd_taccoat', fdTacCoat.load).map(e=>[e.date,e.inspector,e.repairId,e.ticket,e.truck,e.contractor,e.gallons,e.temp,e.finalPay]) }
+    ];
+  }
+  /** Summary section: one row per logged repair with its final pay-item quantities
+   * (as shown on the Repair Log screen), plus a TOTALS row summing each pay item. */
+  function getFdSummarySection(){
+    const entries = fdOpEntriesFor('fd_repairlog', loadFdRepairLog);
+    const headers = ['Date','Repair ID','Inspector', ...FD_PAY_ITEM_COLUMNS.map(c=>c.label)];
+    const rows = entries.map(e => [e.date, e.repairId, e.inspector, ...FD_PAY_ITEM_COLUMNS.map(c => e[c.key]||'')]);
+    if(entries.length){
+      const totals = ['', 'TOTALS', ''];
+      FD_PAY_ITEM_COLUMNS.forEach(c=>{
+        if(c.key==='trafficcontrol'){ totals.push(''); return; }
+        const sum = entries.reduce((s,e)=> s + (parseFloat(e[c.key])||0), 0);
+        totals.push(sum ? sum.toFixed(2) : '');
+      });
+      rows.push(totals);
+    }
+    return { name:'Summary', headers, rows };
+  }
+  function fdMasterHasAnyData(){
+    const logs = getFdAllLogs();
+    return Object.keys(logs).some(key => fdOpEntriesFor(key, logs[key].load).length > 0);
+  }
+
+  /** Holds the last "Sync All to Cloud" pull: every inspector's synced data for one date,
+   * combined across every Full Depth Repair operation. Null until someone has pulled it,
+   * so a device that hasn't synced yet still shows (and exports) its own local work. */
+  let fdMasterCloudSnapshot = null;
+
+  function combineFdOpEntries(opKey, inspectorsMap){
+    const out = [];
+    Object.values(inspectorsMap || {}).forEach(doc => { (doc[opKey]||[]).forEach(entry => out.push(entry)); });
+    return out;
+  }
+  /** Whether the master report is currently showing the combined cloud picture
+   * (today's pull) or falling back to this device's own local data. */
+  function fdMasterDataSource(){
+    const today = todayStr();
+    if(fdMasterCloudSnapshot && fdMasterCloudSnapshot.date === today){
+      return { mode:'cloud', date: today, inspectors: fdMasterCloudSnapshot.inspectors, pulledAt: fdMasterCloudSnapshot.pulledAt };
+    }
+    return { mode:'local', date: today };
+  }
+  /** Entries for one Full Depth Repair operation, sourced from the combined cloud
+   * pull when available (today only), otherwise this device's own local log
+   * (all dates, matching how each tab's own Export CSV already behaves). */
+  function fdOpEntriesFor(opKey, loadFn){
+    const src = fdMasterDataSource();
+    if(src.mode==='cloud') return combineFdOpEntries(opKey, src.inspectors);
+    return loadFn();
+  }
+  function fdMasterSourceLabel(){
+    const src = fdMasterDataSource();
+    if(src.mode==='cloud'){
+      const names = Object.values(src.inspectors).map(d=>d.inspectorName).filter(Boolean);
+      const when = src.pulledAt ? new Date(src.pulledAt).toLocaleTimeString() : '';
+      return `Combined report for ${src.date} — ${names.length} inspector(s)${names.length?' ('+names.join(', ')+')':''}. Last combined ${when}.`;
+    }
+    return `Showing this device's local data only (not yet combined with other inspectors). Click "Sync All to Cloud" to pull in everyone's synced work for ${src.date}.`;
+  }
+  function updateFdMasterStatus(){
+    const el = document.getElementById('fd_master_status');
+    if(el) el.textContent = fdMasterSourceLabel();
+    updateFdInspectorReportButton();
+  }
+
+  /** Builds a genuine multi-sheet Excel workbook (.xls, HTML-based — opens natively
+   * in Microsoft Excel with one tab per section) with no external library needed. */
+  function downloadFdExcelWorkbook(sections, filenamePrefix){
+    const sheetDefs = sections.map(s =>
+      `<x:ExcelWorksheet><x:Name>${escapeHtml(s.name.slice(0,31))}</x:Name><x:WorksheetOptions><x:Panes></x:Panes><x:Selected/></x:WorksheetOptions></x:ExcelWorksheet>`
+    ).join('');
+    const tables = sections.map(s => {
+      const headerRow = `<tr>${s.headers.map(h=>`<th style="background:#dde3ea;font-weight:bold;border:1px solid #999;padding:4px;">${escapeHtml(h)}</th>`).join('')}</tr>`;
+      const bodyRows = s.rows.length ? s.rows.map(r=>`<tr>${r.map(v=>`<td style="border:1px solid #ccc;padding:4px;">${escapeHtml(v)}</td>`).join('')}</tr>`).join('') :
+        `<tr><td style="padding:4px;color:#888;" colspan="${s.headers.length}">No entries</td></tr>`;
+      return `<table border="1" style="border-collapse:collapse;">${headerRow}${bodyRows}</table>`;
+    }).join('<br>');
+    const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+<head><meta charset="UTF-8">
+<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets>${sheetDefs}</x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->
+</head>
+<body>${tables}</body></html>`;
+    const blob = new Blob(['﻿'+html], {type:'application/vnd.ms-excel'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `${filenamePrefix}-${todayStr()}.xls`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  /** Opens a print-formatted window and triggers the browser's print dialog —
+   * the person chooses "Save as PDF" there. No external library needed. */
+  function openFdPdfReport(sections, title, sourceLabel){
+    const win = window.open('', '_blank');
+    if(!win){ alert('Please allow pop-ups for this site to generate the PDF report.'); return; }
+    const sectionsHtml = sections.map(s => {
+      const headerRow = `<tr>${s.headers.map(h=>`<th>${escapeHtml(h)}</th>`).join('')}</tr>`;
+      const bodyRows = s.rows.length ? s.rows.map(r=>`<tr>${r.map(v=>`<td>${escapeHtml(v)}</td>`).join('')}</tr>`).join('') :
+        `<tr><td colspan="${s.headers.length}" style="text-align:center;color:#888;">No entries</td></tr>`;
+      return `<h2>${escapeHtml(s.name)}</h2><table>${headerRow}${bodyRows}</table>`;
+    }).join('');
+    win.document.write(`<!DOCTYPE html><html><head><title>${escapeHtml(title)}</title>
+<style>
+  body{font-family:Arial, Helvetica, sans-serif; font-size:11px; margin:24px; color:#111;}
+  h1{font-size:18px; margin-bottom:4px;}
+  h2{font-size:13px; margin-top:22px; margin-bottom:6px; border-bottom:2px solid #333; padding-bottom:4px;}
+  table{width:100%; border-collapse:collapse; margin-bottom:10px;}
+  th,td{border:1px solid #999; padding:4px 6px; text-align:left; font-size:10px; word-break:break-word;}
+  th{background:#eee;}
+  .meta{color:#555; margin-bottom:6px; font-size:11px;}
+  .source{color:#555; margin-bottom:16px; font-size:11px; font-style:italic;}
+  @media print{ h2{page-break-after:avoid;} tr{page-break-inside:avoid;} }
+</style></head><body>
+<h1>${escapeHtml(title)}</h1>
+<div class="meta">Contract D265724 &mdash; Sunrise Hwy Mill &amp; Fill &mdash; Full Depth Repair<br>Generated ${escapeHtml(new Date().toLocaleString())}</div>
+${sourceLabel ? `<div class="source">${escapeHtml(sourceLabel)}</div>` : ''}
+${sectionsHtml}
+</body></html>`);
+    win.document.close();
+    win.focus();
+    setTimeout(() => { win.print(); }, 350);
+  }
+
+  function fdInfoSheet(){
+    return { name:'Info', headers:['Report'], rows:[[fdMasterSourceLabel()],['Generated '+new Date().toLocaleString()]] };
+  }
+  function exportFdMasterFullXlsx(){
+    if(!fdMasterHasAnyData()){ alert('No Full Depth Repair entries logged yet.'); return; }
+    downloadFdExcelWorkbook([fdInfoSheet(), ...getFdMasterSections(), getFdSummarySection()], 'fulldepth-full-report');
+  }
+  function exportFdMasterFullPdf(){
+    if(!fdMasterHasAnyData()){ alert('No Full Depth Repair entries logged yet.'); return; }
+    openFdPdfReport([...getFdMasterSections(), getFdSummarySection()], 'Full Depth Repair — Full Daily Report', fdMasterSourceLabel());
+  }
+  function exportFdMasterSummaryXlsx(){
+    const summary = getFdSummarySection();
+    if(summary.rows.length===0){ alert('No repairs logged in the Repair Log yet.'); return; }
+    downloadFdExcelWorkbook([fdInfoSheet(), summary], 'fulldepth-summary-report');
+  }
+  function exportFdMasterSummaryPdf(){
+    const summary = getFdSummarySection();
+    if(summary.rows.length===0){ alert('No repairs logged in the Repair Log yet.'); return; }
+    openFdPdfReport([summary], 'Full Depth Repair — Summary Report', fdMasterSourceLabel());
+  }
+  /** "Sync All to Cloud": first pushes this device's own today's entries for every
+   * Full Depth Repair operation up to the cloud (same as each tab's own Sync button,
+   * just done for all of them at once), then pulls EVERY inspector's synced data for
+   * today back down and combines it into one master picture — so Export Full/Summary
+   * Report reflect the whole team's work, not just what happened on this device. */
+  async function syncFdMasterAll(){
+    const logs = getFdAllLogs();
+    const keys = Object.keys(logs);
+    const today = todayStr();
+    const results = await Promise.all(keys.map(key => syncOperation(key, logs[key].load, true)));
+    let synced = 0, skipped = 0, failed = 0;
+    results.forEach(result => {
+      if(!result) return;
+      if(result.ok && result.syncedCount>0) synced++;
+      else if(result.ok && result.syncedCount===0) skipped++;
+      else failed++;
+    });
+
+    await waitForCloud();
+    if(!window.__millfillCloud){
+      alert(`Push finished (${synced} synced, ${skipped} had nothing new, ${failed} failed), but the cloud is unreachable right now so the combined report could not be pulled. Check your connection and try again.`);
+      return;
+    }
+    try{
+      const inspectors = await window.__millfillCloud.getAllInspectorDocs(today);
+      fdMasterCloudSnapshot = { date: today, inspectors, pulledAt: new Date().toISOString() };
+      updateFdMasterStatus();
+      const names = Object.values(inspectors).map(d => d.inspectorName).filter(Boolean);
+      if(failed>0){
+        alert(`Synced with issues (${synced} ok, ${failed} failed). Combined report for ${today} now includes ${names.length} inspector(s): ${names.join(', ')||'none yet'}.`);
+      } else {
+        showToast(`✓ Synced & combined — ${names.length} inspector(s) for ${today}`);
+      }
+    } catch(err){
+      alert('Push finished, but could not pull the combined report from the cloud: ' + err.message);
+    }
+  }
+  /** PIN-gated clear of every Full Depth Repair sub-log at once. Only clears THIS
+   * device's local data — it does not delete anything already synced to the cloud
+   * for other inspectors, and dropping the cached cloud snapshot means the master
+   * report falls back to (now-empty) local data until "Sync All to Cloud" is run again. */
+  function clearFdMasterAll(){
+    const logs = getFdAllLogs();
+    const counts = Object.values(logs).map(l => l.load().length);
+    const total = counts.reduce((a,b)=>a+b,0);
+    if(total===0){ alert('There is nothing logged in Full Depth Repair yet.'); return; }
+    const summary = Object.values(logs).map(l => `${l.label}: ${l.load().length}`).join('\n');
+    const pin = prompt(`This will permanently clear ALL Full Depth Repair data on THIS DEVICE (${total} total entries):\n\n${summary}\n\nThis does not delete anything already synced to the cloud. Enter the 4-digit PIN to confirm:`);
+    if(pin===null) return; // cancelled
+    if(pin.trim() !== '3450'){ alert('Incorrect PIN. Nothing was cleared.'); return; }
+    Object.values(logs).forEach(l => { l.save([]); l.render(); });
+    fdMasterCloudSnapshot = null;
+    updateFdMasterStatus();
+    showToast('✓ Full Depth Repair report cleared on this device');
+  }
+
+  /* ================= FULL DEPTH REPAIR — INSPECTOR REPORT (NARRATIVE) ================= */
+  const fdInspectorReports = makeFdLog('fd_ir', 'millfill_fd_inspectorreports_v1');
+
+  /** Entries for one operation, scoped to a single Repair ID, sourced from the
+   * combined cloud picture (see fdOpEntriesFor) when available. */
+  function fdEntriesForRepair(opKey, loadFn, repairId){
+    return fdOpEntriesFor(opKey, loadFn).filter(e => (e.repairId||'').trim() === repairId);
+  }
+  /** The Inspector Report can only be generated once "Sync All to Cloud" has
+   * pulled in the combined picture for today — otherwise it would just be
+   * describing this one device's own work and calling it the full report. */
+  function fdInspectorReportReady(){
+    return fdMasterDataSource().mode === 'cloud';
+  }
+  function updateFdInspectorReportButton(){
+    const btn = document.getElementById('fd_master_inspectorReport');
+    if(!btn) return;
+    const ready = fdInspectorReportReady();
+    btn.disabled = !ready;
+    btn.title = ready ? '' : 'Click "Sync All to Cloud" first — the Inspector Report is written from the combined data of every inspector for today.';
+  }
+
+  /** Builds the narrative write-up for one Repair ID: a summary block of the
+   * final pay-item quantities, then a "Work Performed" narrative describing
+   * each operation logged against that Repair ID, using only real logged values. */
+  function buildFdInspectorReportNarrative(repairId){
+    const rl = fdEntriesForRepair('fd_repairlog', loadFdRepairLog, repairId);
+    const labor = fdEntriesForRepair('fd_labor', fdLabor.load, repairId);
+    const equip = fdEntriesForRepair('fd_equipment', fdEquip.load, repairId);
+    const concrete = fdEntriesForRepair('fd_concrete', fdConcrete.load, repairId);
+    const pccliftout = fdEntriesForRepair('fd_pccliftout', fdPccLiftout.load, repairId);
+    const asphalt = fdEntriesForRepair('fd_asphalt', fdAsphalt.load, repairId);
+    const sawcut = fdEntriesForRepair('fd_sawcutqa', fdSawCutQA.load, repairId);
+    const subbase = fdEntriesForRepair('fd_subbasecomp', fdSubbaseComp.load, repairId);
+    const dowels = fdEntriesForRepair('fd_dowels', fdDowels.load, repairId);
+    const tac = fdEntriesForRepair('fd_taccoat', fdTacCoat.load, repairId);
+
+    const rlEntry = rl.length ? rl[rl.length-1] : null;
+    const inspector = (rlEntry && rlEntry.inspector) || (labor[0] && labor[0].inspector) || (concrete[0] && concrete[0].inspector) || '';
+    const date = (rlEntry && rlEntry.date) || todayStr();
+    const location = (rlEntry && rlEntry.location) || '';
+
+    const summary = [];
+    summary.push(['Repair ID', repairId]);
+    if(location) summary.push(['Location', location]);
+    summary.push(['Date', date]);
+    summary.push(['Inspector', inspector || '—']);
+    if(rlEntry) summary.push(['Excavation', `${rlEntry.exL||'—'} ft x ${rlEntry.exW||'—'} ft x ${rlEntry.exD||'—'} ft`]);
+    if(subbase.length) summary.push(['304.10119917 — Subbase Course (CY)', subbase[subbase.length-1].calcCY || '—']);
+    if(concrete.length) summary.push(['510.02210018 — PCC Full-Depth Repair (CY)', concrete[concrete.length-1].calcCY || '—']);
+    if(pccliftout.length) summary.push(['510.20000018 — PCC Pavement Lift Out (SY)', pccliftout[pccliftout.length-1].calcSY || '—']);
+    if(asphalt.length) summary.push(['404.1969 — Binder Course Asphalt (TON)', asphalt[asphalt.length-1].calcTons || '—']);
+    if(tac.length) summary.push(['407.0102 — Diluted Tack Coat (GAL)', tac[tac.length-1].finalPay || '—']);
+    if(dowels.length) summary.push(['510.81000018 — Drill & Anchor Dowels (EACH)', dowels[dowels.length-1].combinedTotal || 0]);
+    if(rlEntry && rlEntry.transjoints) summary.push(['510.91000018 — Transverse Joints (LF)', rlEntry.transjoints]);
+    if(sawcut.length) summary.push(['520.09000010 — Saw Cutting Asphalt Concrete (LF)', sawcut[sawcut.length-1].lfManual || sawcut[sawcut.length-1].lfTicket || '—']);
+    if(rlEntry && rlEntry.trafficcontrol) summary.push(['619.01 — Work Zone Traffic Control (LS)', rlEntry.trafficcontrol]);
+
+    const paragraphs = [];
+
+    if(rlEntry){
+      paragraphs.push(`This report documents the full-depth pavement repair performed at Repair ID ${repairId}${location ? ' ('+location+')' : ''} on ${rlEntry.date||date}, under the supervision of Inspector ${inspector||'—'}. Excavation of the failed pavement section measured approximately ${rlEntry.exL||'—'} ft (L) x ${rlEntry.exW||'—'} ft (W) x ${rlEntry.exD||'—'} ft (D).`);
+    }
+
+    if(equip.length){
+      const items = equip.map(e => `${e.type||'Equipment'}${e.model?` (${e.model}${e.equipNum?', ID '+e.equipNum:''})`:''}`).join('; ');
+      paragraphs.push(`Equipment mobilized for this repair included: ${items}.`);
+    }
+    if(labor.length){
+      const items = labor.map(e => `${e.role||'Laborer'} ${e.name||''}`.trim()).filter(Boolean).join('; ');
+      if(items) paragraphs.push(`The following crew performed the work: ${items}.`);
+    }
+
+    subbase.forEach(s => {
+      paragraphs.push(`Subbase material was delivered under Ticket #${s.ticket||'—'} (${s.delivered||'—'} CY delivered) and placed in ${s.lifts||'—'} lift(s). Compaction testing returned a ${s.result||'—'} result. The placed subbase measured ${s.L||'—'} ft x ${s.W||'—'} ft x ${s.D||'—'} ft, yielding a calculated quantity of ${s.calcCY||'—'} CY (Pay Item 304.10119917).`);
+    });
+
+    if(sawcut.length){
+      const seen = new Set();
+      sawcut.forEach(s => {
+        const key = [s.ticket, s.lfTicket, s.lfManual].join('|');
+        if(seen.has(key)) return; seen.add(key);
+        paragraphs.push(`Saw cutting was performed by ${s.subcontractor||'the saw cutting subcontractor'} under Ticket #${s.ticket||'—'}. The ticketed quantity measured ${s.lfTicket||'—'} LF; the quantity measured manually in the field measured ${s.lfManual||'—'} LF. Per project policy, the manually measured quantity governs payment unless authorized otherwise (Pay Item 520.09000010).`);
+      });
+      const crew = sawcut.map(s => `${s.role||''} ${s.name||''}`.trim()).filter(Boolean).join('; ');
+      if(crew) paragraphs.push(`Saw cutting crew: ${crew}.`);
+    }
+
+    dowels.forEach(d => {
+      const cageBreakdown = (d.cages||[]).map(c=>`Cage #${c.cageNum} (${c.dowels} dowels)`).join(', ');
+      paragraphs.push(`Dowel installation consisted of ${d.individualCount||0} individually placed dowel(s)${cageBreakdown ? ', plus '+(d.cageCount||0)+' dowel cage(s): '+cageBreakdown : ''}, for a combined total of ${d.combinedTotal||0} dowels (Pay Item 510.81000018). Installation QA — hole diameter, hole depth, dust removal, epoxy mixing and placement, hole spacing, dowel protrusion, alignment, and dowel end caps — returned an overall result of ${d.overall||'—'}.`);
+    });
+
+    concrete.forEach(c => {
+      paragraphs.push(`Concrete was delivered under Ticket #${c.ticket||'—'} (mix design correct: ${c.mixCorrect==='Y'?'Yes':c.mixCorrect==='N'?'No':'—'}), arriving on site at ${c.timeArrived||'—'} with a calculated placement deadline of ${c.deadline||'—'}. Testing performed by Universal Concrete Testing at ${c.hours||'—'} hour(s) after placement recorded a slump of ${c.slump||'—'} in., a temperature of ${c.temp||'—'}°F, and a compressive strength of ${c.psi||'—'} psi. The concrete was placed to dimensions of ${c.L||'—'} ft x ${c.W||'—'} ft x ${c.D||'—'} in, yielding a calculated quantity of ${c.calcCY||'—'} CY (Pay Item 510.02210018).`);
+    });
+
+    pccliftout.forEach(p => {
+      paragraphs.push(`PCC pavement lift-out was performed over an area measuring ${p.L||'—'} ft x ${p.W||'—'} ft, yielding a calculated quantity of ${p.calcSY||'—'} SY (Pay Item 510.20000018).`);
+    });
+
+    asphalt.forEach(a => {
+      paragraphs.push(`Asphalt (Type ${a.type||'—'}${a.typeCorrect==='N' ? ', flagged as not matching the specified type':''}) was delivered under Ticket #${a.ticket||'—'} at a placement temperature of ${a.temp||'—'}°F. The asphalt was placed to dimensions of ${a.L||'—'} ft x ${a.W||'—'} ft x ${a.D||'—'} in, yielding a calculated quantity of ${a.calcTons||'—'} tons (Pay Item 404.1969).`);
+    });
+
+    tac.forEach(t => {
+      paragraphs.push(`Diluted tack coat was applied under Ticket #${t.ticket||'—'} via Truck ${t.truck||'—'} from ${t.contractor||'—'}. ${t.gallons||'—'} gallons were delivered at a gauge temperature of ${t.temp||'—'}°F, yielding a temperature-corrected final pay quantity of ${t.finalPay||'—'} gallons (Pay Item 407.0102).`);
+    });
+
+    if(rlEntry && (rlEntry.transjoints || rlEntry.trafficcontrol)){
+      const bits = [];
+      if(rlEntry.transjoints) bits.push(`${rlEntry.transjoints} LF of transverse joints were installed (Pay Item 510.91000018)`);
+      if(rlEntry.trafficcontrol) bits.push(`work zone traffic control was maintained throughout the operation (Pay Item 619.01, ${rlEntry.trafficcontrol})`);
+      if(bits.length) paragraphs.push(bits.join('; ') + '.');
+    }
+
+    if(paragraphs.length===0){
+      paragraphs.push(`No operations have been logged yet for Repair ID ${repairId}.`);
+    }
+
+    return { repairId, date, inspector, location, summary, paragraphs };
+  }
+
+  function generateFdInspectorReport(){
+    if(!fdInspectorReportReady()){
+      alert('Click "Sync All to Cloud" first — the Inspector Report is written from the combined data of every inspector for today.');
+      return;
+    }
+    const repairId = $('fd_rl_repairid').value.trim();
+    if(!repairId){ alert('Enter the Repair ID in the field above first.'); return; }
+    const narrative = buildFdInspectorReportNarrative(repairId);
+    const entries = fdInspectorReports.load();
+    entries.push({
+      id: genId(), locked:false, repairId, date: narrative.date, inspector: narrative.inspector,
+      generatedAt: new Date().toISOString(), sourceLabel: fdMasterSourceLabel(),
+      summary: narrative.summary, paragraphs: narrative.paragraphs
+    });
+    fdInspectorReports.save(entries);
+    renderFdInspectorReports();
+    showToast(`✓ Inspector report generated for ${repairId}`);
+  }
+
+  function renderFdInspectorReports(){
+    fdInspectorReports.render((e,i) => `<tr>
+      <td>${escapeHtml(e.repairId||'')}</td><td>${escapeHtml(e.date||'')}</td><td>${escapeHtml(e.inspector||'')}</td>
+      <td>${e.generatedAt ? new Date(e.generatedAt).toLocaleString() : ''}</td>
+      <td>
+        <button class="btn" data-ir-download="${i}" style="padding:6px 10px;font-size:11px;">Download PDF</button>
+        <button class="btn danger" data-ir-delete="${i}" style="padding:6px 10px;font-size:11px;">Delete</button>
+      </td>
+    </tr>`);
+  }
+
+  /** Opens the narrative report in a print-formatted window — "Save as PDF"
+   * from the browser's print dialog gives the downloadable file. */
+  function downloadFdInspectorReportPdf(report){
+    const win = window.open('', '_blank');
+    if(!win){ alert('Please allow pop-ups for this site to generate the PDF.'); return; }
+    const summaryHtml = report.summary.map(([k,v]) => `<div class="kv"><span class="k">${escapeHtml(k)}</span><span class="v">${escapeHtml(v)}</span></div>`).join('');
+    const paraHtml = report.paragraphs.map(p => `<p>${escapeHtml(p)}</p>`).join('');
+    win.document.write(`<!DOCTYPE html><html><head><title>Inspector Report — ${escapeHtml(report.repairId)}</title>
+<style>
+  body{font-family:Georgia, 'Times New Roman', serif; font-size:12px; margin:32px; color:#111; line-height:1.5;}
+  h1{font-family:Arial, sans-serif; font-size:18px; margin-bottom:2px;}
+  h2{font-family:Arial, sans-serif; font-size:13px; text-transform:uppercase; letter-spacing:0.05em; color:#444; margin-top:26px; margin-bottom:8px; border-bottom:1px solid #999; padding-bottom:4px;}
+  .meta{font-family:Arial, sans-serif; color:#555; font-size:11px; margin-bottom:16px;}
+  .summary{display:grid; grid-template-columns:1fr 1fr; gap:2px 24px;}
+  .kv{display:flex; justify-content:space-between; border-bottom:1px dotted #ccc; padding:3px 0; font-family:Arial, sans-serif; font-size:11px;}
+  .kv .k{color:#555;}
+  .kv .v{font-weight:bold; text-align:right; margin-left:12px;}
+  p{margin:0 0 12px 0; text-align:justify;}
+  @media print{ h2{page-break-after:avoid;} p{page-break-inside:avoid;} }
+</style></head><body>
+<h1>Inspector Report — Full-Depth Pavement Repair</h1>
+<div class="meta">Contract D265724 &mdash; Sunrise Hwy Mill &amp; Fill<br>Repair ID: ${escapeHtml(report.repairId)} &mdash; Date: ${escapeHtml(report.date)} &mdash; Inspector: ${escapeHtml(report.inspector)}<br>${escapeHtml(report.sourceLabel||'')}<br>Generated ${escapeHtml(new Date(report.generatedAt).toLocaleString())}</div>
+<h2>Summary</h2>
+<div class="summary">${summaryHtml}</div>
+<h2>Work Performed</h2>
+${paraHtml}
+</body></html>`);
+    win.document.close();
+    win.focus();
+    setTimeout(() => { win.print(); }, 350);
+  }
+
+  function deleteFdInspectorReport(idx){
+    if(!confirm('Delete this generated Inspector Report? This cannot be undone.')) return;
+    const entries = fdInspectorReports.load();
+    entries.splice(idx,1);
+    fdInspectorReports.save(entries);
+    renderFdInspectorReports();
   }
 
   /* ================= EVENT WIRING ================= */
@@ -4016,6 +4620,26 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
     entries.splice(idx,1); saveFdRepairLog(entries); renderFdRepairLog();
   });
 
+  $('fd_master_exportFullXlsx').addEventListener('click', exportFdMasterFullXlsx);
+  $('fd_master_exportFullPdf').addEventListener('click', exportFdMasterFullPdf);
+  $('fd_master_exportSummaryXlsx').addEventListener('click', exportFdMasterSummaryXlsx);
+  $('fd_master_exportSummaryPdf').addEventListener('click', exportFdMasterSummaryPdf);
+  $('fd_master_sync').addEventListener('click', syncFdMasterAll);
+  $('fd_master_clear').addEventListener('click', clearFdMasterAll);
+  $('fd_master_inspectorReport').addEventListener('click', generateFdInspectorReport);
+  $('fd_ir_tbody').addEventListener('click', (e) => {
+    const dlBtn = e.target.closest('[data-ir-download]');
+    const delBtn = e.target.closest('[data-ir-delete]');
+    if(dlBtn){
+      const idx = parseInt(dlBtn.dataset.irDownload,10);
+      const entries = fdInspectorReports.load();
+      if(entries[idx]) downloadFdInspectorReportPdf(entries[idx]);
+    }
+    if(delBtn){
+      deleteFdInspectorReport(parseInt(delBtn.dataset.irDelete,10));
+    }
+  });
+
   FD_LABOR_ROLE_FIELDS.forEach(fieldId => { $(fieldId).addEventListener('input', renderFdLaborNameInputs); });
   $('fd_lb_add').addEventListener('click', addFdLaborEntry);
   $('fd_lb_export').addEventListener('click', () => fdLabor.exportCSV(['Date','Inspector','Repair ID','Role','Name'], e=>[e.date,e.inspector,e.repairId,e.role,e.name], 'fulldepth-labor'));
@@ -4058,6 +4682,24 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
     const idx = parseInt(btn.dataset.idx,10);
     if(entries[idx] && entries[idx].locked){ alert('This entry is locked and cannot be deleted.'); return; }
     entries.splice(idx,1); fdConcrete.save(entries); renderFdConcrete();
+  });
+
+  $('fd_plo_L').addEventListener('input', calcFdPccLiftoutSY);
+  $('fd_plo_W').addEventListener('input', calcFdPccLiftoutSY);
+  $('fd_plo_calcBtn').addEventListener('click', calcAndPushPccLiftoutSY);
+  $('fd_plo_add').addEventListener('click', addFdPccLiftoutEntry);
+  $('fd_plo_export').addEventListener('click', () => fdPccLiftout.exportCSV(
+    ['Date','Inspector','Repair ID','L','W','Calc SY'],
+    e=>[e.date,e.inspector,e.repairId,e.L,e.W,e.calcSY],
+    'fulldepth-pccliftout'));
+  $('fd_plo_sync').addEventListener('click', () => syncOperation('fd_pccliftout', fdPccLiftout.load));
+  $('fd_plo_clear').addEventListener('click', () => fdPccLiftout.clear(renderFdPccLiftout));
+  $('fd_plo_tbody').addEventListener('click', (e) => {
+    const btn = e.target.closest('.del-btn'); if(!btn) return;
+    const entries = fdPccLiftout.load();
+    const idx = parseInt(btn.dataset.idx,10);
+    if(entries[idx] && entries[idx].locked){ alert('This entry is locked and cannot be deleted.'); return; }
+    entries.splice(idx,1); fdPccLiftout.save(entries); renderFdPccLiftout();
   });
 
   $('fd_as_calcBtn').addEventListener('click', calcAndPushAsphaltTons);
@@ -4117,6 +4759,7 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
     const btn = e.target.closest('.del-btn'); if(!btn) return;
     removeFdDwCage(parseInt(btn.dataset.cageIdx,10));
   });
+  $('fd_dw_pushCount').addEventListener('click', pushFdDwCombinedTotal);
   $('fd_dw_add').addEventListener('click', addFdDowelsEntry);
   $('fd_dw_export').addEventListener('click', () => fdDowels.exportCSV(
     ['Date','Inspector','Repair ID','Individual Count','# Cages','Cage Breakdown','Combined Total','QA Overall',...FD_DOWEL_CHECKS],
@@ -4137,6 +4780,7 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
   });
   $('fd_tc_gallons').addEventListener('input', calcFdTac);
   $('fd_tc_temp').addEventListener('input', calcFdTac);
+  $('fd_tc_pushBtn').addEventListener('click', pushFdTacFinalPay);
   $('fd_tc_add').addEventListener('click', addFdTacCoatEntry);
   $('fd_tc_export').addEventListener('click', () => fdTacCoat.exportCSV(
     ['Date','Inspector','Repair ID','Ticket','Truck','Contractor','Gallons','Temp','Final Pay'],
@@ -4967,6 +5611,7 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
   wireInspectorField('fd_lb');
   wireInspectorField('fd_eq');
   wireInspectorField('fd_co');
+  wireInspectorField('fd_plo');
   wireInspectorField('fd_as');
   wireInspectorField('fd_sc');
   wireInspectorField('fd_sb');
@@ -4976,13 +5621,14 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
   $('sc_date').value = todayStr();
   $('ap_date').value = todayStr();
   $('ua_date').value = todayStr();
-  ['fd_rl','fd_lb','fd_eq','fd_co','fd_as','fd_sc','fd_sb','fd_dw','fd_tc'].forEach(p => { $(p+'_date').value = todayStr(); });
+  ['fd_rl','fd_lb','fd_eq','fd_co','fd_plo','fd_as','fd_sc','fd_sb','fd_dw','fd_tc'].forEach(p => { $(p+'_date').value = todayStr(); });
   renderFdRepairLog();
   renderFdLabor();
   renderFdLaborNameInputs();
   renderFdEquipment();
   renderFdEquipmentUnitInputs();
   renderFdConcrete();
+  renderFdPccLiftout();
   renderFdAsphalt();
   renderFdSawCutQA();
   renderFdSawCutNameInputs();
@@ -4991,6 +5637,8 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
   renderFdDwCageList();
   updateFdDwCombinedTotal();
   renderFdTacCoat();
+  renderFdInspectorReports();
+  updateFdMasterStatus();
   renderRoster();
   renderFillLog();
   renderMillLog();
