@@ -252,15 +252,46 @@
   </header>
 
   <div class="config" id="globalConfig">
+    <div class="field cfg-fill-only full">
+      <label>Superpave Mix Type</label>
+      <select id="mixType">
+        <option value="">&mdash; Select Mix Type &mdash;</option>
+        <option value="custom">Custom (I know the Gmb)</option>
+        <option value="sp_base_375">SP Base 37.5mm</option>
+        <option value="sp_binder_250">SP Binder 25.0mm</option>
+        <option value="sp_binder_190">SP Binder 19.0mm</option>
+        <option value="sp_top_125">SP Top 12.5mm</option>
+        <option value="sp_top_95">SP Top 9.5mm</option>
+        <option value="sp_top_63">SP Top 6.3mm</option>
+        <option value="bridgedeck">Bridgedeck Overlay</option>
+      </select>
+      <div class="hint">Region 10 Superpave averages (NYSDOT). Drives the Gmb / Average Yield below &mdash; leave unset to keep using a manual Gmb.</div>
+    </div>
     <div class="field cfg-fill-only">
-      <label>Density (lb/ft&sup3;)</label>
-      <input type="number" id="density" value="145" step="0.1" inputmode="decimal">
-      <div class="hint">Overrides 145 default in all Fill calculations</div>
+      <label>Tonnage Basis</label>
+      <select id="densityMethod">
+        <option value="gmb">Bulk Specific Gravity (Gmb)</option>
+        <option value="yield" disabled>Average Yield (quick field check)</option>
+      </select>
+      <div class="hint">Gmb is precise if known; Average Yield is a fast field estimate by mix type.</div>
     </div>
     <div class="field cfg-fill-only">
       <label>Default Truck Load (tons)</label>
       <input type="number" id="truckTons" value="40" step="0.5" inputmode="decimal">
       <div class="hint">Used for quick truck-coverage calcs</div>
+    </div>
+    <div class="field cfg-fill-only" id="gmbField">
+      <label>Gmb (Bulk Specific Gravity, compacted mix)</label>
+      <input type="number" id="gmbInput" value="2.3237" step="0.001" inputmode="decimal">
+      <div class="hint">If the mix design's Gmb is known, type it in here.</div>
+    </div>
+    <div class="field cfg-fill-only" id="yieldField" style="display:none;">
+      <label>Average Yield (SY per Ton @ 1&Prime; thick)</label>
+      <input type="number" id="yieldInput" value="17.03" step="0.01" inputmode="decimal">
+      <div class="hint">From the selected mix type (Region 10 average). Editable if your plant gave you a specific Job Mix Formula yield.</div>
+    </div>
+    <div class="field cfg-fill-only full" style="margin-top:-6px;">
+      <div class="hint">Effective density used in all Tonnage formulas: <strong><span id="fillEffDensity">145.0</span> lb/ft&sup3;</strong> (replaces the old flat-145 assumption &mdash; based on Gmb &times; 62.4 lb/ft&sup3; water, or back-calculated from Average Yield)</div>
     </div>
     <div class="field cfg-depth">
       <label>Target Depth (in)</label>
@@ -525,7 +556,7 @@
 
     <div class="panel fill-tab-panel" id="panel-tonnage" style="display:none;">
       <h2>Master Tonnage</h2>
-      <div class="desc">Tons = (L &times; W &times; D &times; density) &divide; 24,000</div>
+      <div class="desc">Tons = (L &times; W &times; D &times; effective density) &divide; 24,000 &mdash; effective density from the Superpave Mix Type / Gmb / Average Yield above</div>
       <div class="grid2">
         <div class="field"><label>Length (ft)</label><input type="number" id="t_L" value="500" inputmode="decimal"></div>
         <div class="field"><label>Width (ft)</label><input type="number" id="t_W" value="12" inputmode="decimal"></div>
@@ -536,7 +567,7 @@
 
     <div class="panel fill-tab-panel" id="panel-truck" style="display:none;">
       <h2>Truck Coverage</h2>
-      <div class="desc">LF = (Truck tons &times; 24,000) &divide; (W &times; D &times; density)</div>
+      <div class="desc">LF = (Truck tons &times; 24,000) &divide; (W &times; D &times; effective density)</div>
       <div class="grid2">
         <div class="field"><label>Width (ft)</label><input type="number" id="tc_W" value="12" inputmode="decimal"></div>
         <div class="field"><label>Depth (in)</label><input type="number" id="tc_D" value="2" step="0.25" inputmode="decimal"></div>
@@ -547,7 +578,7 @@
 
     <div class="panel fill-tab-panel" id="panel-stationtons" style="display:none;">
       <h2>Station Range &rarr; Tons</h2>
-      <div class="desc">LF = |End &minus; Start|, then Tons = (LF &times; W &times; D &times; density) &divide; 24,000</div>
+      <div class="desc">LF = |End &minus; Start|, then Tons = (LF &times; W &times; D &times; effective density) &divide; 24,000</div>
       <div class="grid2">
         <div class="field"><label>Starting Station</label><input type="text" id="st_start" placeholder="122+50"></div>
         <div class="field"><label>Ending Station</label><input type="text" id="st_end" placeholder="164+00"></div>
@@ -559,7 +590,7 @@
 
     <div class="panel fill-tab-panel" id="panel-tonsstation" style="display:none;">
       <h2>Known Tonnage &rarr; Station Range</h2>
-      <div class="desc">LF = (Tons &times; 24,000) &divide; (W &times; D &times; density), applied from a start station</div>
+      <div class="desc">LF = (Tons &times; 24,000) &divide; (W &times; D &times; effective density), applied from a start station</div>
       <div class="grid2">
         <div class="field"><label>Tons Available</label><input type="number" id="ts_tons" value="40" inputmode="decimal"></div>
         <div class="field"><label>Width (ft)</label><input type="number" id="ts_W" value="12" inputmode="decimal"></div>
@@ -571,7 +602,7 @@
 
     <div class="panel fill-tab-panel" id="panel-width" style="display:none;">
       <h2>Find Width</h2>
-      <div class="desc">W = (Tons &times; 24,000) &divide; (L &times; D &times; density)</div>
+      <div class="desc">W = (Tons &times; 24,000) &divide; (L &times; D &times; effective density)</div>
       <div class="grid2">
         <div class="field"><label>Tons</label><input type="number" id="w_tons" value="602" inputmode="decimal"></div>
         <div class="field"><label>Length (ft)</label><input type="number" id="w_L" value="4150" inputmode="decimal"></div>
@@ -582,7 +613,7 @@
 
     <div class="panel fill-tab-panel" id="panel-depth" style="display:none;">
       <h2>Find Depth</h2>
-      <div class="desc">D = (Tons &times; 24,000) &divide; (L &times; W &times; density) &nbsp;&mdash;&nbsp; result in inches</div>
+      <div class="desc">D = (Tons &times; 24,000) &divide; (L &times; W &times; effective density) &nbsp;&mdash;&nbsp; result in inches</div>
       <div class="grid2">
         <div class="field"><label>Tons</label><input type="number" id="d_tons" value="40" inputmode="decimal"></div>
         <div class="field"><label>Length (ft)</label><input type="number" id="d_L" value="276" inputmode="decimal"></div>
@@ -593,7 +624,7 @@
 
     <div class="panel fill-tab-panel" id="panel-length" style="display:none;">
       <h2>Find Length</h2>
-      <div class="desc">L = (Tons &times; 24,000) &divide; (W &times; D &times; density)</div>
+      <div class="desc">L = (Tons &times; 24,000) &divide; (W &times; D &times; effective density)</div>
       <div class="grid2">
         <div class="field"><label>Tons</label><input type="number" id="l_tons" value="40" inputmode="decimal"></div>
         <div class="field"><label>Width (ft)</label><input type="number" id="l_W" value="12" inputmode="decimal"></div>
@@ -1295,7 +1326,7 @@
     <div class="fd-maintab-panel" id="fdmain-asphalt" style="display:none;">
       <div class="panel">
         <h2>Asphalt</h2>
-        <div class="desc">19F9 Binder Course Asphalt, 60 Series Compaction. Tonnage = (L &times; W &times; Depth(in) &times; 145) &divide; 24000, using field-measured depth (not assumed).</div>
+        <div class="desc">19F9 Binder Course Asphalt, 60 Series Compaction. Tonnage = (L &times; W &times; Depth(in) &times; effective density) &divide; 24000, using field-measured depth (not assumed) and the Gmb / Average Yield selected below.</div>
         <div class="grid2">
           <div class="field"><label>Inspector</label><select id="fd_as_inspector"></select></div>
           <div class="field" id="fd_as_inspector_other_wrap" style="display:none;"><label>Inspector Name</label><input type="text" id="fd_as_inspector_other" placeholder="Type name"></div>
@@ -1317,6 +1348,37 @@
 
         <div style="font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em; margin:16px 0 8px;">Placement &amp; Tonnage Calculation</div>
         <div class="grid2">
+          <div class="field full">
+            <label>Superpave Mix Type</label>
+            <select id="fd_as_mixType">
+              <option value="sp_binder_190">SP Binder 19.0mm (matches 19F9 Binder Course)</option>
+              <option value="custom">Custom (I know the Gmb)</option>
+              <option value="sp_base_375">SP Base 37.5mm</option>
+              <option value="sp_binder_250">SP Binder 25.0mm</option>
+              <option value="sp_top_125">SP Top 12.5mm</option>
+              <option value="sp_top_95">SP Top 9.5mm</option>
+              <option value="sp_top_63">SP Top 6.3mm</option>
+              <option value="bridgedeck">Bridgedeck Overlay</option>
+            </select>
+            <div class="hint">Region 10 Superpave averages (NYSDOT) &mdash; replaces the old flat 145 lb/ft&sup3; assumption below.</div>
+          </div>
+          <div class="field">
+            <label>Tonnage Basis</label>
+            <select id="fd_as_densityMethod">
+              <option value="gmb">Bulk Specific Gravity (Gmb)</option>
+              <option value="yield">Average Yield (quick field check)</option>
+            </select>
+          </div>
+          <div class="field" id="fd_as_gmbField">
+            <label>Gmb (Bulk Specific Gravity)</label>
+            <input type="number" id="fd_as_gmbInput" value="2.535" step="0.001" inputmode="decimal">
+          </div>
+          <div class="field" id="fd_as_yieldField" style="display:none;">
+            <label>Average Yield (SY/Ton @ 1&Prime;)</label>
+            <input type="number" id="fd_as_yieldInput" value="16.86" step="0.01" inputmode="decimal">
+          </div>
+        </div>
+        <div class="grid2">
           <div class="field"><label>Length (ft)</label><input type="number" id="fd_as_L" inputmode="decimal"></div>
           <div class="field"><label>Width (ft)</label><input type="number" id="fd_as_W" inputmode="decimal"></div>
           <div class="field"><label>Depth (in)</label><input type="number" id="fd_as_D" inputmode="decimal"></div>
@@ -1325,7 +1387,7 @@
         <div class="result" style="margin-top:10px;">
           <div class="label">Calculated Tonnage</div>
           <div class="value" id="fd_as_calcTons">&mdash;</div>
-          <div class="station">(L &times; W &times; Depth(in) &times; 145) &divide; 24000</div>
+          <div class="station">(L &times; W &times; Depth(in) &times; <span id="fd_as_effDensity">158.2</span>) &divide; 24000</div>
         </div>
         <div id="fd_as_typeflag"></div>
 
@@ -1643,7 +1705,7 @@
   </div>
 
   <footer>
-    Assumptions: 145 lb/ft&sup3; density &amp; 40-ton truck load unless overridden above. QA flags (temperature, depth) are advisory records — they do not block saving an entry.<br>
+    Assumptions: asphalt tonnage uses the selected Superpave mix's Gmb or Average Yield (Region 10 NYSDOT averages, or a manually entered Gmb) &amp; a 40-ton truck load unless overridden above. QA flags (temperature, depth) are advisory records — they do not block saving an entry.<br>
     For payment quantities, always follow the project&rsquo;s contract/spec measurement requirements.
 
   </footer>
@@ -1673,7 +1735,63 @@
   }
   function todayStr(){ return new Date().toISOString().slice(0,10); }
 
-  function density(){ return parseFloat($('density').value) || 145; }
+  // Region 10 Superpave average yields (NYSDOT, "Yields for Superpave Asphalt", updated by R. DiGregorio: 2023).
+  // Gmb = Bulk Specific Gravity of the Compacted Mix. yield = SY per Ton at 1" thick, averaged across Region 10 mixes.
+  const MIX_TYPES = [
+    { key:'sp_base_375',   name:'SP Base 37.5mm',     gmb:2.570, yield:16.63 },
+    { key:'sp_binder_250', name:'SP Binder 25.0mm',   gmb:2.555, yield:16.73 },
+    { key:'sp_binder_190', name:'SP Binder 19.0mm',   gmb:2.535, yield:16.86 },
+    { key:'sp_top_125',    name:'SP Top 12.5mm',      gmb:2.510, yield:17.03 },
+    { key:'sp_top_95',     name:'SP Top 9.5mm',       gmb:2.480, yield:17.23 },
+    { key:'sp_top_63',     name:'SP Top 6.3mm',       gmb:2.460, yield:17.37 },
+    { key:'bridgedeck',    name:'Bridgedeck Overlay', gmb:2.455, yield:17.41 },
+  ];
+  function getMixType(key){ return MIX_TYPES.find(m => m.key === key) || null; }
+  // Water's density (62.4 lb/ft3) x Gmb gives the mix's effective compacted density in lb/ft3.
+  // That plugs straight into the existing Tons = (L x W x D(in) x density) / 24000 formula, and is
+  // algebraically identical to using the table's "Average Yield" (SY/Ton at 1"): density = 24000/(9*yield).
+  function densityFromGmb(gmb){ return gmb * 62.4; }
+  function densityFromYield(syPerTon){ return 24000 / (9 * syPerTon); }
+
+  /** Reads the Filling section's Gmb/Average-Yield controls and returns the effective density (lb/ft3)
+   * to use in every Fill tonnage formula. Falls back to the legacy 145 lb/ft3 if nothing valid is entered. */
+  function density(){
+    const methodEl = $('densityMethod');
+    const method = methodEl ? methodEl.value : 'gmb';
+    if(method === 'yield'){
+      const y = parseFloat($('yieldInput') ? $('yieldInput').value : '');
+      if(isFinite(y) && y > 0) return densityFromYield(y);
+    }
+    const g = parseFloat($('gmbInput') ? $('gmbInput').value : '');
+    if(isFinite(g) && g > 0) return densityFromGmb(g);
+    return 145;
+  }
+  /** Mix Type dropdown changed: populate the Gmb / Average Yield fields from the table (still editable),
+   * and only allow the "Average Yield" method when a real mix (not Custom) is selected. */
+  function onMixTypeChange(){
+    const mix = getMixType($('mixType').value);
+    const yieldOption = $('densityMethod').querySelector('option[value="yield"]');
+    if(mix){
+      $('gmbInput').value = mix.gmb.toFixed(3);
+      $('yieldInput').value = mix.yield.toFixed(2);
+      if(yieldOption) yieldOption.disabled = false;
+    } else {
+      if(yieldOption) yieldOption.disabled = true;
+      if($('densityMethod').value === 'yield') $('densityMethod').value = 'gmb';
+    }
+    updateDensityMethodVisibility();
+    calcFill();
+  }
+  function updateDensityMethodVisibility(){
+    const method = $('densityMethod').value;
+    $('gmbField').style.display = (method === 'gmb') ? 'block' : 'none';
+    $('yieldField').style.display = (method === 'yield') ? 'block' : 'none';
+    updateEffectiveDensityDisplay();
+  }
+  function updateEffectiveDensityDisplay(){
+    const el = $('fillEffDensity');
+    if(el) el.textContent = fmt(density(), 1);
+  }
   function truckTons(){ return parseFloat($('truckTons').value) || 40; }
   function targetDepth(){ return parseFloat($('targetDepth').value) || 2; }
   function depthTol(){ return parseFloat($('depthTol').value) || 0.25; }
@@ -1860,6 +1978,7 @@
 
   /* ================= FILL CALCULATORS ================= */
   function calcFill(){
+    updateEffectiveDensityDisplay();
     const rho = density();
     const truck = truckTons();
 
@@ -2151,8 +2270,11 @@ const DRAIN_STRUCTURES = [{"id":"DS1-1","desc":"SW CORNER OF SUNRISE HWY AND THE
   function getLane0TargetTons(intersectionName, opType){
     const cs = CROSS_STREET_AREAS.find(c => c[1]===intersectionName);
     if(!cs) return 0;
-    const density = opType==='mill' ? 115 : 145;
-    return cs[2]*2*density/24000; // area(SF) x depth(2in) x density / 24000
+    // Milling keeps its own fixed 115 lb/ft3 removed-RAP assumption (unrelated to placed-asphalt
+    // Superpave mix design); Fill now uses the same Gmb/Average-Yield-derived density as every
+    // other Fill tonnage calculation, via density().
+    const rho = opType==='mill' ? 115 : density();
+    return cs[2]*2*rho/24000; // area(SF) x depth(2in) x density / 24000
   }
 
   function getLane0LoggedTons(intersectionName, opType){
@@ -2191,16 +2313,18 @@ const DRAIN_STRUCTURES = [{"id":"DS1-1","desc":"SW CORNER OF SUNRISE HWY AND THE
       totalSF += segLF * w;
     }
     const onePassSF = totalLF * 12;
-    const density = 145, depth = 2;
-    const totalQty = opType === 'mill' ? totalSF/9 : totalSF*depth*density/24000;
-    const onePassQty = opType === 'mill' ? onePassSF/9 : onePassSF*depth*density/24000;
+    // Fill now uses the same Gmb/Average-Yield-derived density as every other Fill tonnage
+    // calculation (via density()); Milling stays area-based (SY), so density is irrelevant there.
+    const rho = opType === 'mill' ? 0 : density(), depth = 2;
+    const totalQty = opType === 'mill' ? totalSF/9 : totalSF*depth*rho/24000;
+    const onePassQty = opType === 'mill' ? onePassSF/9 : onePassSF*depth*rho/24000;
     const passesNeeded = onePassQty > 0 ? Math.ceil(totalQty/onePassQty) : 0;
 
     // Cross-street/driveway areas whose station falls within tonight's range -- kept separate
     // from the mainline pass math, since a detour into a side street isn't an "extra straight pass".
     const matchedCrossStreets = CROSS_STREET_AREAS
       .filter(cs => cs[0] >= lo && cs[0] <= hi)
-      .map(cs => ({ name: cs[1], areaSF: cs[2], qty: opType==='mill' ? cs[2]/9 : cs[2]*depth*density/24000 }));
+      .map(cs => ({ name: cs[1], areaSF: cs[2], qty: opType==='mill' ? cs[2]/9 : cs[2]*depth*rho/24000 }));
     const crossStreetQty = matchedCrossStreets.reduce((s,c)=>s+c.qty, 0);
 
     return {
@@ -3157,7 +3281,7 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
         $('fd_rl_concCalc').textContent = fmt(concCalc,2)+' CY';
       } else { $('fd_rl_concCalc').textContent = '—'; }
       if(isFinite(asphD_in)){
-        const asphTons = (L*W*asphD_in*145)/24000; // same formula as the Asphalt tab itself
+        const asphTons = (L*W*asphD_in*fdAsphaltDensity())/24000; // same formula as the Asphalt tab itself
         $('fd_rl_asphCalc').textContent = fmt(asphTons,2)+' tons';
       } else { $('fd_rl_asphCalc').textContent = '—'; }
     } else {
@@ -3487,10 +3611,48 @@ const DRAIN_SEED = [{"structureId":"DS1-162","desc":"NW CORNER OF N OCEANSIDE RD
 
   // --- Asphalt (Verification + Tonnage Calc, merged) ---
   const fdAsphalt = makeFdLog('fd_as', 'millfill_fd_asphalt_v1');
+  /** Full Depth Repair's Asphalt tab has its own Mix Type / Gmb / Average Yield controls
+   * (defaults to SP Binder 19.0mm, matching the tab's 19F9 Binder Course pay item), independent
+   * of the Filling section's global mix selection. */
+  function fdAsphaltDensity(){
+    const methodEl = $('fd_as_densityMethod');
+    const method = methodEl ? methodEl.value : 'gmb';
+    if(method === 'yield'){
+      const y = parseFloat($('fd_as_yieldInput') ? $('fd_as_yieldInput').value : '');
+      if(isFinite(y) && y > 0) return densityFromYield(y);
+    }
+    const g = parseFloat($('fd_as_gmbInput') ? $('fd_as_gmbInput').value : '');
+    if(isFinite(g) && g > 0) return densityFromGmb(g);
+    return 145;
+  }
+  function onFdAsMixTypeChange(){
+    const mix = getMixType($('fd_as_mixType').value);
+    const yieldOption = $('fd_as_densityMethod').querySelector('option[value="yield"]');
+    if(mix){
+      $('fd_as_gmbInput').value = mix.gmb.toFixed(3);
+      $('fd_as_yieldInput').value = mix.yield.toFixed(2);
+      if(yieldOption) yieldOption.disabled = false;
+    } else {
+      if(yieldOption) yieldOption.disabled = true;
+      if($('fd_as_densityMethod').value === 'yield') $('fd_as_densityMethod').value = 'gmb';
+    }
+    updateFdAsDensityMethodVisibility();
+  }
+  function updateFdAsDensityMethodVisibility(){
+    const method = $('fd_as_densityMethod').value;
+    $('fd_as_gmbField').style.display = (method === 'gmb') ? 'block' : 'none';
+    $('fd_as_yieldField').style.display = (method === 'yield') ? 'block' : 'none';
+    const el = $('fd_as_effDensity');
+    if(el) el.textContent = fmt(fdAsphaltDensity(), 1);
+    calcFdAsphaltTons();
+    calcFdRepairCrossChecks();
+  }
   function calcFdAsphaltTons(){
     const L = parseFloat($('fd_as_L').value), W = parseFloat($('fd_as_W').value), D = parseFloat($('fd_as_D').value);
+    const el = $('fd_as_effDensity');
+    if(el) el.textContent = fmt(fdAsphaltDensity(), 1);
     if(isFinite(L) && isFinite(W) && isFinite(D)){
-      const tons = (L*W*D*145)/24000;
+      const tons = (L*W*D*fdAsphaltDensity())/24000;
       $('fd_as_calcTons').innerHTML = fmt(tons,2)+'<span class="unit">tons</span>';
       return tons;
     }
@@ -4586,6 +4748,8 @@ ${paraHtml}
   document.addEventListener('change', (e) => {
     if(e.target.classList.contains('ja-check')) renderJointQcPreview();
   });
+  $('mixType').addEventListener('change', onMixTypeChange);
+  $('densityMethod').addEventListener('change', () => { updateDensityMethodVisibility(); calcFill(); });
   $('ja_locmode').addEventListener('change', toggleJointLocMode);
   $('tac_truck').addEventListener('change', () => {
     $('tac_truck_other_wrap').style.display = $('tac_truck').value==='__other__' ? 'block' : 'none';
@@ -4788,6 +4952,10 @@ ${paraHtml}
   $('fd_as_calcBtn').addEventListener('click', calcAndPushAsphaltTons);
   $('fd_as_typecorrect').addEventListener('change', renderFdAsphaltTypeFlag);
   $('fd_as_add').addEventListener('click', addFdAsphaltEntry);
+  $('fd_as_mixType').addEventListener('change', onFdAsMixTypeChange);
+  $('fd_as_densityMethod').addEventListener('change', updateFdAsDensityMethodVisibility);
+  $('fd_as_gmbInput').addEventListener('input', () => { calcFdAsphaltTons(); calcFdRepairCrossChecks(); });
+  $('fd_as_yieldInput').addEventListener('input', () => { calcFdAsphaltTons(); calcFdRepairCrossChecks(); });
   $('fd_as_export').addEventListener('click', () => fdAsphalt.exportCSV(
     ['Date','Inspector','Repair ID','Ticket','Type','Type Correct','Temp','L','W','D','Calc Tons'],
     e=>[e.date,e.inspector,e.repairId,e.ticket,e.type,e.typeCorrect,e.temp,e.L,e.W,e.D,e.calcTons],
